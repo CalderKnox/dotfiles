@@ -37,8 +37,8 @@
       "unlink *": "deny",
       "dd *": "deny",
       "mkfs.*": "deny",
-      "python3 *": "ask",
-      "node *": "ask"
+      "python3 *": "allow",
+      "node *": "allow"
     },
     "path": {
       "*": "allow",
