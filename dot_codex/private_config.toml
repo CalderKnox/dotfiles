@@ -6,32 +6,33 @@
 # See: https://github.com/openai/codex — config reference.
 # MCP/marketplace/notify paths are kept as commented examples, not active.
 
-model_provider = "cc-switch-official"
-model = "gpt-5.6-sol"                       # default model (override per-session if needed)
-review_model = "gpt-5.6-terra"              # model used for `codex review`
-model_reasoning_effort = "medium"           # low | medium | high | xhigh | ultra | persistent | max
-sandbox_mode = "workspace-write"            # workspace-write | danger-full-access | read-only
-web_search = "indexed"                      # indexed search (requires network)
+model = "gpt-6-astra"  # default model (override per-session if needed)
+review_model = "gpt-5.6-sol"  # model used for `codex review`
+model_reasoning_effort = "medium"  # low | medium | high | xhigh | ultra | persistent | max
 
-[model_providers.cc-switch-official]
-name = "OpenAI"
-requires_openai_auth = true                 # prompts for OPENAI_API_KEY / `codex auth`
-supports_websockets = false                 # use HTTP streaming only
-wire_api = "responses"                      # OpenAI Responses API (vs Chat Completions)
-base_url = "http://127.0.0.1:15721/v1"      # local cc-switch proxy; adjust if port differs
+# --- Security & access control ---
+sandbox_mode = "workspace-write"  # workspace-write | danger-full-access | read-only
+approval_policy = "on-request"
+approvals_reviewer = "auto_review"
+
+# --- Performance & resource limits ---
+service_tier = "ultrafast"
+model_context_window = 1000000
+model_auto_compact_token_limit = 900000
+
+# disable_response_storage = false
 
 [desktop]
 followUpQueueMode = "steer"
 conversationDetailMode = "STEPS_COMMANDS"
 show-context-window-usage = true
-enabled-reasoning-efforts = ["low", "medium", "high", "xhigh", "ultra", "persistent", "max"]
-localeOverride = "zh-CN"
+enabled-reasoning-efforts = ["low", "medium", "high", "xhigh", "max", "ultra"]
 
 [agents]
-max_depth = 2                               # maximum depth of reasoning / subagent calls
-max_concurrent_threads_per_session = 12     # maximum concurrent threads per session (across all subagents)
-default_subagent_model = "gpt-5.6-terra"    # default model for subagents (can be overridden per subagent)
-default_subagent_reasoning_effort = "low"   # default reasoning effort for subagents (can be overridden per subagent)
+max_depth = 2  # maximum depth of reasoning / subagent calls
+max_concurrent_threads_per_session = 12  # maximum concurrent threads per session (across all subagents)
+default_subagent_model = "gpt-5.6-sol"  # default model for subagents (can be overridden per subagent)
+default_subagent_reasoning_effort = "medium"  # default reasoning effort for subagents (can be overridden per subagent)
 
 # --- Marketplaces & plugins (generic) ---
 # Upstream marketplaces with local `source` paths (e.g. ~/.codex/.tmp/...,
@@ -41,67 +42,16 @@ default_subagent_reasoning_effort = "low"   # default reasoning effort for subag
 # stable, portable set; add local marketplaces per-machine via
 # ~/.codex/config.local.toml if you need them.
 # Example (commented, not active):
-# [marketplaces.openai-bundled]
-# source_type = "local"
-# source = "~/.codex/.tmp/bundled-marketplaces/openai-bundled"
+[marketplaces]
+openai-bundled = { source_type = "local", source = "~/.codex/.tmp/bundled-marketplaces/openai-bundled" }
 
-[plugins."codex-app-tools@openai-bundled"]
-enabled = true
-
-[plugins."browser@openai-bundled"]
-enabled = true
-
-[plugins."visualize@openai-bundled"]
-enabled = true
-
-[plugins."computer-use@openai-bundled"]
-enabled = true
-
-[plugins."documents@openai-primary-runtime"]
-enabled = true
-
-[plugins."pdf@openai-primary-runtime"]
-enabled = true
-
-[plugins."spreadsheets@openai-primary-runtime"]
-enabled = true
-
-[plugins."presentations@openai-primary-runtime"]
-enabled = true
-
-[plugins."template-creator@openai-primary-runtime"]
-enabled = true
-
-# --- MCP servers (portable, disabled by default) ---
-# Previous machine-specific entries (absolute paths such as
-# /Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl,
-# ~/.codex/computer-use/Codex Computer Use.app/..., versioned
-# browser-service.mjs 26.831.20005, CODEX_HOME=/Users/.../.codex, etc.)
-# are omitted. They leak absolute user paths and app versions and break
-# portability. Keep such overrides local (e.g. ~/.codex/config.local.toml)
-# or uncomment and adjust the template below.
-#
-# [mcp_servers.node_repl]
-# command = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl"
-# args = []
-# startup_timeout_sec = 120
-# [mcp_servers.node_repl.env]
-# CODEX_HOME = "~/.codex"
-# NODE_REPL_NODE_PATH = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node"
-# NODE_REPL_TRUSTED_CODE_PATHS = "~/.codex:/Applications/ChatGPT.app/Contents/Resources/cua_node/lib/node_modules"
-# # ... additional env (BROWSER_USE_*, SKY_CUA_SERVICE_PATH, etc.) as needed
-#
-# [mcp_servers.computer-use]
-# command = "./Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient"
-# args = ["mcp"]
-# cwd = "."
-# enabled = false
-#
-# [mcp_servers.cua_repl]
-# command = "/Applications/ChatGPT.app/Contents/MacOS/ChatGPT"
-# enabled = false
-
-# --- Notify (machine-specific, disabled) ---
-# notify = ["~/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
-# The above absolute path is generated locally (contains user home and app
-# version). Keep it in a local override if you need desktop notifications.
+[plugins]
+"codex-app-tools@openai-bundled" = { enabled = true }
+"browser@openai-bundled" = { enabled = true }
+"visualize@openai-bundled" = { enabled = true }
+"computer-use@openai-bundled" = { enabled = true }
+"documents@openai-primary-runtime" = { enabled = true }
+"pdf@openai-primary-runtime" = { enabled = true }
+"spreadsheets@openai-primary-runtime" = { enabled = true }
+"presentations@openai-primary-runtime" = { enabled = true }
+"template-creator@openai-primary-runtime" = { enabled = true }
