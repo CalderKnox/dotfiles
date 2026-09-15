@@ -279,3 +279,37 @@ update-all() {
         return 1
     fi
 }
+
+
+
+bak() {
+    emulate -L zsh
+    zmodload zsh/datetime 2>/dev/null
+    local ts
+    if (( $+builtins[strftime] )); then
+        strftime -s ts '%Y%m%d_%H%M%S' $EPOCHSECONDS
+    else
+        ts=$(date +%Y%m%d_%H%M%S)
+    fi
+    (( $# )) || { print -u2 "Usage: bak <file1> <file2> ..."; return 1 }
+    local file base backup
+    for file in "$@"; do
+        if [[ ! -e $file ]]; then
+            print -u2 -P "%F{red}Error: $file does not exist%f"
+            continue
+        fi
+        base=${file:t}
+        # 关键守卫：zsh 的 :r/:e 会把 .bashrc 拆成 ""+"bashrc"，不能用
+        if [[ $base == ?*.* ]]; then
+            backup="${file:h}/${base%.*}_${ts}.${base##*.}"
+        else
+            backup="${file:h}/${base}_${ts}"
+        fi
+        if [[ -e $backup ]]; then
+            print -u2 -P "%F{yellow}Warning: $backup already exists, skipped%f"
+            continue
+        fi
+        cp -f -- "$file" "$backup" &&
+            print "Backed up: $file -> $backup"
+    done
+}
