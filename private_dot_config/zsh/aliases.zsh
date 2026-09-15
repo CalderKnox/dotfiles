@@ -33,7 +33,7 @@ alias zshsource='source ~/.zshrc'                # 重新加载配置
 # 启用终端代理 (127.0.0.1:5376, HTTP/HTTPS + SOCKS5)
 onproxy() {
     local host="127.0.0.1" port=5376
-    local http="http://$host:$port" socks="socks5://$host:$port"
+    local http="http://$host:$port" socks="socks5h://$host:$port"
     export all_proxy="$socks" http_proxy="$http" https_proxy="$http" \
            ALL_PROXY="$socks" HTTP_PROXY="$http" HTTPS_PROXY="$http"
     printf "🚀 终端代理已开启：\n   HTTP/HTTPS: $http\n   SOCKS5: $socks"
