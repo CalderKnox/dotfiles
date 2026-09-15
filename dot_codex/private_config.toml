@@ -6,7 +6,7 @@
 # See: https://github.com/openai/codex — config reference.
 # MCP/marketplace/notify paths are kept as commented examples, not active.
 
-model = "gpt-6-astra"  # default model (override per-session if needed)
+model = "gpt-5.6-sol"  # default model (override per-session if needed) gpt-6-astra
 review_model = "gpt-5.6-sol"  # model used for `codex review`
 model_reasoning_effort = "medium"  # low | medium | high | xhigh | ultra | persistent | max
 
@@ -26,7 +26,7 @@ model_auto_compact_token_limit = 900000
 followUpQueueMode = "steer"
 conversationDetailMode = "STEPS_COMMANDS"
 show-context-window-usage = true
-enabled-reasoning-efforts = ["low", "medium", "high", "xhigh", "max", "ultra"]
+enabled-reasoning-efforts = ["minimal", "low", "medium", "high", "xhigh", "max", "ultra"]
 
 [agents]
 max_depth = 2  # maximum depth of reasoning / subagent calls
