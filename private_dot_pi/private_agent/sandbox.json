@@ -17,6 +17,7 @@
     "allowRead": [
       ".",
       "~/.gitconfig",
+      "~/.gitignore_global",
       "~/.config/git/config",
       "/private/etc/ssl",
       "/dev/null",
