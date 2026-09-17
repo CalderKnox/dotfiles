@@ -10,7 +10,7 @@ COLORTERM = "truecolor"
 LANG = "zh_CN.UTF-8"
 LC_ALL = "zh_CN.UTF-8"
 
-[terminal]
+# [terminal]
 # # shell configuration for Alacritty with tmux
 shell = { program = "/opt/homebrew/bin/fish", args = [
   "-c",
@@ -19,16 +19,15 @@ shell = { program = "/opt/homebrew/bin/fish", args = [
 # shell = { program = "/bin/zsh", args = ["-l"] }
 # shell = { program = "/opt/homebrew/bin/fish", args = ["-l"] }
 
-
 [font]
 size = 15
-
 
 # Requires JetBrainsMono Nerd Font Mono installed (via Homebrew `font-jetbrains-mono-nerd-font`).
 normal = { family = "JetBrainsMono Nerd Font Mono", style = "Regular" }
 bold = { family = "JetBrainsMono Nerd Font Mono", style = "Bold" }
 italic = { family = "JetBrainsMono Nerd Font Mono", style = "Italic" }
 bold_italic = { family = "JetBrainsMono Nerd Font Mono", style = "Bold Italic" }
+builtin_box_drawing = true
 
 # Palette: Catppuccin Mocha (active) — same Catppuccin Mocha theme family as ghostty & local starship (ANSI bright variants differ from ghostty's bundled theme); the Dracula block below is kept fully commented as an alternative template.
 [colors]
@@ -42,19 +41,22 @@ primary = { background = "#1e1e2e", foreground = "#cdd6f4" }
 normal = { black = "#45475a", red = "#f38ba8", green = "#a6e3a1", yellow = "#f9e2af", blue = "#89b4fa", magenta = "#cba6f7", cyan = "#94e2d5", white = "#bac2de" }
 bright = { black = "#585b70", red = "#f38ba8", green = "#a6e3a1", yellow = "#f9e2af", blue = "#89b4fa", magenta = "#cba6f7", cyan = "#94e2d5", white = "#a6adc8" }
 
-
 [window]
-resize_increments = true 
+resize_increments = true
 
 padding = { x = 10, y = 10 }
 # opacity = 0.85
-blur = true                         # macOS translucent blur behind window
-option_as_alt = "OnlyRight"         # left Option stays for input (e.g. umlauts), right Option = Alt/Meta
-# dimensions = { columns = 120, lines = 35 }  # example: fixed startup size (disabled)
-decorations = "none"
+blur = true  # macOS translucent blur behind window
+option_as_alt = "OnlyRight"  # left Option stays for input (e.g. umlauts), right Option = Alt/Meta
+dimensions = { columns = 160, lines = 48 }  # example: fixed startup size (disabled)
+decorations = "full"  # example: full window decorations (traffic lights) (disabled)
 # decorations = "Buttonless"                  # example: hide traffic lights (disabled)
 startup_mode = "Fullscreen"
 dynamic_title = true
+
+[scrolling]
+history = 1000
+multiplier = 3
 
 [selection]
 save_to_clipboard = true  # copy selection directly to system clipboard
