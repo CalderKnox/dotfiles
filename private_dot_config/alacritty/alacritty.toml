@@ -4,18 +4,22 @@
 # Docs: https://alacritty.org/config-alacritty.html | bindings: .../config-alacritty-bindings.html
 # Reference: https://www.kevnu.com/zh/posts/18
 
-[env]
-TERM = "xterm-256color"  # ensure 256-color + truecolor in tmux/ssh
-COLORTERM = "truecolor"
-LANG = "zh_CN.UTF-8"
-LC_ALL = "zh_CN.UTF-8"
-
-# [terminal]
-# # shell configuration for Alacritty with tmux
 shell = { program = "/opt/homebrew/bin/fish", args = [
   "-c",
   "tmux new -A -s main",
 ] }
+
+[env]
+TERM = "xterm-256color"  # ensure 256-color + truecolor in tmux/ssh
+COLORTERM = "truecolor"
+LANG = "zh_CN.UTF-8"
+
+# [terminal]
+# shell configuration for Alacritty with tmux
+# shell = { program = "/opt/homebrew/bin/fish", args = [
+#   "-c",
+#   "tmux new -A -s main",
+# ] }
 # shell = { program = "/bin/zsh", args = ["-l"] }
 # shell = { program = "/opt/homebrew/bin/fish", args = ["-l"] }
 
@@ -46,11 +50,10 @@ resize_increments = true
 
 padding = { x = 10, y = 10 }
 # opacity = 0.85
-blur = true  # macOS translucent blur behind window
 option_as_alt = "OnlyRight"  # left Option stays for input (e.g. umlauts), right Option = Alt/Meta
-dimensions = { columns = 160, lines = 48 }  # example: fixed startup size (disabled)
-decorations = "full"  # example: full window decorations (traffic lights) (disabled)
-# decorations = "Buttonless"                  # example: hide traffic lights (disabled)
+dimensions = { columns = 160, lines = 48 }  # example: fixed startup size
+decorations = "full"  # example: full window decorations (traffic lights)
+# decorations = "Buttonless"                  # example: hide traffic lights
 startup_mode = "Fullscreen"
 dynamic_title = true
 

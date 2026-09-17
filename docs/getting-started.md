@@ -44,7 +44,7 @@ brew install fzf starship zoxide mise fd ripgrep
 # 示例：本机代理监听 5376（与 dot_gitconfig / ~/.ssh/config 中的代理端口一致）
 export https_proxy=http://127.0.0.1:5376
 export http_proxy=http://127.0.0.1:5376
-export all_proxy=socks5://127.0.0.1:5376
+export all_proxy=socks5h://127.0.0.1:5376
 
 # 探活：确认代理端口确实在监听，再继续后面的 bootstrap
 nc -z 127.0.0.1 5376 && echo "proxy ok" || echo "proxy not listening on 5376"
@@ -53,7 +53,7 @@ nc -z 127.0.0.1 5376 && echo "proxy ok" || echo "proxy not listening on 5376"
 - 代理不在监听时先解决代理本身，或改走直连/镜像；探活通过后再执行 `chezmoi init`、
   首次启动 `zsh`、首次运行 `nvim`。
 - 两通道行为不对称：`dot_gitconfig` 中仅一处按域名限定的 GitHub 代理（`[http "https://github.com"]`，对该 URL 匹配的 HTTP/HTTPS 远程均生效；冗余的 `[https …]` / `[ssh …]` 段已删）固定为
-  `socks5://127.0.0.1:5376` 且**无直连回退**——代理离线时对 GitHub 的 git 操作会卡住或报
+  `socks5h://127.0.0.1:5376` 且**无直连回退**——代理离线时对 GitHub 的 git 操作会卡住或报
   `Connection refused`；`~/.ssh/config` 的 `ProxyCommand` 则先探测 `127.0.0.1:5376`，
   在线走 SOCKS5、离线自动回退直连。
 - 首次启动 `zsh` 时 `zimfw` 拉模块走 HTTPS（新机默认无 `~/.gitconfig` 即不受 git 代理
@@ -130,9 +130,9 @@ brew install bat lsd htop fastfetch neovim tmux yazi gh lazygit tldr coreutils \
 ```
 
 - `coreutils` 提供 `nproc`（`makes` / `xargsp` 半核并行依赖它）
-- Fish 侧：`brew install fish fisher`——`~/.config/fish/` 的 14 个插件由 `fish_plugins` 清单管理（`fisher update` 安装/更新）；提示符复用 `starship`、fzf 键位复用 `fzf.fish`（均已在上方依赖中）
+- Fish 侧：`brew install fish fisher`——`~/.config/fish/` 的 13 个插件由 `fish_plugins` 清单管理（`fisher update` 安装/更新）；提示符复用 `starship`、fzf 键位复用 `fzf.fish`（均已在上方依赖中）
 - `bat` / `lsd` / `htop` 分别接管 `cat` / `ls` / `top`；脚本中需要原生行为时用 `command cat` 等
-- `gh` 配合 `~/.ssh/config` 的 `Host github.com → ssh.github.com:443` 与 `dot_gitconfig` 的 `socks5://127.0.0.1:5376` 代理共同保证 GitHub 可达。代理已统一为 `5376`，不再区分 `7890`（详见 [dev-tools.md](dev-tools.md) 中的代理配置说明）。
+- `gh` 配合 `~/.ssh/config` 的 `Host github.com → ssh.github.com:443` 与 `dot_gitconfig` 的 `socks5h://127.0.0.1:5376` 代理共同保证 GitHub 可达。代理已统一为 `5376`，不再区分 `7890`（详见 [dev-tools.md](dev-tools.md) 中的代理配置说明）。
 
 按需补装（别名 / 函数指向的目标，未装时对应功能退化）：
 
@@ -189,7 +189,7 @@ nvim --headless +qa                  # 无插件加载错误
 # SSH / GitHub 可达性
 cat ~/.ssh/config                    # 顶部含 Include ~/.orbstack/ssh/config，github.com 走 ssh.github.com:443
 git lfs version                      # 确认 git-lfs 已装（缺失时 clone/push 会因 filter lfs required=true 全局失败）
-git config --get-regexp proxy        # 应为 socks5://127.0.0.1:5376（与 SSH ProxyCommand 5376 统一；
+git config --get-regexp proxy        # 应为 socks5h://127.0.0.1:5376（与 SSH ProxyCommand 5376 统一；
                                      # apply 已部署 ~/.gitconfig，可直接读取）
                                      # 也可直接校验源文件：
                                      # git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy

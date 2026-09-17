@@ -15,7 +15,7 @@
 | 领域 | 方案 | 说明 |
 | --- | --- | --- |
 | Shell | Zsh + [Zim](https://zimfw.sh/) + 自有模块 | `aliases.zsh` / `fzf.zsh` / `sdk.zsh` 三模块化加载；`update-all` 批量更新（`brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`，支持参数过滤与失败计数） |
-| Fish | Fish + [Fisher](https://github.com/jorgebucaran/fisher) + Starship | Ghostty 登录 shell（`fish -l`，tmux `default-shell` 同步）；`fish_plugins` 锁定 14 个插件（fzf.fish / forgit / autopair / done 等），`conf.d` 五文件设定 PATH/LANG/EDITOR 等环境，补全含 OrbStack docker/kubectl/orbctl 符号链接 |
+| Fish | Fish + [Fisher](https://github.com/jorgebucaran/fisher) + Starship | Ghostty 登录 shell（`fish -l`，tmux `default-shell` 同步）；`fish_plugins` 锁定 13 个插件（fzf.fish / forgit / autopair / done 等），`conf.d` 四文件设定 PATH/LANG/EDITOR 等环境，补全含 OrbStack docker/kubectl/orbctl 符号链接 |
 | 提示符 | [Starship](https://starship.rs/) | Catppuccin Mocha powerline 风格（`starship.toml` 为机器本地文件，未入库） |
 | 模糊搜索 | fzf + fzf-tab + fd | Ctrl-R 历史、Ctrl-T 文件、Alt-C 目录、`frg`/`fkill`/`ftm`/`fl*` 交互函数 |
 | 终端 | Ghostty（主力）/ Alacritty（备用） | JetBrainsMono Nerd Font Mono，Catppuccin Mocha 配色（Dracula 以注释模板保留于 alacritty） |
@@ -77,7 +77,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 ├── dot_gitignore_global               →  ~/.gitignore_global          全局忽略规则（构建产物根锚定，无 bin/）
 ├── dot_tmux.conf                      →  ~/.tmux.conf                  tmux 配置（Fish 登录 shell、tpm 插件、Catppuccin Mocha 状态栏）
 ├── dot_codex/
-│   └── private_config.toml            →  ~/.codex/config.toml         cc-switch 本地代理配置（0600，详见 dot_codex/private_config.toml）
+│   └── private_config.toml            →  (不部署) ~/.codex/config.toml   cc-switch 机器本地配置参考快照（被 .chezmoiignore 的 .codex/config.toml 排除）
 ├── private_dot_claude/
 │   └── settings.json                  →  ~/.claude/settings.json       Claude Code 设置（目录 0700 / 文件 0644；statusLine bun 动态解析/插件/环境）
 ├── private_dot_config/
@@ -91,13 +91,14 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │   │   └── README.md                  →  (不部署) 模块文档，由 **/README.md 排除
 │   ├── ghostty/config                 →  ~/.config/ghostty/config     Ghostty 终端（command = fish -l）
 │   ├── alacritty/alacritty.toml       →  ~/.config/alacritty/alacritty.toml  Alacritty 备用
+│   ├── kitty/kitty.local.conf         →  ~/.config/kitty/kitty.local.conf  kitty 增量个人配置（由本机 kitty.conf 末尾 include 引入；仓库不含 kitty.conf）
 │   ├── mise/config.toml               →  ~/.config/mise/config.toml   mise 工具链
 │   ├── nvim/                          →  ~/.config/nvim/              LazyVim 配置（含 lazy-lock.json / stylua.toml）
-│   └── private_fish/                  →  ~/.config/fish/              Fish 辅助配置（Starship + Fisher 14 插件清单）
+│   └── private_fish/                  →  ~/.config/fish/              Fish 辅助配置（Starship + Fisher 13 插件清单）
 │       ├── config.fish                →  ~/.config/fish/config.fish
-│       ├── fish_plugins                →  ~/.config/fish/fish_plugins     Fisher 14 插件清单
+│       ├── fish_plugins                →  ~/.config/fish/fish_plugins     Fisher 13 插件清单
 │       ├── private_completions/       →  ~/.config/fish/completions/  symlink_docker/kubectl/orbctl.fish → OrbStack
-│       ├── private_conf.d/, private_functions/ → conf.d（00_env / 00_aliases / 01_dev / 01_rev / fzf 五文件）与 functions/（fzf.fish 插件函数）
+│       ├── private_conf.d/, private_functions/ → conf.d（00_env / 00_aliases / 01_dev / 01_rev 四文件）与 functions/（fzf.fish 插件函数，fisher 运行时生成不入库）
 │       └── themes/                    →  ~/.config/fish/themes/       空占位目录（仅 .keep）
 ├── private_dot_ssh/
 │   └── private_config                 →  ~/.ssh/config                ★ GitHub 走 ssh.github.com:443 + 自适应 SOCKS5 ProxyCommand（含 OrbStack Include；~/.ssh 目录 0700）
@@ -111,7 +112,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
         └── settings.json              →  ~/.pi/workflows/settings.json 工作流设置（并发/进度面板）
 ```
 
-> 根级 `README.md` / `LICENSE` / `docs/` 与全部嵌套 `README.md` / `LICENSE`（含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）均由 `.chezmoiignore`（`**/README.md`、`**/LICENSE` 等按目标名书写的模式）排除、不部署；历史上的 `**/REAMDME.md` 拼写失配与 `dot_git`/`dot_DS_Store`/`dot_gitconfig` 源名失配已修复。`managed` 目标数演进：核心 55 → zsh 收敛后 57（`dot_zshrc/dot_zimrc` → `private_dot_config/zsh/dot_*` + 2 条 `symlink_*.tmpl`），鱼 shell 扩容后曾达 81（纳入 `.config/fish/fish_variables` 后为 82）；当前 `chezmoi managed | wc -l` 为 85（核心 49 + fish 36；2026-09-07 `model-tiers.json` 移除与 `dot_neoconf.json` 删除后），详见 [docs/layout.md](docs/layout.md) 目标映射；后续去重又清理了被更宽模式覆盖的冗余行，目标数不再单调变化。
+> 根级 `README.md` / `LICENSE` / `docs/` 与全部嵌套 `README.md` / `LICENSE`（含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）均由 `.chezmoiignore`（`**/README.md`、`**/LICENSE` 等按目标名书写的模式）排除、不部署；历史上的 `**/REAMDME.md` 拼写失配与 `dot_git`/`dot_DS_Store`/`dot_gitconfig` 源名失配已修复。`managed` 目标数演进：核心 55 → zsh 收敛后 57（`dot_zshrc/dot_zimrc` → `private_dot_config/zsh/dot_*` + 2 条 `symlink_*.tmpl`），鱼 shell 扩容后曾达 81（纳入 `.config/fish/fish_variables` 后为 82）；当前 `chezmoi managed | wc -l` 为 85（核心 50 + fish 35；2026-09-07 `model-tiers.json` 移除与 `dot_neoconf.json` 删除后曾为核心 49 + fish 36，2026-09-09 删 conf.d/fzf.fish、09-15 增 kitty.local.conf、本次删 private_completions/sdk.fish 后：+1 kitty −1 sdk，总数 85 不变），详见 [docs/layout.md](docs/layout.md) 目标映射；后续去重又清理了被更宽模式覆盖的冗余行，目标数不再单调变化。
 
 ## 📚 文档索引
 
@@ -132,12 +133,12 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 ## 🔒 安全与隐私
 
 - 敏感度较高的路径使用 `private_` 前缀收紧权限：目录 `0700`（如 `~/.ssh/`、
-  `~/.pi/agent/`、`~/.config/fish/`），文件 `0600`（如 `private_` 前缀的 `~/.codex/config.toml`）。
+    `~/.pi/agent/`、`~/.config/fish/`），文件 `0600`（如 `~/.ssh/config`）。
 - `~/.config/gh/` 下的 `config.yml` 与 `hosts.yml` 均由 `gh auth login`
   在目标机器上生成，含凭据，不入仓库。
 - pi agent 的沙箱与权限策略显式拒绝读取 `*.env`、`~/.ssh/*`、`~/.aws/*` 等，
   并禁止 `sudo` / `rm` 类命令——细节见 [docs/dev-tools.md](docs/dev-tools.md)。
-- `dot_gitconfig` 与 `private_dot_ssh/private_config` 中包含本地代理地址（`socks5://127.0.0.1:5376`，git 一处（gitconfig 单条代理行）与 SSH 探测均统一为 5376，仅对 `github.com`/`ssh.github.com` 生效）
+- `dot_gitconfig` 与 `private_dot_ssh/private_config` 中包含本地代理地址（`socks5h://127.0.0.1:5376`，git 一处（gitconfig 单条代理行）与 SSH 探测均统一为 5376，仅对 `github.com`/`ssh.github.com` 生效）
   与个人身份信息，公开 fork 前请先脱敏。
 
 ## 🧾 环境

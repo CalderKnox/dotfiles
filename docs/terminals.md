@@ -1,8 +1,8 @@
-# 终端：Ghostty（主力）与 Alacritty（备用）
+# 终端：Ghostty（主力）、Alacritty（备用）与 kitty
 
-两套配置共用 `JetBrainsMono Nerd Font Mono`（字号均为 15），可独立安装、互不依赖。Ghostty 为日常主力（支持热重载、Quick Terminal），Alacritty 为轻量备用。
+三套配置共用 `JetBrainsMono Nerd Font Mono`，可独立安装、互不依赖。Ghostty 为日常主力（支持热重载、Quick Terminal），Alacritty 为轻量备用，kitty 仅以增量个人配置 `kitty.local.conf` 入库（在新机生成的默认 `kitty.conf` 末尾 `include` 引入即可，见下文）。四者的 shell 均已统一为 fish：Ghostty `command = fish -l`、Alacritty `shell = fish + tmux`、kitty `shell = fish`、tmux `default-shell = fish`。
 
-> **分工**：本文件只解释终端模拟器自身的配置思路与日常使用，不重复具体数值。提示符与配色方案的完整定义（Starship `catppuccin_mocha`、powerline 格式与各段样式）见 [shell.md — Starship 提示符](shell.md#starship-提示符机器本地-starshiptoml)。所有实际配置值（字体、透明度、键位、配色等）一律以源文件为唯一权威：Ghostty 见 `private_dot_config/ghostty/config`，Alacritty 见 `private_dot_config/alacritty/alacritty.toml`。
+> **分工**：本文件只解释终端模拟器自身的配置思路与日常使用，不重复具体数值。提示符与配色方案的完整定义（Starship `catppuccin_mocha`、powerline 格式与各段样式）见 [shell.md — Starship 提示符](shell.md#starship-提示符机器本地-starshiptoml)。所有实际配置值（字体、透明度、键位、配色等）一律以源文件为唯一权威：Ghostty 见 `private_dot_config/ghostty/config`，Alacritty 见 `private_dot_config/alacritty/alacritty.toml`，kitty 见 `private_dot_config/kitty/kitty.local.conf`。
 
 ---
 
@@ -27,6 +27,14 @@
 - **字体**与 Ghostty 共用 JetBrainsMono Nerd Font Mono、`size = 15`。
 - **配色**：活跃调色板为 Catppuccin Mocha（`colors.primary / normal / bright` 的 `#1e1e2e` / `#f38ba8` 系列）；Dracula 块整体注释保留，需要时取消注释切换。实际 hex 值以源文件 `alacritty.toml` 的 `[colors]` 为准。
 - **键位**：复用交给 tmux，故屏蔽 `Cmd+T` / `Cmd+N`、保留 `Cmd+Enter` 切换全屏；其余自定义绑定见源文件。
+
+## kitty — `private_dot_config/kitty/kitty.local.conf`
+
+仓库仅提交 kitty 的**增量**个人配置 `kitty.local.conf`（kitty 不会自动读取该文件名）：kitty 首次启动会在 `~/.config/kitty/` 生成默认 `kitty.conf`，需在其末尾手工添加一行 `include kitty.local.conf` 引入本文件（仓库有意不含 `kitty.conf`，避免整份覆盖上游默认值；新机器装好 kitty 后此操作一次即可）。之后可用 `Cmd+,`（`edit_config_file`）编辑、`Ctrl+Cmd+,`（`load_config_file`）热重载。
+
+- **启动即 Fish**：`shell = /opt/homebrew/bin/fish --login --interactive`（默认取自 `$SHELL`/passwd，本机为 zsh，故显式固定为 Fish，与 Ghostty 的 `command`、tmux 的 `default-shell` 统一）。
+- **字体与外观**：JetBrainsMono Nerd Font Mono、Catppuccin Mocha 配色、powerline 标签栏与 minimal 边框；具体数值见源文件。
+- **键位**：`Cmd+T` 在 `~/workspaces` 开新标签页、`Cmd+D` / `Cmd+Shift+D` 横纵分屏、`Cmd+Shift+Enter` 在相邻位置开窗、`Cmd+1`–`Cmd+9` 标签跳转等；完整 `map` 列表以源文件为准。
 
 ## 字体安装与校验
 

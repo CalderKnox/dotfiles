@@ -78,7 +78,7 @@ Host inner
 
 
 ## private github
-Host github.com
+Host github.com ssh.github.com
     # ssh.github.com:443 — HTTPS port, traverses firewalls that block 22
     HostName ssh.github.com
     User git
@@ -98,7 +98,7 @@ Host github.com
 ## （git@ssh.github.com-443）——ControlPersist 600 窗口内会复用已有 master，
 ## 工作密钥永远不会被真正使用。连接前先 `ssh -O exit github.com` 关闭复用，
 ## 或用 `ssh -o ControlPath=none github-work.com` 直连，才能实际走工作身份。
-# Host github-work.com
+# Host github-work.com ssh.github.com
 #     HostName ssh.github.com
 #     User git
 #     Port 443
@@ -113,7 +113,7 @@ Host *
     ServerAliveCountMax 3
     StrictHostKeyChecking accept-new
     ControlMaster auto
-    # 使用ControlPath 前需建目录：mkdir -p ~/.ssh/sockets
+    # 目录由 chezmoi run_once 脚本创建（.chezmoiscripts/run_once_create-ssh-sockets.sh）
     ControlPath ~/.ssh/sockets/%r@%h-%p
     ControlPersist 600
 

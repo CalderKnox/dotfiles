@@ -55,43 +55,17 @@ return {
     -- },
 
     -- ============================================================================
-    -- Example: Telescope plugin file browser
+    -- Example: fzf-lua plugin file browser (default picker is fzf-lua)
     -- ============================================================================
     -- Add a keymap to browse plugin files
     {
-        "nvim-telescope/telescope.nvim",
+        "ibhagwan/fzf-lua",
         keys = {
             -- Find plugin file with leader+fp
-            -- stylua: ignore
             {
                 "<leader>fp",
-                function() require("telescope.builtin").find_files({ cwd = require("lazy.core.config").options.root }) end,
+                function() require("fzf-lua").files({ cwd = vim.fn.stdpath("data") .. "/lazy" }) end,
                 desc = "Find Plugin File",
-            },
-        },
-        -- Change some telescope options
-        opts = {
-            defaults = {
-                layout_strategy = "horizontal",
-                layout_config = { prompt_position = "top" },
-                sorting_strategy = "ascending",
-                winblend = 0,
-            },
-        },
-    },
-
-    -- ============================================================================
-    -- Example: Add pyright for Python LSP
-    -- ============================================================================
-    -- Add pyright to lspconfig (automatically installed with mason)
-    {
-        "neovim/nvim-lspconfig",
-        ---@class PluginLspOpts
-        opts = {
-            ---@type lspconfig.options
-            servers = {
-                -- pyright will be automatically installed with mason and loaded with lspconfig
-                pyright = {},
             },
         },
     },
@@ -139,36 +113,6 @@ return {
 
     -- Or use the LazyVim extra for typescript
     -- { import = "lazyvim.plugins.extras.lang.typescript" },
-
-    -- ============================================================================
-    -- Add more treesitter parsers
-    -- ============================================================================
-    -- Treesitter parsers (single spec — includes tsx/typescript; duplicate spec was removed)
-    {
-        "nvim-treesitter/nvim-treesitter",
-        opts = {
-            ensure_installed = {
-                "bash",
-                "html",
-                "javascript",
-                "json",
-                "lua",
-                "markdown",
-                "markdown_inline",
-                "python",
-                "query",
-                "regex",
-                "tsx",
-                "typescript",
-                "vim",
-                "yaml",
-            },
-        },
-    },
-
-    -- NOTE: Former second treesitter spec that re-added tsx/typescript was merged
-    -- into the single spec above (which already lists tsx + typescript). Keeping one
-    -- spec avoids duplicate vim.list_extend work and lazy.nvim merge overhead.
 
     -- ============================================================================
     -- Configure lualine with custom sections
@@ -220,13 +164,8 @@ return {
     {
         "mason-org/mason.nvim",
         opts = {
-            ensure_installed = {
-                "stylua",           -- Lua formatter
-                "shellcheck",       -- Shell script checker
-                "shfmt",            -- Shell script formatter
-                "flake8",           -- Python linter
-                -- "prettier",       -- JS formatter (enable if needed)
-            },
+            ensure_installed = { "shellcheck" }, -- Shell script checker
+            -- "prettier",       -- JS formatter (enable if needed)
         },
     },
 

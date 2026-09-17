@@ -5,7 +5,7 @@
 [core]
 	# git config 仅将双引号视为引用；单引号是字面字符（旧值 'code' 靠 sh 启动编辑器剥离引号才可用），
 	# 规范为不带引号的裸值，行为一致
-	editor = code
+	editor = code --wait
 	autocrlf = input
 	excludesfile = ~/.gitignore_global
 [filter "lfs"]
@@ -21,7 +21,7 @@
 [init]
 	defaultBranch = main
 
-# NOTE: GitHub HTTPS 仅有此代理 socks5://127.0.0.1:5376，代理离线时无直连回退；
+# NOTE: GitHub HTTPS 仅有此代理 socks5h://127.0.0.1:5376，代理离线时无直连回退；
 # 临时恢复直连：git config --global --unset http.https://github.com.proxy
 [http "https://github.com"]
 	proxy = socks5h://127.0.0.1:5376

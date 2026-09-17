@@ -61,7 +61,7 @@ nvim
 │   │   ├── keymaps.lua       custom keymaps (loaded after LazyVim defaults)
 │   │   └── autocmds.lua      autocmds (loaded on VeryLazy)
 │   └── plugins/
-│       └── example.lua       example specs (effective: catppuccin / telescope / pyright / treesitter / mason; trouble spec removed, nvim-cmp & second lualine spec disabled; stylua 2-space layout)
+│       └── example.lua       example specs (effective: catppuccin / fzf-lua(<leader>fp) / pyright / treesitter / lualine 😄 / mason; trouble spec removed, nvim-cmp & second lualine spec disabled; 4-space indent, stylua.toml Spaces-2 pass pending)
 ├── lazy-lock.json            43 plugins locked by commit (reproducible)
 ├── lazyvim.json              LazyVim metadata (extras=[], news 11866, version 8 — extras empty is expected, real list is in lazy.lua)
 ├── stylua.toml               Spaces 2 / 120 columns
@@ -151,9 +151,9 @@ All other keys are LazyVim defaults (flash, neo-tree, snacks, bufferline, which-
 
 | Event | Group | Pattern | Action |
 | ----- | ----- | ------- | ------ |
-| `TextYankPost` | `user_yank_highlight` | `*` | Highlight yank 300 ms with `IncSearch` |
-| `VimResized` | `user_resize_splits` | `*` | `tabdo wincmd =` — equalize splits |
 | `InsertEnter`/`InsertLeave` | `user_cursorline_toggle` | `*` | Cursorline only in Normal mode |
+
+> yank 高亮与窗口均分已由 LazyVim v16 上游覆盖，不再重复定义。
 
 > No per-filetype autocmds: the former `FileType python` row was stale (removed from autocmds.lua as redundant) — indentation is set globally in `options.lua` (4-space) and per-filetype needs would go in `autocmds.lua`.
 

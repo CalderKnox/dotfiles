@@ -38,6 +38,12 @@
         "repo": "jarrodwatts/claude-hud",
         "source": "github"
       }
+    },
+    "omc": {
+      "source": {
+        "repo": "Yeachan-Heo/oh-my-claudecode",
+        "source": "github"
+      }
     }
   },
   "includeCoAuthoredBy": false,

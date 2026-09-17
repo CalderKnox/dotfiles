@@ -48,5 +48,3 @@ node_modules/
 **/.pi
 
 # Note: `*.git` typo line removed (was ambiguous — likely *.orig/*.patch merge residue).
-# If you need to ignore git internals, use an explicit pattern with a comment.
-**/.git

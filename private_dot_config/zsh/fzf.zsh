@@ -109,6 +109,7 @@ export FZF_DEFAULT_OPTS="
   --multi                                                     # 支持多选(Tab 切换选中,Enter 确认）
   --ansi                                                      # 支持颜色编码
   --preview-window=right:50%:wrap                             # 预览窗口默认右侧,50%宽度，自动换行
+  --with-shell='sh -c'                                        # preview 执行 shell 固定为 sh（tmux 内 zsh 会话继承 SHELL=fish，preview 经 $SHELL -c 执行会报 fish 语法错误；fzf ≥0.48 支持，本机 0.74.4 实测可与行内注释共存）
   --bind='ctrl-/:change-preview-window(down|hidden|)'         # Ctrl+/ 切换预览位置/隐藏
   --bind='ctrl-g:execute($EDITOR {} &> /dev/tty)'             # Ctrl-G（激活）：用 $EDITOR 打开选中项（$EDITOR 由 aliases.zsh 导出）
   # --bind='ctrl-e:execute(code {} &> /dev/tty)'              # Ctrl-E（已停用）：用 VS Code 打开选中项

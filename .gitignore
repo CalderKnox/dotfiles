@@ -21,11 +21,8 @@
 
 # --- Fish — Fisher 生成与机器本地状态 ---
 # Fisher 在目标机按 fish_plugins 清单生成函数/补全；仓库仅提交用户手写的
-# config.fish、0*.fish（00_*/01_*）、fzf.fish、fish_plugins 与 completions/symlink_*，
+# config.fish、0*.fish（00_*/01_*）、fish_plugins 与 completions/symlink_*，
 # 其余 fisher 生成物不入库、由 .keep 占位。
-# 注意：patrickf1/fzf.fish 插件自身也安装 conf.d/fzf.fish，fisher update
-# 可能覆盖部署目标，下次 chezmoi apply 会再写回 —— 两工具对该路径存在
-# 所有权竞争，属已知取舍（保留 chezmoi 为最终真相源）。
 private_dot_config/private_fish/private_fish_variables
 private_dot_config/private_fish/private_functions/*
 !private_dot_config/private_fish/private_functions/.keep
@@ -34,7 +31,6 @@ private_dot_config/private_fish/private_completions/*
 private_dot_config/private_fish/private_conf.d/*
 !private_dot_config/private_fish/private_conf.d/.keep
 !private_dot_config/private_fish/private_conf.d/0*\.fish
-!private_dot_config/private_fish/private_conf.d/fzf.fish
 
 # --- chezmoi 本地状态 ---
 chezmoistate.boltdb

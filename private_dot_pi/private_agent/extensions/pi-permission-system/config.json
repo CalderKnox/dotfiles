@@ -51,7 +51,9 @@
       "~/.aws/*": "deny",
       "~/.gnupg/*": "deny",
       "/etc/*": "deny",
-      "/var/*": "deny"
+      "/var/*": "deny",
+      "/private/etc/*": "deny",
+      "/private/var/*": "deny"
     },
     "external_directory": {
       "*": "ask",

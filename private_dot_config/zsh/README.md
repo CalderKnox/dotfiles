@@ -71,11 +71,11 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.fzf_prefix_cache`）�
 
 ### 有守卫的可选组件（未安装时静默跳过）
 
-`pnpm`（tabtab 补全）、SDKMAN（惰性加载，详见 `sdk.zsh` 注释）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/` 并 `zcompile`，二进制更新自动重建；`k` 别名带守卫）、krew、`~/.cargo/env`。`update-all` 的 6 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 逐项 `command -v` 守卫，未安装跳过、失败汇总并返回非零。详见 `sdk.zsh` 与 `aliases.zsh` 源码。
+`pnpm`（tabtab 补全）、SDKMAN（惰性加载，详见 `sdk.zsh` 注释）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/` 并 `zcompile`，二进制更新自动重建；`k` 别名带守卫）、krew、`~/.cargo/env`。`update-all` 的 6 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 逐项 `command -v` 守卫，未安装跳过、失败汇总并返回非零；其中 `brew` 任务依赖 `brew tap buo/homebrew-cask-upgrade`（提供 `brew cu`），新机器上未 tap 时该任务会在 `brew cu` 处失败。详见 `sdk.zsh` 与 `aliases.zsh` 源码。
 
 ### 运行时工具（对应别名/函数调用时才需要）
 
-`fd`（主力，缺省回退 `rg`）、`bat`、`lsd`、`nvim`、`code`、`htop`、`fastfetch`、`tmux`、`yazi`、`gh`、`lazygit`、`claude`、`opencode`、`ruff`、`uv`、`rustup`、`tldr`、`mise`、`nproc`（coreutils）、`jadx-gui`、`scrcpy`。`java` 仅经 `update-all` 的 `sdk` 任务间接使用。已移除的死引用可从更早的独立 `zsh-config` 仓库历史找回；本仓库从未有过 `baseline` 标签，勿凭空创建。
+`fd`（主力，缺省回退 `rg`）、`bat`、`lsd`、`nvim`、`code`、`htop`、`fastfetch`、`tmux`、`yazi`、`gh`、`lazygit`、`claude`、`opencode`、`ruff`、`uv`、`rustup`、`tldr`、`mise`、`nproc`（coreutils）、`wget`、`jadx-gui`、`scrcpy`。`java` 仅经 `update-all` 的 `sdk` 任务间接使用。已移除的死引用可从更早的独立 `zsh-config` 仓库历史找回；本仓库从未有过 `baseline` 标签，勿凭空创建。
 
 ## 注意事项
 

@@ -31,7 +31,7 @@
 
 - **选项**（`options.lua`）：行号同时显示绝对与相对；4 空格缩进、不折行；搜索智能大小写 + 增量高亮；真彩 24-bit + 100 列标线。剪贴板与补全不覆盖、沿用 LazyVim 上游默认（剪贴板含 SSH 感知）。完整 `vim.opt` 取值以源文件为准。
 - **键位**（`keymaps.lua`）：Leader 为空格（LazyVim 默认），本仓库在默认之后叠加少量自定义项（如 `jk` 退出插入、`<leader>sv/sh` 分屏、`<leader>rl` 切换相对行号；`<leader>bd` 关缓冲由 LazyVim 内置 Snacks.bufdelete 提供，不再自定义）；其余沿用 LazyVim 默认，可用 `<leader>` 唤出 which-key 查看。完整映射以 `keymaps.lua` 为准。
-- **自动命令**（`autocmds.lua`，均在 VeryLazy 之后加载）：yank 高亮反馈、`VimResized` 均分分屏、仅普通模式高亮 cursorline 三件（无 per-filetype autocmd，缩进由 `options.lua` 全局提供）；保存时格式化交由 LazyVim 内置 autoformat 接管。完整定义以 `autocmds.lua` 为准。
+- **自动命令**（`autocmds.lua`，VeryLazy 之后加载）：仅保留『仅普通模式高亮 cursorline』一件；yank 高亮与窗口均分已由 LazyVim v16 上游覆盖，不再重复定义（无 per-filetype autocmd，缩进由 `options.lua` 全局提供）；保存时格式化交由 LazyVim 内置 autoformat 接管。完整定义以 `autocmds.lua` 为准。
 - **示例插件**（`lua/plugins/example.lua`）：顶部守卫当前为注释状态（示例配置实际生效）；如仅当模板用应取消该行注释。其中部分示例（如 `catppuccin` 强制配色、telescope 布局、mason 工具等）已生效，另一些以注释保留为模板参考。
 
 ## 与 private_dot_config/nvim/README.md 的分工

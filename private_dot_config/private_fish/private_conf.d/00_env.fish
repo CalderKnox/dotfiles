@@ -37,7 +37,6 @@ type -q kubecolor; and complete --command kubecolor --wraps kubectl
 # Locale / Editor / Homebrew
 # ---------------------------------------------------------------------------
 set -gx LANG zh_CN.UTF-8
-set -gx LC_ALL zh_CN.UTF-8
 
 set -gx EDITOR nvim
 set -gx VISUAL nvim

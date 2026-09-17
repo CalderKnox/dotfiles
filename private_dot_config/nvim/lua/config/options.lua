@@ -31,8 +31,7 @@ vim.opt.shiftwidth = 4 -- size of >> / << and autoindent step
 vim.opt.scrolloff = 8 -- keep 8 lines above/below cursor for context while scrolling (upstream: 4)
 vim.opt.colorcolumn = "100" -- ruler at 100 cols as line-length guide
 
--- Search: hlsearch/incsearch match upstream defaults (kept as documentation of
--- the search UX); showmatch below is a genuine override (Vim default: off).
-vim.opt.hlsearch = true -- highlight all matches (clear with <leader><space>)
-vim.opt.incsearch = true -- show matches incrementally while typing
+-- Search: hlsearch/incsearch are Neovim defaults and are not re-set here;
+-- clear highlights with <leader><space> (see keymaps.lua). showmatch below is
+-- a genuine override (Vim default: off).
 vim.opt.showmatch = true -- briefly jump to matching bracket when cursor is on one

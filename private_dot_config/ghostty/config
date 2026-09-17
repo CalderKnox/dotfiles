@@ -19,7 +19,6 @@ font-size = 15
 
 # 精细调整字重与渲染（macOS 独有优化）
 font-thicken = true
-font-thicken-strength = 1
 alpha-blending = linear 
 
 # 微调字符间距（-1 到 2 之间，依字体而定）
@@ -61,7 +60,6 @@ cursor-style = block
 cursor-style-blink = true
 cursor-opacity = 0.8
 # adjust-cursor-thickness = 2px
-cursor-color = #ff0000
 
 mouse-scroll-multiplier = 1.0
 

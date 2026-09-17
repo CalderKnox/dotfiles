@@ -1,10 +1,9 @@
 # Codex config (chezmoi: dot_codex/private_config.toml -> ~/.codex/config.toml, 0600)
 # `private_` prefix ensures 0600 permissions (no group/other read) on deploy.
-# Proxy: routes through local cc-switch at 127.0.0.1:15721 (OpenAI-compatible).
-# No secrets committed — auth via `requires_openai_auth` prompt / env.
-# `wire_api = "responses"` selects OpenAI Responses API; websockets disabled.
+# Provider 段（model_provider / [model_providers.*]，含 base_url、requires_openai_auth、wire_api）
+# 由 cc-switch 在各机器注入/改写，不入仓库；实际生效值以 ~/.codex/config.toml 为准，本文件仅作参考快照。
 # See: https://github.com/openai/codex — config reference.
-# MCP/marketplace/notify paths are kept as commented examples, not active.
+# MCP/notify 未配置；[marketplaces]/[plugins] 为激活的便携集合，openai-bundled 为无版本号的稳定路径，有意保持激活（见下）
 
 model = "gpt-5.6-sol"  # default model (override per-session if needed) gpt-6-astra
 review_model = "gpt-5.6-sol"  # model used for `codex review`
@@ -37,11 +36,11 @@ default_subagent_reasoning_effort = "medium"  # default reasoning effort for sub
 # --- Marketplaces & plugins (generic) ---
 # Upstream marketplaces with local `source` paths (e.g. ~/.codex/.tmp/...,
 # ~/.cache/codex-runtimes/...) are machine-generated cache state with
-# version-pinned absolute paths. They are omitted here to keep the dotfile
-# portable and reproducible across machines. The plugins below are the
-# stable, portable set; add local marketplaces per-machine via
-# ~/.codex/config.local.toml if you need them.
-# Example (commented, not active):
+# version-pinned absolute paths. Other machine-generated cache paths
+# (version-pinned) are omitted here; exception: the openai-bundled path is
+# stable across machines and kept active — the plugins below depend on it.
+# The plugins below are the stable, portable set; add local marketplaces
+# per-machine via ~/.codex/config.local.toml if you need them.
 [marketplaces]
 openai-bundled = { source_type = "local", source = "~/.codex/.tmp/bundled-marketplaces/openai-bundled" }
 

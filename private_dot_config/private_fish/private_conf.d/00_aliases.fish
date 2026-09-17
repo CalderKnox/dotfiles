@@ -195,9 +195,10 @@ end
 
 # ---------------------------------------------------------------------------
 # update-all — 声明式批量更新 (fish 版; 默认清单与 zsh 有意不同, 非对齐关系)
-# 用法: update-all [targets...]  无参全量；有参按名过滤（sdk 可经参数指定）
+# 用法: update-all [targets...]  无参全量；有参按名过滤
 #       auto-update = onproxy + update-all（先开代理再全量更新）
-# 任务: brew / rust / tldr / uv / mise / pi (fish 侧含 pi 更新；sdk 已移出默认任务)
+# 任务: brew / rust / tldr / uv / mise / pi (fish 侧含 pi 更新)
+#       fish 侧不支持 sdk 目标（sdkman 插件已移除，与 zsh 的能力差异属有意决定）
 # 守卫: type -q / command -q 逐项守卫，未装跳过；失败计数与耗时统计
 # ---------------------------------------------------------------------------
 function auto-update --description "一键更新所有开发环境 (fish 版)"
@@ -206,8 +207,8 @@ function auto-update --description "一键更新所有开发环境 (fish 版)"
 end
 
 function update-all --description "一键更新所有开发环境 (fish 版)"
-    # 默认清单与 zsh 有意不同：fish 含 pi 不含 sdk（sdk 仅可经参数指定），
-    # zsh 含 sdk 不支持 pi；目标名 rust 对应 zsh 侧的 rustup
+    # 默认清单与 zsh 有意不同：fish 含 pi 不含 sdk（sdkman 插件已移除，
+    # 与 zsh 的能力差异属有意决定）；目标名 rust 对应 zsh 侧的 rustup
     set -l tasks brew rust tldr uv mise pi
 
     set -l targets
@@ -232,17 +233,10 @@ function update-all --description "一键更新所有开发环境 (fish 版)"
                     echo (set_color yellow)"⚠️  brew not found, skipped"(set_color normal)
                 end
 
-            case sdk
-                if type -q sdk
-                    sdk upgrade && sdk selfupdate && sdk flush
-                    or set failed (math $failed + 1)
-                else
-                    echo (set_color yellow)"⚠️  sdk not found, skipped"(set_color normal)
-                end
 
             case rust
                 if type -q rustup
-                    rustup update && rustup upgrade
+                    rustup update
                     or set failed (math $failed + 1)
                 else
                     echo (set_color yellow)"⚠️  rustup not found, skipped"(set_color normal)
@@ -349,10 +343,10 @@ alias timestamp_millisecond='date +%s%N | cut -c 1-13'
 alias timestamp_microsecond='date +%s%N | cut -c 1-16'
 
 alias top='htop'
-alias df='df -kTh'
+alias df='df -h'
 alias du='du -kh'
 alias ping='ping -c 5'
-alias pws="ps -p $fish_pid"
+alias pws='ps -p $fish_pid'
 
 alias tmux="tmux -2"
 

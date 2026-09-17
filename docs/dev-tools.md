@@ -7,7 +7,7 @@
 
 `dot_gitconfig` 会随 `chezmoi apply` 部署为 `~/.gitconfig`（chezmoi managed 实测包含 `.gitconfig`）。它统一设置编辑器（VS Code）、默认分支 `main`、LFS 四件套、push 行为与全局忽略文件 `~/.gitignore_global`（`~` 由 git 原生展开，无用户名硬编码）。所有实际字段以源文件 `dot_gitconfig` 为唯一权威。
 
-> **代理说明**：当前 `dot_gitconfig` 仅保留一条按域名限定的代理行 `[http "https://github.com"]`（socks5://127.0.0.1:5376）；非标准键（如 `[https …]`）会被 git 静默忽略。SSH 侧代理由 `private_dot_ssh/private_config` 的自适应 `ProxyCommand` 负责，探测端口同为 `5376`；如需 `git pull` 一律变基，应使用标准键 `pull.rebase = true`（当前未启用）。早期版本 `.chezmoiignore` 中按源文件名书写的 `dot_gitconfig` / `**/dot_git` 行从不匹配任何目标、未生效，现已删除，本文件正常随 `apply` 部署。
+> **代理说明**：当前 `dot_gitconfig` 仅保留一条按域名限定的代理行 `[http "https://github.com"]`（socks5h://127.0.0.1:5376；socks5h 与 socks5 的差别是 DNS 由代理端解析）；非标准键（如 `[https …]`）会被 git 静默忽略。SSH 侧代理由 `private_dot_ssh/private_config` 的自适应 `ProxyCommand` 负责，探测端口同为 `5376`；如需 `git pull` 一律变基，应使用标准键 `pull.rebase = true`（当前未启用）。早期版本 `.chezmoiignore` 中按源文件名书写的 `dot_gitconfig` / `**/dot_git` 行从不匹配任何目标、未生效，现已删除，本文件正常随 `apply` 部署。
 
 全局忽略规则（`dot_gitignore_global` → `~/.gitignore_global`，完整清单以源文件为准）：编辑器临时文件与交换文件（`*~`、`.DS_Store`、`*.swp` 等）、IDE 目录（`.idea` / `*.iml` / `.vscode`）、构建产物（`*.aux` / `*.log*` 及根锚定的 `/dist/` / `/build/` / `/target/`；`bin/` 已移除以免误伤正常入库的同名目录）、Python 相关（`__pycache__/` / `*.venv` / `*.cache`）与 Node 依赖（`node_modules/`）。具体条目与分类以源文件 `dot_gitignore_global` 为准。
 
@@ -43,7 +43,7 @@ mise 工具链由 `private_dot_config/mise/config.toml` 声明（工具与版本
 
 ## Codex — `dot_codex/private_config.toml`
 
-部署目标为 **`~/.codex/config.toml`**（`chezmoi managed` 实测为 `.codex/config.toml`）：`private_` 前缀对应 `0600` 权限。`dot_codex/private_config.toml` 为真实的 cc-switch 本地代理配置，确保 `~/.codex/` 目录存在且权限正确，实值以源文件 `dot_codex/private_config.toml` 为唯一权威。
+`config.toml` **不随 `chezmoi apply` 部署**：已被 `.chezmoiignore` 的排除行 `.codex/config.toml` 排除（该配置含 provider、hooks/projects trust 等机器本地状态，由各机 cc-switch 注入维护，不入部署）。仓库内的 `dot_codex/private_config.toml` 仅作参考快照（`private_` 前缀对应 `0600` 权限语义），实际生效值以各机 `~/.codex/config.toml` 为准。
 
 ## pi coding agent — `private_dot_pi/private_agent/`
 
@@ -61,7 +61,7 @@ mise 工具链由 `private_dot_config/mise/config.toml` 声明（工具与版本
 
 ### landstrip.json — 子代理与任务权限
 
-`private_dot_pi/private_agent/landstrip.json` 控制子代理派生的任务级权限：任务级 `*`（`task` 执行类）默认 `ask`、只读 `review` 默认 `allow`，即派生子代理前需用户确认，同时免询问放行只读审查。它与 `workflows/settings.json` 的 `progressPanelMaxAgents` 职责不同、相互独立：后者限制工作流进度面板的并发 / 展示代理数上限，前者指定沙箱复用。详见 [layout.md](layout.md) 与下节。
+`private_dot_pi/private_agent/landstrip.json` 控制子代理派生的任务级权限：任务级 `*`（`task` 执行类）默认 `ask`，即派生子代理前需用户确认；landstrip.json 未配置 `review` 条目，只读审查类子代理与执行类同样按 `task` 规则处理（不因「只读」豁免确认）。它与 `workflows/settings.json` 的 `progressPanelMaxAgents` 职责不同、相互独立：后者限制工作流进度面板的并发 / 展示代理数上限，前者指定沙箱复用。详见 [layout.md](layout.md) 与下节。
 
 ### workflows/settings.json — 动态工作流设置
 
@@ -69,4 +69,4 @@ mise 工具链由 `private_dot_config/mise/config.toml` 声明（工具与版本
 
 ### extensions/pi-permission-system/config.json — 工具级权限矩阵
 
-`private_dot_pi/private_agent/extensions/pi-permission-system/config.json` 定义工具级权限矩阵：默认全局 `allow`，对 `read` / `write` / `edit` / `path` 中的敏感路径（如 `*.env`、`~/.ssh/*`、`~/.aws/*`、`/etc/*`、`/var/*`）与高危 bash 命令（`sudo` / `mv` / `rm` / `dd` / `mkfs.*` 等）硬拒绝（`deny`），脚本类（`python3 *` / `node *`）与 `external_directory` 设为需确认（`ask`）；`yoloMode` 开启时所有 `ask` 自动批准、硬 `deny` 仍生效。其目标是让 agent 完成日常编码与受控编辑，同时杜绝误删、密钥外泄与敏感路径写入；完整矩阵与 `$schema` 指向 pi-permission-system 的 JSON Schema，实值以源文件 `private_dot_pi/private_agent/extensions/pi-permission-system/config.json` 为唯一权威。
+`private_dot_pi/private_agent/extensions/pi-permission-system/config.json` 定义工具级权限矩阵：默认全局 `allow`，对 `read` / `write` / `edit` / `path` 中的敏感路径（如 `*.env`、`~/.ssh/*`、`~/.aws/*`、`/etc/*`、`/var/*`）与高危 bash 命令（`sudo` / `mv` / `rm` / `dd` / `mkfs.*` 等）硬拒绝（`deny`）；`external_directory` 为需确认（`ask`，仅 `~/.cargo/registry`、`~/.npm`、`~/.cache` 白名单放行），`python3 *` / `node *` 显式保持放行（`allow`）；`yoloMode` 开启时所有 `ask` 自动批准、硬 `deny` 仍生效。其目标是让 agent 完成日常编码与受控编辑，同时杜绝误删、密钥外泄与敏感路径写入；完整矩阵与 `$schema` 指向 pi-permission-system 的 JSON Schema，实值以源文件 `private_dot_pi/private_agent/extensions/pi-permission-system/config.json` 为唯一权威。

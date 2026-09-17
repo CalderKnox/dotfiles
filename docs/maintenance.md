@@ -84,13 +84,13 @@ nvim --headless -c "lua require('config.lazy')" -c "qa"  # 可选：校验 lazy 
 git config --list --show-origin | head
 git config --get core.editor
 git config --get safe.directory
-git config --get-regexp proxy               # 应为 socks5://127.0.0.1:5376（与 SSH ProxyCommand 5376 统一）
+git config --get-regexp proxy               # 应为 socks5h://127.0.0.1:5376（与 SSH ProxyCommand 5376 统一）
 # 或校验源文件：
 git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy
 
 # fish 配置语法检查（fish -n 只校验首个文件，必须逐个检查；实测多文件传参时后续文件被静默跳过）
 for f in ~/.config/fish/config.fish ~/.config/fish/conf.d/*.fish; fish -n $f; or exit 1; end
-# conf.d 现含五文件：00_env / 00_aliases / 01_dev / 01_rev / fzf
+# conf.d 现含四文件：00_env / 00_aliases / 01_dev / 01_rev（fish 侧 fzf 键位由 fisher 插件 patrickf1/fzf.fish 运行时生成 conf.d/fzf.fish，不入库）
 
 # mise 环境体检
 mise doctor
@@ -123,7 +123,7 @@ rm -f ~/.fzf_prefix_cache && exec zsh
 
 ### 换了代理端口 / 地址
 
-`dot_gitconfig` 中仅一处引用 `socks5://127.0.0.1:5376`（`http "https://github.com"`，对该 URL 匹配的
+`dot_gitconfig` 中仅一处引用 `socks5h://127.0.0.1:5376`（`http "https://github.com"`，对该 URL 匹配的
 HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/private_config` 的 `ProxyCommand` 探测端口 `5376` 统一
 （`nc -z 127.0.0.1 5376`），全局替换即可。
 历史遗留的冗余 `[https …]` / `[ssh "ssh.github.com"]` 段及注释化全局代理段均已清理，无需再处理旧注释。详见 [dev-tools.md](dev-tools.md) 与 [getting-started.md](getting-started.md)。
@@ -135,7 +135,7 @@ HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/private_config` 的 `Pro
 
 | 维度 | `auto-update` | `update-all` |
 | --- | --- | --- |
-| 定义位置 | `aliases.zsh:52` | `aliases.zsh:205` |
+| 定义位置 | `aliases.zsh:53` | `aliases.zsh:206` |
 | 覆盖目标 | 6 项（同 `update-all`，经委托实现） | 6 项：`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise`（含 `mise upgrade`） |
 | 参数 | 无参数，固定调用 `update-all` 全量 | 支持 `update-all brew mise` 参数过滤，未传参则全量；未知目标报错并提示可用列表 |
 | 守卫与容错 | 由 `update-all` 实现 | 循环内 `command -v $name` 守卫 + `eval` 失败则 `failed++` |

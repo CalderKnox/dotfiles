@@ -20,7 +20,7 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
   if vim.v.shell_error ~= 0 then
     vim.api.nvim_echo({
       { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-      { out, "WarningMsg" },
+      { out,                            "WarningMsg" },
       { "\nPress any key to exit..." },
     }, true, {})
     vim.fn.getchar()
@@ -32,8 +32,10 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
   spec = {
     -- LazyVim core + default plugins
-    { "LazyVim/LazyVim", import = "lazyvim.plugins" },
-    -- Language & UI extras (source of truth; lazyvim.json `extras: []` is runtime metadata).
+    { "LazyVim/LazyVim",                                import = "lazyvim.plugins" },
+    -- Language & UI extras (source of truth; lazyvim.json `extras: []` is runtime
+    -- metadata only). lazyvim.json 由 chezmoi 托管：extras 增删一律改本文件后 chezmoi apply，
+    -- :LazyExtras / NEWS 弹窗写入的运行时改动会被 apply 回滚。
     { import = "lazyvim.plugins.extras.lang.typescript" },
     { import = "lazyvim.plugins.extras.lang.json" },
     { import = "lazyvim.plugins.extras.lang.python" },
@@ -49,7 +51,7 @@ require("lazy").setup({
   },
 
   defaults = {
-    lazy = false, -- custom plugins load at startup; set true to lazy-load all by default
+    lazy = false,    -- custom plugins load at startup; set true to lazy-load all by default
     version = false, -- always latest git commit; version tags are often stale
   },
 
