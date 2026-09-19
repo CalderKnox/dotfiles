@@ -211,6 +211,7 @@ update-all() {
         tldr  "tldr --update"
         uv    "uv tool upgrade --all"
         mise  "mise upgrade"
+        pi  "pi update --all"
     )
 
     local -a targets
