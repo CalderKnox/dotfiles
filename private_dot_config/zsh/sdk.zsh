@@ -8,7 +8,7 @@
 #               顺序即语义）
 # Guards      : 单项工具均 command -v / 目录存在 + 去重守卫；SDKMAN 惰性桩；
 #               补全缓存按二进制 mtime 失效并 zcompile
-# Loading-order contract: aliases.zsh -> fzf.zsh -> sdk.zsh (sdk last)
+# 加载顺序契约: aliases.zsh -> fzf.zsh -> sdk.zsh（sdk 最后）
 # Author      : Payne
 # =============================================================================
 

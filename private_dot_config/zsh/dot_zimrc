@@ -6,79 +6,74 @@
 #               自动建议）。注释掉的模块（fzf / zsh-syntax-highlighting / zfm）
 #               未加载，由 fzf.zsh 与 fast-syntax-highlighting 等替代。
 # Author      : Payne
-# zimfw docs  : https://github.com/zimfw/zimfw
+# zimfw 文档  : https://github.com/zimfw/zimfw
 # Update      : `zimfw install` 重新生成 ~/.zim/init.zsh；新增模块放 utility 之后、
 #               Prompt 之前（见下方注释）。
 # =============================================================================
 
 #
-# This is not sourced during shell startup and is only used to configure zimfw.
+# 本文件不会在 shell 启动时 source，仅供 zimfw 读取配置。
 #
 
 #
-# Modules
+# 模块
 #
 
-# Sets sane Zsh built-in environment options.
+# 设置合理的 Zsh 内置环境选项。
 zmodule environment
-# Provides handy git aliases and functions.
+# 提供实用的 git 别名与函数。
 zmodule git
-# Applies correct bindkeys for input events. Add one of the following to the
-# beginning of your ~/.zshrc to set your preferred editor keymap to emacs or vi
-# respectively: bindkey -e or bindkey -v
+# 为输入事件应用正确的键位绑定。将下面两者之一加到 ~/.zshrc 开头，
+# 分别可将编辑器键位绑定为 emacs 或 vi: bindkey -e 或 bindkey -v
 zmodule input
-# Sets a custom terminal title.
+# 设置自定义终端标题。
 zmodule termtitle
-# Utility aliases and functions. Adds colour to ls, grep and less.
+# 实用别名与函数。为 ls、grep、less 添加着色。
 zmodule utility
 
-# <-- Normally new modules should be added here. Check each module documentation
-# for any caveats.
+# <-- 通常新模块应加在此处。注意查阅各模块文档中的注意事项。
 
 #
-# Prompt
+# 提示符
 #
 
-# Exposes how long the last command took to run to prompts.
+# 向提示符暴露上一条命令的运行耗时。
 zmodule duration-info
-# Exposes git repository status information to prompts.
+# 向提示符暴露 git 仓库状态信息。
 zmodule git-info
-# Formats the current working directory for prompts.
+# 为提示符格式化当前工作目录。
 zmodule prompt-pwd
-# A heavily reduced, ASCII-only version of the Spaceship and Starship prompts.
+# Spaceship 与 Starship 提示符的高度精简、纯 ASCII 版本。
 zmodule asciiship
 
 #
-# Completion
+# 补全
 #
 # Homebrew：注入 brew shellenv（HOMEBREW_PREFIX/PATH/fpath 等）并提供 brew/cask 别名。
 # fpath 无需额外声明：shell 启动时 HOMEBREW_PREFIX 未设，模块 else 分支 eval 的
 # brew shellenv 会无条件前置 brew 的 site-functions（fpath[1,0]），补全直接可用。
 zmodule zimfw/homebrew
 
-# Additional completion definitions for Zsh.
+# Zsh 的补充补全定义。
 zmodule zsh-users/zsh-completions --fpath src
-# Enables and configures smart and extensive tab completion, must be sourced
-# after all modules that add completion definitions.
+# 启用并配置智能而全面的 Tab 补全；必须在所有添加补全定义的模块之后 source。
 zmodule completion
 
-# <!-- zmodule fzf -->  # disabled: replaced by Aloxaf/fzf-tab + fzf.zsh
-# fzf-tab: replace Zsh's default completion menu with fzf-powered fuzzy search.
+# <!-- zmodule fzf -->  # 已停用: 由 Aloxaf/fzf-tab + fzf.zsh 替代
+# fzf-tab: 用 fzf 驱动的模糊搜索替换 Zsh 默认补全菜单。
 zmodule Aloxaf/fzf-tab
 
 #
-# Modules that must be initialized last
+# 必须最后初始化的模块
 #
 
-# Fish-like syntax highlighting for Zsh, must be sourced after completion.
-# <!-- zmodule zsh-users/zsh-syntax-highlighting -->  # disabled: using fast-syntax-highlighting
+# 类 Fish 的 Zsh 语法高亮；必须在补全之后 source。
+# <!-- zmodule zsh-users/zsh-syntax-highlighting -->  # 已停用: 改用 fast-syntax-highlighting
 zmodule zdharma-continuum/fast-syntax-highlighting
-# Fish-like history search for Zsh, must be sourced after
-# fast-syntax-highlighting.
+# 类 Fish 的 Zsh 历史子串搜索；必须在 fast-syntax-highlighting 之后 source。
 zmodule zsh-users/zsh-history-substring-search
-# Fish-like autosuggestions for Zsh. Add the following to your ~/.zshrc to boost
-# performance: ZSH_AUTOSUGGEST_MANUAL_REBIND=1
+# 类 Fish 的 Zsh 自动建议。将以下内容加入 ~/.zshrc 可提升性能: ZSH_AUTOSUGGEST_MANUAL_REBIND=1
 zmodule zsh-users/zsh-autosuggestions
 
-# <!-- zmodule pabloariasal/zfm -->  # disabled: file-manager not needed
+# <!-- zmodule pabloariasal/zfm -->  # 已停用: 不需要文件管理器
 

@@ -6,32 +6,32 @@
 # Usage       : chezmoi apply 部署后 `git config --get core.excludesfile`
 # Author      : Payne
 # =============================================================================
-# Loaded via `core.excludesfile` in dot_gitconfig; applies to all repos.
-# Keep project-specific ignores in repo-local .gitignore. Categories below.
+# 经 dot_gitconfig 的 `core.excludesfile` 加载；对本机所有仓库生效。
+# 项目特定忽略请写入仓库本地 .gitignore。分类见下。
 
-# --- OS / backups ---
+# --- 操作系统 / 备份 ---
 .DS_Store
 *~
 *.swp
 *.swo
 *.bak
 
-# --- Editors / IDEs ---
+# --- 编辑器 / IDE ---
 .vscode
 .idea
 *.iml
 
-# --- Logs / LaTeX intermediates ---
+# --- 日志 / LaTeX 中间产物 ---
 *.aux
 *.log
 *.log.*
 
-# --- Python / virtualenvs ---
+# --- Python / 虚拟环境 ---
 *.venv
 __pycache__/
 .tox
 
-# --- Node / caches ---
+# --- Node / 缓存 ---
 node_modules/
 *.cache
 
@@ -42,9 +42,9 @@ node_modules/
 # bin/ 已移除：无锚定的 bin/ 会把任何仓库 scripts/bin 目录无声排除，
 # git add . 静默跳过而无警告；项目级忽略请写入各仓库自身 .gitignore
 
-# --- Coding agent ---
+# --- 编码代理 ---
 **/.claude
 **/.omc
 **/.pi
 
-# Note: `*.git` typo line removed (was ambiguous — likely *.orig/*.patch merge residue).
+# 注：已删除 `*.git` 拼写错误行（语义含混——疑似 *.orig/*.patch 合并残留）。

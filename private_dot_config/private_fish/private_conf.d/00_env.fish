@@ -34,7 +34,7 @@ end
 type -q kubecolor; and complete --command kubecolor --wraps kubectl
 
 # ---------------------------------------------------------------------------
-# Locale / Editor / Homebrew
+# locale / 编辑器 / Homebrew
 # ---------------------------------------------------------------------------
 set -gx LANG zh_CN.UTF-8
 

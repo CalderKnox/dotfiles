@@ -9,7 +9,7 @@
 #   ③ 外部配置 source（aliases → fzf → sdk，顺序即语义）
 # Guards     : 所有工具初始化均 command -v 守卫，未装静默跳过；PATH 追加均带
 #              目录存在性 + 去重双守卫（冒号定界 + typeset -U 去重）
-# Loading-order contract: compinit(Zim) -> aliases.zsh -> fzf.zsh -> sdk.zsh
+# 加载顺序契约: compinit(Zim) -> aliases.zsh -> fzf.zsh -> sdk.zsh
 #   aliases 先于 fzf（后者 Ctrl-G 绑定在 source 时展开 $EDITOR）；
 #   sdk 最后（其 compdef 注册依赖 compinit 完成）。
 # Author     : Payne
@@ -17,7 +17,7 @@
 
 # Start configuration added by Zim Framework install {{{
 #
-# User configuration sourced by interactive shells
+# 用户配置：由交互式 shell source
 #
 
 # export LANG=en_US.UTF-8          # 注释备用项（默认已切 zh_CN.UTF-8，见下）
@@ -25,81 +25,80 @@ export LANG=zh_CN.UTF-8
 
 
 # -----------------
-# Zsh configuration
+# Zsh 配置
 # -----------------
 
 #
-# History
+# 历史
 #
 
-# Remove older command from the history if a duplicate is to be added.
+# 若将添加重复命令，则从历史中移除较旧的一条。
 setopt HIST_IGNORE_ALL_DUPS
 
 #
-# Input/output
+# 输入/输出
 #
 
-# Set editor default keymap to emacs (`-e`) or vi (`-v`)
+# 设置编辑器默认键位绑定为 emacs（`-e`）或 vi（`-v`）
 bindkey -e
 
-# Prompt for spelling correction of commands.
+# 命令拼写纠正提示。
 #setopt CORRECT
 
-# Customize spelling correction prompt.
+# 自定义拼写纠正提示。
 #SPROMPT='zsh: correct %F{red}%R%f to %F{green}%r%f [nyae]? '
 
-# Remove path separator from WORDCHARS.
+# 从 WORDCHARS 中移除路径分隔符。
 WORDCHARS=${WORDCHARS//[\/]}
 
 # --------------------
-# Module configuration
+# 模块配置
 # --------------------
 
 #
 # git
 #
 
-# Set a custom prefix for the generated aliases. The default prefix is 'G'.
+# 为生成的别名设置自定义前缀。默认前缀为 'G'。
 #zstyle ':zim:git' aliases-prefix 'g'
 
 #
-# input
+# input（输入）
 #
 
-# Append `../` to your input for each `.` you type after an initial `..`
+# 初始 `..` 后每再输入一个 `.`，就向输入追加一层 `../`
 #zstyle ':zim:input' double-dot-expand yes
 
 #
-# termtitle
+# termtitle（终端标题）
 #
 
-# Set a custom terminal title format using prompt expansion escape sequences.
-# See http://zsh.sourceforge.net/Doc/Release/Prompt-Expansion.html#Simple-Prompt-Escapes
-# If none is provided, the default '%n@%m: %~' is used.
+# 使用提示符展开转义序列设置自定义终端标题格式。
+# 参见 http://zsh.sourceforge.net/Doc/Release/Prompt-Expansion.html#Simple-Prompt-Escapes
+# 未提供时使用默认值 '%n@%m: %~'。
 #zstyle ':zim:termtitle' format '%1~'
 
 #
-# zsh-autosuggestions
+# zsh-autosuggestions（自动建议）
 #
 
-# Disable automatic widget re-binding on each precmd. Upstream suggests setting
-# this when zsh-autosuggestions is the last ~/.zimrc module, which is the case
-# here (fzf-tab initializes before the syntax-highlighting block), and the
-# option cuts precmd cost.
+# 禁止每次 precmd 自动重新绑定 widget。上游建议在 zsh-autosuggestions 为
+# ~/.zimrc 末位模块时设置——此处正是如此（fzf-tab 先于语法高亮块初始化），
+# 该选项可削减 precmd 开销。
 ZSH_AUTOSUGGEST_MANUAL_REBIND=1
 
-# Customize the style that the suggestions are shown with.
-# See https://github.com/zsh-users/zsh-autosuggestions/blob/master/README.md#suggestion-highlight-style
+# 自定义建议的显示样式。
+# 参见 https://github.com/zsh-users/zsh-autosuggestions/blob/master/README.md#suggestion-highlight-style
 #ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=242'
 
 # ------------------
-# Initialize modules
+# 初始化模块
 # ------------------
 
 ZIM_HOME=${ZDOTDIR:-${HOME}}/.zim
-# Download zimfw plugin manager if missing or empty (zero-byte on prior failure).
-# Robustness: curl → wget fallback, each checked for existence; failure cleans up
-# zero-byte file and prints colored error, avoiding cryptic zimfw init failure.
+# zimfw 插件管理器缺失或为空（上次失败产生零字节文件）时下载。
+# 健壮性: curl → wget 回退，各自校验存在性；失败时清理零字节文件并打印
+# 彩色错误，避免 zimfw init 的晦涩报错。
 if [[ ! -s ${ZIM_HOME}/zimfw.zsh ]]; then
   mkdir -p ${ZIM_HOME}
   if (( ${+commands[curl]} )); then
@@ -118,7 +117,7 @@ if [[ ! -s ${ZIM_HOME}/zimfw.zsh ]]; then
     print -P "%F{red}✗ curl and wget not found — cannot install zimfw%f" >&2
   fi
 fi
-# Install missing modules, and update ${ZIM_HOME}/init.zsh if missing or outdated.
+# 安装缺失模块，并在 ${ZIM_HOME}/init.zsh 缺失或过期时更新。
 # 守卫：下载失败（zimfw.zsh 缺失/空）时跳过 source，避免每次启动报错
 if [[ ! ${ZIM_HOME}/init.zsh -nt ${ZIM_CONFIG_FILE:-${ZDOTDIR:-${HOME}}/.zimrc} ]]; then
   [[ -s ${ZIM_HOME}/zimfw.zsh ]] && source ${ZIM_HOME}/zimfw.zsh init

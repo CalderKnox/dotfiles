@@ -1,80 +1,77 @@
 # 💤 LazyVim
 
-A starter template for [LazyVim](https://github.com/LazyVim/LazyVim) — deployed via [chezmoi](https://www.chezmoi.io/) from `private_dot_config/nvim/` → `~/.config/nvim/`.
+[LazyVim](https://github.com/LazyVim/LazyVim) 的 starter 模板 —— 经 [chezmoi](https://www.chezmoi.io/) 从 `private_dot_config/nvim/` 部署到 `~/.config/nvim/`。
 
 > **chezmoi 视角**：本文件由源目录 `.chezmoiignore` 的 `**/README.md` 排除、**不**部署到 `~/.config/nvim/README.md`，仅仓库内查阅。仓库级一致性校验（extras 清单 / 43 锁定 / 选项与键位逐行核对）见 [`docs/neovim.md`](../../docs/neovim.md)，二者互补不重复；改动配置以 `lua/config/*.lua` 与 `lazy-lock.json` 为权威。
 
-## Overview
+## 概览
 
-This is a Neovim configuration based on LazyVim, designed to provide a modern,
-highly customizable editor experience with sensible defaults and a great out-of-the-box
-setup. This configuration is managed as static files (no templates) and has been
-enhanced with comprehensive comments throughout `lua/config/*.lua`.
+基于 LazyVim 的 Neovim 配置，目标是提供现代化、高度可定制的编辑器体验：默认值合理、开箱即用。本配置以静态文件管理（无模板），并在 `lua/config/*.lua` 全程附有详尽注释。
 
-- **Target**: Neovim ≥ 0.9 (verified on 0.12)
-- **Manager**: [lazy.nvim](https://github.com/folke/lazy.nvim) with commit-level lock (`lazy-lock.json`, 43 plugins)
-- **Extras**: 10 extras (9 `lang.*` + 1 `ui.mini-animate`, see `lua/config/lazy.lua`)
-- **Style**: `stylua.toml` — Spaces, width 2, column 120; `catppuccin` as default colorscheme (via `lua/plugins/example.lua`)
+- **目标版本**：Neovim ≥ 0.9（本机验证 0.12）
+- **管理器**：[lazy.nvim](https://github.com/folke/lazy.nvim)，commit 级锁定（`lazy-lock.json`，43 个插件）
+- **Extras**：10 个 extras（9 个 `lang.*` + 1 个 `ui.mini-animate`，见 `lua/config/lazy.lua`）
+- **风格**：`stylua.toml` —— Spaces、宽度 2、列宽 120；默认配色 `catppuccin`（经 `lua/plugins/example.lua`）
 
-## Installation
+## 安装
 
-### Recommended: via chezmoi (this dotfiles repo)
+### 推荐：经 chezmoi（本 dotfiles 仓库）
 
 ```bash
-# 1. Preview and apply (source is ~/.local/share/chezmoi)
+# 1. 预览并应用（源目录为 ~/.local/share/chezmoi）
 chezmoi diff
 chezmoi apply
 
-# 2. Start Neovim — first launch bootstraps lazy.nvim and installs 43 plugins (needs network)
+# 2. 启动 Neovim —— 首次启动会 bootstrap lazy.nvim 并安装 43 个插件（需网络）
 nvim
-# :Lazy sync  — if you add plugins later
-# :checkhealth — verify LSP / treesitter / provider health
+# :Lazy sync    —— 以后新增插件后执行
+# :checkhealth  —— 校验 LSP / treesitter / provider 健康度
 ```
 
-No separate `git clone` is needed; `chezmoi apply` already places this directory at `~/.config/nvim/`.
+无需单独 `git clone`；`chezmoi apply` 已将本目录放置到 `~/.config/nvim/`。
 
-### Standalone (without chezmoi)
+### 独立使用（不经 chezmoi）
 
-If you use this `nvim/` directory outside chezmoi:
+若要在 chezmoi 之外使用本 `nvim/` 目录：
 
 ```bash
-# 1. Backup existing config (optional but recommended)
+# 1. 备份已有配置（可选但推荐）
 mv ~/.config/nvim ~/.config/nvim.bak
 
-# 2. Clone / copy this directory
+# 2. 克隆/拷贝本目录
 git clone <your-fork-url> ~/.config/nvim
-# NOTE: raw cp keeps chezmoi names like dot_gitignore/.gitignore unrenamed — prefer chezmoi apply over manual copy
+# 注意：裸 cp 会保留 dot_gitignore/.gitignore 这类 chezmoi 命名——优先用 chezmoi apply，而非手工拷贝
 
-# 3. Start Neovim (auto-bootstrap)
+# 3. 启动 Neovim（自动 bootstrap）
 nvim
 ```
 
-## Structure
+## 目录结构
 
 ```
-~/.config/nvim/  (source: private_dot_config/nvim)
-├── init.lua                  → require("config.lazy") only
+~/.config/nvim/  （源: private_dot_config/nvim）
+├── init.lua                  → 仅 require("config.lazy")
 ├── lua/
 │   ├── config/
-│   │   ├── lazy.lua          bootstrap + spec (LazyVim + 10 extras + plugins)
-│   │   ├── options.lua       global options (numbers / 4-space indent / search / truecolor; clipboard & completion inherit LazyVim defaults)
-│   │   ├── keymaps.lua       custom keymaps (loaded after LazyVim defaults)
-│   │   └── autocmds.lua      autocmds (loaded on VeryLazy)
+│   │   ├── lazy.lua          bootstrap + spec（LazyVim + 10 extras + plugins）
+│   │   ├── options.lua       全局选项（行号 / 4 空格缩进 / 搜索 / 真彩；剪贴板与补全沿用 LazyVim 默认）
+│   │   ├── keymaps.lua       自定义键位（在 LazyVim 默认之后加载）
+│   │   └── autocmds.lua      自动命令（VeryLazy 时加载）
 │   └── plugins/
-│       └── example.lua       example specs (effective: catppuccin / fzf-lua(<leader>fp) / pyright / treesitter / lualine 😄 / mason; trouble spec removed, nvim-cmp & second lualine spec disabled; 4-space indent, stylua.toml Spaces-2 pass pending)
-├── lazy-lock.json            43 plugins locked by commit (reproducible)
-├── lazyvim.json              LazyVim metadata (extras=[], news 11866, version 8 — extras empty is expected, real list is in lazy.lua)
-├── stylua.toml               Spaces 2 / 120 columns
-├── .gitignore                ignores tag / log / data
-├── LICENSE                   Apache-2.0 (LazyVim starter, 与根 LICENSE 同源同哈希)；仓库内，**/LICENSE 排除，不部署
-└── README.md                 this file（仓库内，**/README.md 排除，不部署）
+│       └── example.lua       示例 spec（已生效：catppuccin / fzf-lua(<leader>fp) / lualine 😄 / mason；trouble spec 已移除，nvim-cmp 与第二个 lualine spec 已禁用）
+├── lazy-lock.json            43 个插件按 commit 锁定（可复现）
+├── lazyvim.json              LazyVim 元数据（extras=[]、news 11866、version 8 —— extras 为空是预期行为，真实清单在 lazy.lua）
+├── stylua.toml               Spaces 2 / 120 列
+├── .gitignore                忽略 tag / log / data
+├── LICENSE                   Apache-2.0（LazyVim starter，与根 LICENSE 同源同哈希）；仓库内，**/LICENSE 排除，不部署
+└── README.md                 本文件（仓库内，**/README.md 排除，不部署）
 ```
 
-See [`docs/neovim.md`](../../docs/neovim.md) for the full chezmoi mapping (`dot_gitignore` → `.gitignore`, etc.) and `.chezmoiignore` notes.
+chezmoi 完整映射（`dot_gitignore` → `.gitignore` 等）与 `.chezmoiignore` 说明见 [`docs/neovim.md`](../../docs/neovim.md)。
 
-## Features
+## 功能特性
 
-### Extras (lua/config/lazy.lua — 10)
+### Extras（lua/config/lazy.lua —— 10 个）
 
 ```lua
 { import = "lazyvim.plugins.extras.lang.typescript" },
@@ -89,114 +86,114 @@ See [`docs/neovim.md`](../../docs/neovim.md) for the full chezmoi mapping (`dot_
 { import = "lazyvim.plugins.extras.ui.mini-animate" },
 ```
 
-9 language extras + `mini-animate`. LSP / formatting / lint are handled by mason + nvim-lspconfig + conform + nvim-lint; mason prompts to install the server on first open of the relevant filetype. `lazyvim.json` `extras: []` is expected — LazyVim writes that file at runtime; the source of truth is `lazy.lua`.
+9 个语言 extras + `mini-animate`。LSP / 格式化 / lint 由 mason + nvim-lspconfig + conform + nvim-lint 组合处理；首次打开对应语言文件时 mason 会提示安装相应 server。`lazyvim.json` 的 `extras: []` 是预期行为——该文件由 LazyVim 在运行时写入；唯一事实来源是 `lazy.lua`。
 
-### Locked Plugins (lazy-lock.json — 43)
+### 锁定插件（lazy-lock.json —— 43 个）
 
-`LazyVim`, `SchemaStore.nvim`, `blink.cmp`, `bufferline.nvim`, `catppuccin`, `cmake-tools.nvim`,
-`conform.nvim`, `crates.nvim`, `flash.nvim`, `friendly-snippets`, `fzf-lua`, `gitsigns.nvim`,
-`grug-far.nvim`, `lazy.nvim`, `lazydev.nvim`, `lualine.nvim`, `markdown-preview.nvim`,
-`mason-lspconfig.nvim`, `mason.nvim`, `mini.ai`, `mini.animate`, `mini.icons`, `mini.pairs`,
-`neo-tree.nvim`, `noice.nvim`, `nui.nvim`, `nvim-lint`, `nvim-lspconfig`,
-`nvim-treesitter`, `nvim-treesitter-textobjects`, `nvim-ts-autotag`, `persistence.nvim`,
-`plenary.nvim`, `render-markdown.nvim`, `rustaceanvim`, `snacks.nvim`, `telescope.nvim`,
-`todo-comments.nvim`, `tokyonight.nvim`, `trouble.nvim`, `ts-comments.nvim`,
-`venv-selector.nvim`, `which-key.nvim`.
+`LazyVim`、`SchemaStore.nvim`、`blink.cmp`、`bufferline.nvim`、`catppuccin`、`cmake-tools.nvim`、
+`conform.nvim`、`crates.nvim`、`flash.nvim`、`friendly-snippets`、`fzf-lua`、`gitsigns.nvim`、
+`grug-far.nvim`、`lazy.nvim`、`lazydev.nvim`、`lualine.nvim`、`markdown-preview.nvim`、
+`mason-lspconfig.nvim`、`mason.nvim`、`mini.ai`、`mini.animate`、`mini.icons`、`mini.pairs`、
+`neo-tree.nvim`、`noice.nvim`、`nui.nvim`、`nvim-lint`、`nvim-lspconfig`、
+`nvim-treesitter`、`nvim-treesitter-textobjects`、`nvim-ts-autotag`、`persistence.nvim`、
+`plenary.nvim`、`render-markdown.nvim`、`rustaceanvim`、`snacks.nvim`、`telescope.nvim`、
+`todo-comments.nvim`、`tokyonight.nvim`、`trouble.nvim`、`ts-comments.nvim`、
+`venv-selector.nvim`、`which-key.nvim`。
 
-> Update via `:Lazy update` (syncs lock file) / `:Lazy restore` (rollback). The shell `update-all` (brew/mise/sdk/…) does **not** touch Neovim plugins — the two channels are independent.
+> 更新用 `:Lazy update`（同步 lock 文件）/ `:Lazy restore`（回滚）。shell 的 `update-all`（brew/mise/sdk/…）**不会**触及 Neovim 插件——两条更新通道相互独立。
 
-### Plugin Highlights (from lua/plugins/example.lua)
+### 插件要点（来自 lua/plugins/example.lua）
 
-- **catppuccin** — set as LazyVim default `colorscheme` (overrides tokyonight)
-- **trouble.nvim** — no custom spec: the former `use_diagnostic_signs = true` was a trouble v2-era option (absent from v3 at lock bd67efe); v3 renders diagnostic icons via its own defaults
-- **telescope.nvim** — `<leader>fp` "Find Plugin File" + `horizontal / prompt_position=top / ascending` layout
-- **nvim-lspconfig** — `pyright` enabled; `tsserver` example kept commented (use the `lang.typescript` extra instead)
-- **nvim-treesitter** — `ensure_installed` includes bash/html/javascript/json/lua/markdown/markdown_inline/python/query/regex/tsx/typescript/vim/yaml (single spec; tsx/typescript listed once — the former duplicate spec was merged)
-- **mason.nvim** — `ensure_installed` includes stylua / shellcheck / shfmt / flake8
-- **lualine.nvim** — appends `😄` component (the second "empty override" spec is now commented out — an opts-function return value replaces merged opts and would wipe LazyVim's entire lualine config)
-- **nvim-cmp + cmp-emoji** — **disabled (commented out)**: inert dead config — LazyVim v14 ships blink.cmp and drops nvim-cmp specs unless the `lazyvim.plugins.extras.coding.nvim-cmp` extra is imported, so it never loaded (cmp-emoji is absent from the lock). To enable, import that extra first and run `:Lazy sync`
-- *(commented, inactive)*: gruvbox, mini.starter, dap.python, gitsigns/json extras — keep as templates.
+- **catppuccin** —— 设为 LazyVim 默认 `colorscheme`（覆盖 tokyonight）
+- **trouble.nvim** —— 无自定义 spec：原 `use_diagnostic_signs = true` 属 trouble v2 时代选项（锁定 bd67efe 的 v3 已无此字段）；v3 经自身默认值渲染诊断图标
+- **telescope.nvim** —— `<leader>fp`「查找插件文件」+ `horizontal / prompt_position=top / ascending` 布局
+- **nvim-lspconfig** —— 启用 `pyright`；`tsserver` 示例保留注释（改用 `lang.typescript` extra）
+- **nvim-treesitter** —— `ensure_installed` 含 bash/html/javascript/json/lua/markdown/markdown_inline/python/query/regex/tsx/typescript/vim/yaml（单一 spec；tsx/typescript 仅列一次——原重复 spec 已合并）
+- **mason.nvim** —— `ensure_installed` 含 stylua / shellcheck / shfmt / flake8
+- **lualine.nvim** —— 追加 `😄` 组件（第二个「空覆盖」spec 已注释——opts 函数返回值会替换合并后的 opts，会清空 LazyVim 的整个 lualine 配置）
+- **nvim-cmp + cmp-emoji** —— **已禁用（注释）**：不生效的死配置——LazyVim v14 自带 blink.cmp，且除非导入 `lazyvim.plugins.extras.coding.nvim-cmp` extra，否则会丢弃 nvim-cmp spec，因此从未真正加载（cmp-emoji 不在 lock 中）。要启用，先导入该 extra 并运行 `:Lazy sync`
+- *（注释、未生效）*：gruvbox、mini.starter、dap.python、gitsigns/json extras —— 保留为模板。
 
-> `lazy-lock.json` still pins `fzf-lua`, but no spec references it anymore; a future manual `:Lazy sync` / `:Lazy clean` will drop it (committed lock stays 43 entries, reproducible).
+> `lazy-lock.json` 仍锁定 `fzf-lua`，但已无 spec 引用；将来手动 `:Lazy sync` / `:Lazy clean` 会将其移除（入库 lock 保持 43 条，可复现）。
 
-### Built-in Settings (lua/config/options.lua)
+### 内置设置（lua/config/options.lua）
 
-- **Line numbers**: `number` + `relativenumber` (absolute current, relative others)
-- **Indent**: `tabstop=4` `shiftwidth=4` `expandtab` `smartindent` `autoindent` `wrap=false` (4-space)
-- **Scroll**: `scrolloff=8`
-- **Clipboard / completion**: NOT set here — LazyVim's defaults are inherited (clipboard is SSH-aware upstream: empty over `SSH_CONNECTION` so the OSC52 provider works remotely; `completeopt=menu,menuone,noselect` is already the upstream default. Former static overrides removed.)
-- **Search**: `ignorecase` + `smartcase` + `hlsearch` + `incsearch` + `inccommand=nosplit` + `showmatch` (smart case, incremental highlight)
-- **Colors**: `termguicolors` + `colorcolumn="100"` (true color, 100-column ruler)
-- **Cursorline**: highlighted only in Normal mode (toggled via `InsertEnter`/`InsertLeave` autocmd)
+- **行号**：`number` + `relativenumber`（当前行绝对、其余相对）
+- **缩进**：`tabstop=4` `shiftwidth=4` `expandtab` `smartindent` `autoindent` `wrap=false`（4 空格）
+- **滚动**：`scrolloff=8`
+- **剪贴板 / 补全**：不在此设置——沿用 LazyVim 默认（上游剪贴板具备 SSH 感知：存在 `SSH_CONNECTION` 时为空，OSC52 provider 可在远程工作；`completeopt=menu,menuone,noselect` 本就是上游默认。原静态覆盖已移除）
+- **搜索**：`ignorecase` + `smartcase` + `hlsearch` + `incsearch` + `inccommand=nosplit` + `showmatch`（智能大小写、增量高亮）
+- **颜色**：`termguicolors` + `colorcolumn="100"`（真彩、100 列标线）
+- **cursorline**：仅普通模式高亮（经 `InsertEnter`/`InsertLeave` autocmd 切换）
 
-### Key Mappings (lua/config/keymaps.lua)
+### 键位（lua/config/keymaps.lua）
 
-Leader is `<Space>` (LazyVim default). Custom mappings loaded after defaults (so you can override):
+Leader 为 `<Space>`（LazyVim 默认）。自定义映射在默认之后加载（可直接覆盖）：
 
-| Keymap            | Mode | Action                      | Description                  |
+| 键位              | 模式 | 动作                        | 说明                         |
 | ----------------- | ---- | --------------------------- | ---------------------------- |
-| `jk`              | i    | `<ESC>`                     | Exit insert mode             |
-| `<leader><space>` | n    | `<cmd>nohlsearch<CR>`       | Clear search highlights      |
-| `<leader>sv`      | n    | `<C-w>v`                    | Split window vertically      |
-| `<leader>sh`      | n    | `<C-w>s`                    | Split window horizontally    |
-| `<leader>rl`      | n    | `<cmd>set relativenumber!<CR>` | Toggle relative line numbers |
+| `jk`              | i    | `<ESC>`                     | 退出插入模式                 |
+| `<leader><space>` | n    | `<cmd>nohlsearch<CR>`       | 清除搜索高亮                 |
+| `<leader>sv`      | n    | `<C-w>v`                    | 垂直分屏                     |
+| `<leader>sh`      | n    | `<C-w>s`                    | 水平分屏                     |
+| `<leader>rl`      | n    | `<cmd>set relativenumber!<CR>` | 切换相对行号              |
 
-> **Note**: a former `<leader>bd` → raw `<cmd>bdelete<CR>` map was removed — it silently overrode LazyVim's built-in `<leader>bd` (Snacks.bufdelete, keeps window layout) while claiming to complement it; LazyVim's `<leader>bD` remains the raw `:bd` variant.
+> **注意**：原 `<leader>bd` → 裸 `<cmd>bdelete<CR>` 映射已移除——它在声称「补充」的同时静默顶掉了 LazyVim 内置的 `<leader>bd`（Snacks.bufdelete，保留窗口布局）；LazyVim 的 `<leader>bD` 仍是裸 `:bd` 变体。
 
-> **Note**: historical `<leader>u` (UndotreeToggle) and `<leader>f` (LSP format) maps were removed — the former errored `E492` because `mbbill/undotree` is neither in `lazy-lock.json` nor in `lua/plugins/`, and both clobbered LazyVim's `<leader>u` / `<leader>f` group prefixes. To restore undotree, first add a real spec (e.g. `return { "mbbill/undotree" }` + `:Lazy sync`), then map keys; formatting uses LazyVim's built-in `<leader>cf` / `<leader>uf`.
+> **注意**：历史上的 `<leader>u`（UndotreeToggle）与 `<leader>f`（LSP format）映射已移除——前者报 `E492`，因为 `mbbill/undotree` 既不在 `lazy-lock.json` 也不在 `lua/plugins/`，且二者都会顶掉 LazyVim 的 `<leader>u` / `<leader>f` 分组前缀。要恢复 undotree，先添加真实 spec（如 `return { "mbbill/undotree" }` + `:Lazy sync`）再映射键位；格式化用 LazyVim 内置的 `<leader>cf` / `<leader>uf`。
 
-All other keys are LazyVim defaults (flash, neo-tree, snacks, bufferline, which-key, etc.). Press `<leader>` and wait for which-key to see the full list; full reference at [lazyvim.org/keymaps](https://www.lazyvim.org/keymaps).
+其余键位均为 LazyVim 默认（flash、neo-tree、snacks、bufferline、which-key 等）。按 `<leader>` 等待 which-key 查看完整列表；完整参考见 [lazyvim.org/keymaps](https://www.lazyvim.org/keymaps)。
 
-### Autocmds (lua/config/autocmds.lua)
+### 自动命令（lua/config/autocmds.lua）
 
-| Event | Group | Pattern | Action |
-| ----- | ----- | ------- | ------ |
-| `InsertEnter`/`InsertLeave` | `user_cursorline_toggle` | `*` | Cursorline only in Normal mode |
+| 事件  | 分组                    | 模式 | 动作                       |
+| ----- | ----------------------- | ---- | -------------------------- |
+| `InsertEnter`/`InsertLeave` | `user_cursorline_toggle` | `*` | cursorline 仅普通模式显示 |
 
 > yank 高亮与窗口均分已由 LazyVim v16 上游覆盖，不再重复定义。
 
-> No per-filetype autocmds: the former `FileType python` row was stale (removed from autocmds.lua as redundant) — indentation is set globally in `options.lua` (4-space) and per-filetype needs would go in `autocmds.lua`.
+> 无按文件类型的 autocmd：原 `FileType python` 一行已过期（作为冗余项从 autocmds.lua 移除）——缩进在 `options.lua` 全局设置（4 空格），按文件类型的需求应写入 `autocmds.lua`。
 
-> Format-on-save is now handled solely by LazyVim's built-in autoformat (on by default; toggle with `<leader>uf` / `<leader>uF`). The custom `FormatOnSave` `BufWritePre` autocmd was removed — it double-formatted every save and kept running even after autoformat was disabled.
+> 保存时格式化现完全交给 LazyVim 内置 autoformat（默认开启；`<leader>uf` / `<leader>uF` 切换）。自定义 `FormatOnSave` `BufWritePre` autocmd 已移除——它导致每次保存双重格式化，且在 autoformat 关闭后仍在运行。
 
-## Customization
+## 自定义
 
-#### Adding Plugins
+#### 添加插件
 
-Create new files in `lua/plugins/` (or edit `lua/plugins/example.lua`). Every spec under `lua/plugins/` is auto-loaded by lazy.nvim:
+在 `lua/plugins/` 新建文件（或编辑 `lua/plugins/example.lua`）。`lua/plugins/` 下每个 spec 都会被 lazy.nvim 自动加载：
 
 ```lua
 -- lua/plugins/my.lua
 return { "mbbill/undotree", cmd = "UndotreeToggle" }
 ```
 
-The guard `-- if true then return {} end` at the top of `example.lua` is currently **commented out** (specs are active). Uncomment it to disable the file and use it as a pure template.
+`example.lua` 顶部的守卫 `-- if true then return {} end` 目前处于**注释状态**（spec 生效）。取消其注释即可停用整个文件，将其用作纯模板。
 
-#### Modifying Options
+#### 修改选项
 
-Edit `lua/config/options.lua` for globals, or override via the `opts` field in a plugin spec.
+编辑 `lua/config/options.lua` 设置全局项，或在插件 spec 中经 `opts` 字段覆盖。
 
-#### Key Mappings
+#### 键位映射
 
-Add custom maps in `lua/config/keymaps.lua` (loaded after LazyVim defaults, so you can override). Use `desc` for which-key hints:
+在 `lua/config/keymaps.lua` 添加自定义映射（在 LazyVim 默认之后加载，可直接覆盖）。用 `desc` 提供 which-key 提示：
 
 ```lua
-vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })
+vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "垂直分屏" })
 ```
 
-## Updating & Health
+## 更新与健康检查
 
-- **Check**: `:Lazy` — plugin status; `:checkhealth` — LSP / treesitter / providers.
-- **Update**: `:Lazy update` (updates `lazy-lock.json`) · **Restore**: `:Lazy restore` · **Sync**: `:Lazy sync`.
-- **Checker**: `lua/config/lazy.lua` sets `checker.enabled=true, notify=false` (silent background check).
-- **Shell**: `update-all` / `auto-update` in `private_dot_config/zsh/aliases.zsh` cover brew/mise/sdk/… **only** — run `:Lazy update` separately for Neovim.
+- **查看**：`:Lazy` —— 插件状态；`:checkhealth` —— LSP / treesitter / providers。
+- **更新**：`:Lazy update`（更新 `lazy-lock.json`）· **恢复**：`:Lazy restore` · **同步**：`:Lazy sync`。
+- **检查器**：`lua/config/lazy.lua` 设 `checker.enabled=true, notify=false`（静默后台检查）。
+- **Shell**：`private_dot_config/zsh/aliases.zsh` 的 `update-all` / `auto-update` 只覆盖 brew/mise/sdk/…——Neovim 插件需单独运行 `:Lazy update`。
 
-## Relationship to docs/neovim.md
+## 与 docs/neovim.md 的关系
 
-- This README = **repository view** (kept in the source tree; excluded by `.chezmoiignore` `**/README.md`, not deployed to `~/.config/nvim/README.md`) — installation, features, keymaps, settings.
-- [`docs/neovim.md`](../../docs/neovim.md) = **repository view (maintainer)** — source structure, file-by-file mapping, extras provenance, lock verification, autocmd groups, and the `update-all` boundary.
-- Both share the same numbers: **10 extras (9 lang + mini-animate)** and **43 locked plugins** / **5 custom keymaps**; conflicts — `lua/config/*.lua` + `lazy-lock.json` win.
+- 本 README = **仓库内视角**（保留在源码树；由 `.chezmoiignore` 的 `**/README.md` 排除，不部署到 `~/.config/nvim/README.md`）——安装、功能、键位、设置。
+- [`docs/neovim.md`](../../docs/neovim.md) = **仓库视角（维护者）** —— 源结构、逐文件映射、extras 来源、锁定校验、autocmd 分组及 `update-all` 边界。
+- 二者共享同一组数字：**10 个 extras（9 语言 + mini-animate）**与 **43 个锁定插件** / **5 个自定义键位**；如有冲突——以 `lua/config/*.lua` + `lazy-lock.json` 为准。
 
-## License
+## 许可证
 
-Apache-2.0 — See the [LICENSE](LICENSE) file for details.
+Apache-2.0 —— 详见 [LICENSE](LICENSE) 文件。

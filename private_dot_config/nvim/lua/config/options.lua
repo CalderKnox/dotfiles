@@ -8,30 +8,26 @@
 -- Guards      : 无外部依赖；所有选项幂等，重复加载安全
 -- Author      : Payne
 -- =============================================================================
--- Global editor options. Loaded *after* LazyVim's defaults, so values here
--- override LazyVim where they overlap. See `:h <option>` for details.
--- Only overrides and additions are set here; LazyVim handles the rest.
+-- 全局编辑器选项。在 LazyVim 默认值*之后*加载，重叠项以本文件为准。
+-- 详见 `:h <option>`。此处只写覆盖与新增项，其余交给 LazyVim。
 
--- Clipboard / completion: deliberately NOT overridden. LazyVim's defaults are
--- smarter than static values here:
---   clipboard   — upstream is SSH-aware (empty over SSH_CONNECTION, enabling
---                 the OSC52 provider); a bare `unnamedplus` would break remote
---                 sessions, so it was removed from this file.
---   completeopt — upstream default is exactly `menu,menuone,noselect`; the
---                 former duplicate override (mislabeled as a customization)
---                 was removed.
+-- 剪贴板 / 补全: 刻意不覆盖。LazyVim 默认值比这里的静态值更智能:
+--   clipboard   —— 上游具备 SSH 感知（存在 SSH_CONNECTION 时为空，从而启用
+--                  OSC52 provider）;裸写 `unnamedplus` 会破坏远程会话，
+--                  故已从本文件移除。
+--   completeopt —— 上游默认恰为 `menu,menuone,noselect`;此前的重复覆盖
+--                  （误标为自定义项）已删除。
 
--- Indentation width: 4 spaces (LazyVim default is 2). expandtab/smartindent
--- already match upstream and are not re-set; per-filetype overrides can be
--- added in autocmds.lua if a language needs a different width.
-vim.opt.tabstop = 4 -- display width of <Tab>
-vim.opt.shiftwidth = 4 -- size of >> / << and autoindent step
+-- 缩进宽度: 4 空格（LazyVim 默认 2）。expandtab/smartindent 与上游一致，
+-- 不再重设;若某语言需要不同宽度，可在 autocmds.lua 中按文件类型覆盖。
+vim.opt.tabstop = 4 -- <Tab> 的显示宽度
+vim.opt.shiftwidth = 4 -- >> / << 与自动缩进的步长
 
--- Display & scrolling
-vim.opt.scrolloff = 8 -- keep 8 lines above/below cursor for context while scrolling (upstream: 4)
-vim.opt.colorcolumn = "100" -- ruler at 100 cols as line-length guide
+-- 显示与滚动
+vim.opt.scrolloff = 8 -- 滚动时在光标上下保留 8 行上下文（上游: 4）
+vim.opt.colorcolumn = "100" -- 100 列标线，作行长参考
 
--- Search: hlsearch/incsearch are Neovim defaults and are not re-set here;
--- clear highlights with <leader><space> (see keymaps.lua). showmatch below is
--- a genuine override (Vim default: off).
-vim.opt.showmatch = true -- briefly jump to matching bracket when cursor is on one
+-- 搜索: hlsearch/incsearch 为 Neovim 默认值，此处不重设;
+-- 用 <leader><space> 清除高亮（见 keymaps.lua）。下方 showmatch 是真正的
+-- 覆盖项（Vim 默认: 关闭）。
+vim.opt.showmatch = true -- 光标落在括号上时短暂跳到匹配括号
