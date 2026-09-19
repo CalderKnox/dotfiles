@@ -1,25 +1,25 @@
 -- ~/.config/nvim/lua/plugins/example.lua
--- Every file under lua/plugins/ is auto-loaded by lazy.nvim; returned tables are merged.
--- Active specs below DO take effect (template guard `if true then return {} end` is disabled).
--- Commented blocks are inert examples — uncomment to enable.
+-- lua/plugins/ 下每个文件都会被 lazy.nvim 自动加载;返回的表会被合并。
+-- 下方生效的 spec 确实起作用（模板守卫 `if true then return {} end` 处于注释状态）。
+-- 注释块为不生效的示例——取消注释即可启用。
 -- if true then return {} end
 
--- every spec file under the "plugins" directory will be loaded automatically by lazy.nvim
+-- "plugins" 目录下每个 spec 文件都会被 lazy.nvim 自动加载
 --
--- In your plugin files, you can:
--- * add extra plugins
--- * disable/enabled LazyVim plugins
--- * override the configuration of LazyVim plugins
+-- 在插件文件中，你可以:
+-- * 追加额外插件
+-- * 禁用/启用 LazyVim 插件
+-- * 覆盖 LazyVim 插件的配置
 --
--- For more information see: https://lazyvim.github.io/guide/return-a-plugin-return-func/
+-- 更多信息见: https://lazyvim.github.io/guide/return-a-plugin-return-func/
 return {
     -- ============================================================================
-    -- Example: Add Gruvbox colorscheme
+    -- 示例: 添加 Gruvbox 配色
     -- ============================================================================
-    -- Add gruvbox colorscheme uncommenting the line below:
+    -- 取消下面一行的注释即可添加 gruvbox 配色:
     -- { "ellisonleao/gruvbox.nvim" },
 
-    -- Configure LazyVim's default colorscheme (catppuccin); gruvbox alternative kept commented above
+    -- 配置 LazyVim 默认配色（catppuccin）;gruvbox 备选保留在上方注释中
     {
         "LazyVim/LazyVim",
         opts = {
@@ -28,23 +28,22 @@ return {
     },
 
     -- ============================================================================
-    -- Example: Configure Trouble (diagnostic window)
+    -- 示例: 配置 Trouble（诊断窗口）
     -- ============================================================================
-    -- Removed spec: { "folke/trouble.nvim", opts = { use_diagnostic_signs = true } }
-    -- was a trouble v2-era option — v3 (lazy-lock bd67efe) has no such field and
-    -- renders diagnostic icons via its own defaults, so the spec was a no-op.
-    -- Disable Trouble entirely via the line below if not needed:
+    -- 已移除 spec: { "folke/trouble.nvim", opts = { use_diagnostic_signs = true } }
+    -- 属 trouble v2 时代选项——v3（lazy-lock bd67efe）无此字段，
+    -- 诊断图标经其自身默认值渲染，该 spec 是空操作。
+    -- 如不需要，用下面一行整体禁用 Trouble:
     -- { "folke/trouble.nvim", enabled = false },
 
     -- ============================================================================
-    -- Example: Add nvim-cmp with emoji source
+    -- 示例: 添加 nvim-cmp 与 emoji source
     -- ============================================================================
-    -- Disabled (was inert dead config): LazyVim v14 ships blink.cmp as its
-    -- completion engine and drops nvim-cmp specs unless the
-    -- "lazyvim.plugins.extras.coding.nvim-cmp" extra is imported, so this spec
-    -- never actually loaded (cmp-emoji is consequently absent from
-    -- lazy-lock.json). To enable, import that extra first and run :Lazy sync
-    -- so cmp-emoji gets pinned, then uncomment:
+    -- 已禁用（原为不生效的死配置）: LazyVim v14 以 blink.cmp 为补全引擎，
+    -- 且除非导入 "lazyvim.plugins.extras.coding.nvim-cmp" extra，
+    -- 否则会丢弃 nvim-cmp spec，因此该 spec 从未真正加载
+    -- （cmp-emoji 因此不在 lazy-lock.json 中）。要启用，先导入该 extra
+    -- 并运行 :Lazy sync 使 cmp-emoji 入锁，再取消注释:
     -- {
     --     "hrsh7th/nvim-cmp",
     --     dependencies = { "hrsh7th/cmp-emoji" },
@@ -55,36 +54,36 @@ return {
     -- },
 
     -- ============================================================================
-    -- Example: fzf-lua plugin file browser (default picker is fzf-lua)
+    -- 示例: fzf-lua 插件文件浏览器（默认选择器为 fzf-lua）
     -- ============================================================================
-    -- Add a keymap to browse plugin files
+    -- 添加浏览插件文件的键位
     {
         "ibhagwan/fzf-lua",
         keys = {
-            -- Find plugin file with leader+fp
+            -- 用 leader+fp 查找插件文件
             {
                 "<leader>fp",
                 function() require("fzf-lua").files({ cwd = vim.fn.stdpath("data") .. "/lazy" }) end,
-                desc = "Find Plugin File",
+                desc = "查找插件文件",
             },
         },
     },
 
     -- ============================================================================
-    -- Example: Add tsserver with typescript.nvim
+    -- 示例: 用 typescript.nvim 添加 tsserver
     -- ============================================================================
-    -- Add tsserver and setup with typescript.nvim instead of lspconfig
+    -- 添加 tsserver 并用 typescript.nvim（而非 lspconfig）配置
     -- {
     --     "neovim/nvim-lspconfig",
     --     dependencies = {
     --         "jose-elias-alvarez/typescript.nvim",
     --         init = function()
     --             require("lazyvim.util").lsp.on_attach(function(_, buffer)
-    --                 -- Organize imports
+    --                 -- 整理导入
     --                 -- stylua: ignore
     --                 vim.keymap.set("n", "<leader>co", "TypescriptOrganizeImports",
     --                     { buffer = buffer, desc = "Organize Imports" })
-    --                 -- Rename file
+    --                 -- 重命名文件
     --                 vim.keymap.set("n", "<leader>cR", "TypescriptRenameFile", { desc = "Rename File", buffer = buffer })
     --             end)
     --         end,
@@ -93,31 +92,31 @@ return {
     --     opts = {
     --         ---@type lspconfig.options
     --         servers = {
-    --             -- tsserver will be automatically installed with mason and loaded with lspconfig
+    --             -- tsserver 会随 mason 自动安装并经 lspconfig 加载
     --             tsserver = {},
     --         },
-    --         -- You can do any additional lsp server setup here
-    --         -- Return true if you don't want this server to be setup with lspconfig
+    --         -- 可在此做任何额外的 LSP server 配置
+    --         -- 若不想让该 server 经 lspconfig 配置，返回 true
     --         ---@type table<string, fun(server:string, opts:_.lspconfig.options):boolean?>
     --         setup = {
-    --             -- Example to setup with typescript.nvim
+    --             -- 示例: 用 typescript.nvim 配置
     --             tsserver = function(_, opts)
     --                 require("typescript").setup({ server = opts })
     --                 return true
     --             end,
-    --             -- Specify * to use this function as a fallback for any server
+    --             -- 指定 * 将此函数作为任意 server 的回退
     --             -- ["*"] = function(server, opts) end,
     --         },
     --     },
     -- },
 
-    -- Or use the LazyVim extra for typescript
+    -- 或改用 LazyVim 的 typescript extra
     -- { import = "lazyvim.plugins.extras.lang.typescript" },
 
     -- ============================================================================
-    -- Configure lualine with custom sections
+    -- 配置 lualine 自定义分区
     -- ============================================================================
-    -- Add a custom component to lualine_x (right side)
+    -- 向 lualine_x（右侧）追加自定义组件
     {
         "nvim-lualine/lualine.nvim",
         event = "VeryLazy",
@@ -130,52 +129,51 @@ return {
         end,
     },
 
-    -- Or specify new options to override all the defaults
-    -- Disabled: in lazy.nvim an opts function's return value replaces the
-    -- merged opts, so returning {} here wipes LazyVim's entire lualine config
-    -- (and the emoji component added above). Uncomment only together with a
-    -- real config:
+    -- 或指定新选项覆盖全部默认值
+    -- 已禁用: lazy.nvim 中 opts 函数的返回值会替换合并后的 opts，
+    -- 此处返回 {} 会清空 LazyVim 的整个 lualine 配置
+    -- （含上面添加的 emoji 组件）。仅与真实配置一起取消注释:
     -- {
     --     "nvim-lualine/lualine.nvim",
     --     event = "VeryLazy",
     --     opts = function()
     --         return {
-    --             --[[add your custom lualine config here]]
+    --             --[[在此添加自定义 lualine 配置]]
     --         }
     --     end,
     -- },
 
     -- ============================================================================
-    -- Use mini.starter instead of alpha
+    -- 用 mini.starter 替代 alpha
     -- ============================================================================
-    -- Start screen alternative
+    -- 启动屏备选
     -- { import = "lazyvim.plugins.extras.ui.mini-starter" },
 
     -- ============================================================================
-    -- JSON LSP/schema support comes from the lang.json extra (already imported in lua/config/lazy.lua)
+    -- JSON LSP/schema 支持来自 lang.json extra（已在 lua/config/lazy.lua 导入）
     -- ============================================================================
-    -- Setup treesitter for json, json5 and jsonc
+    -- 为 json/json5/jsonc 配置 treesitter
     -- { import = "lazyvim.plugins.extras.lang.json" },
 
     -- ============================================================================
-    -- Add tools you want to have installed
+    -- 添加想要安装的工具
     -- ============================================================================
-    -- Mason setup for LSP/dap/tools installers
+    -- LSP/dap/工具安装器的 mason 配置
     {
         "mason-org/mason.nvim",
         opts = {
-            ensure_installed = { "shellcheck" }, -- Shell script checker
-            -- "prettier",       -- JS formatter (enable if needed)
+            ensure_installed = { "shellcheck" }, -- Shell 脚本检查器
+            -- "prettier",       -- JS 格式化器（需要时启用）
         },
     },
 
     -- ============================================================================
-    -- Example: Debug adapter setup
+    -- 示例: 调试适配器配置
     -- ============================================================================
     -- { import = "lazyvim.plugins.extras.dap.python" },
 
     -- ============================================================================
-    -- Example: Add git commands navigation
+    -- 示例: 添加 git 命令导航
     -- ============================================================================
     -- { import = "lazyvim.plugins.extras.ui.gitsigns" },
 }

@@ -1,10 +1,10 @@
 # ============================================
-# Ghostty Terminal - Complete Configuration (chezmoi: private_dot_config/ghostty/config -> ~/.config/ghostty/config, dir 0700)
-# Theme/palette: Catppuccin Mocha (dark) — see "Theme and Colors" section.
+# Ghostty 终端 - 完整配置 (chezmoi: private_dot_config/ghostty/config -> ~/.config/ghostty/config, 目录 0700)
+# 主题/配色：Catppuccin Mocha（深色）——见「主题与颜色」一节。
 # ============================================
-# File: ~/.config/ghostty/config
-# Reload: Cmd+Shift+, (macOS)
-# View options: ghostty +show-config --default --docs
+# 文件: ~/.config/ghostty/config
+# 重载: Cmd+Shift+,（macOS）
+# 查看生效值: ghostty +show-config --default --docs
 
 env = LANG=zh_CN.UTF-8
 
@@ -12,7 +12,7 @@ env = LANG=zh_CN.UTF-8
 command = /opt/homebrew/bin/fish -l
 # command = /opt/homebrew/bin/tmux new -As main
 
-#--- Typography ---
+#--- 字体排版 ---
 font-family = "JetBrainsMono Nerd Font Mono"
 font-feature = "+calt"
 font-size = 15
@@ -25,15 +25,15 @@ alpha-blending = linear
 adjust-cell-width = -1
 adjust-cell-height = 2
 
-# --- Theme and Colors ---
-# Palette/theme: Catppuccin Mocha (dark). The macOS window chrome follows the
-# system appearance via `window-theme = auto` (set further below).
+# --- 主题与颜色 ---
+# 配色/主题：Catppuccin Mocha（深色）。macOS 窗口外观经下方的
+# `window-theme = auto` 跟随系统外观。
 theme = Catppuccin Mocha
-# Alternative palettes (uncomment to switch):
+# 备选配色（取消注释即切换）：
 # theme = Dracula+
 # theme = "Warm Neon"
 
-# --- Window and Appearance ---
+# --- 窗口与外观 ---
 # # 背景透明度：微妙的毛玻璃效果（0.85-0.95 之间最优雅）
 background-opacity = 0.92
 background-blur-radius = 20
@@ -54,7 +54,7 @@ window-decoration = true
 # 移除多余装饰（macOS）
 macos-titlebar-proxy-icon = hidden
 
-# --- Cursor ---
+# --- 光标 ---
 # cursor-style = underline
 cursor-style = block
 cursor-style-blink = true
@@ -68,36 +68,36 @@ working-directory = ~/workspaces
 window-inherit-working-directory = true
 window-inherit-font-size = true
 
-# --- Mouse ---
+# --- 鼠标 ---
 # 输入时自动隐藏鼠标指针
 mouse-hide-while-typing = true
 clipboard-read = allow
 clipboard-write = allow
 copy-on-select = clipboard
 
-# --- Quick Terminal (Quake-style dropdown) ---
+# --- Quick Terminal（Quake 风格下拉终端） ---
 # 注意：quick-terminal-screen / animation-duration 统一在文件末尾赋值（历史重复键已去重）
 quick-terminal-position = top
 quick-terminal-autohide = true
 
-# --- Security ---
+# --- 安全 ---
 clipboard-paste-protection = true
 clipboard-paste-bracketed-safe = true
 clipboard-trim-trailing-spaces = true
 
-# --- Shell Integration ---
+# --- Shell 集成 ---
 # shell-integration = detect
 shell-integration-features = no-cursor
 
 
-# --- Keybindings ---
-# Tabs: Cmd+T new, Cmd+Shift+Arrow prev/next, Cmd+W close
+# --- 键位绑定 ---
+# 标签页: Cmd+T 新建, Cmd+Shift+方向键 前后切换, Cmd+W 关闭
 keybind = cmd+t=new_tab
 keybind = cmd+shift+left=previous_tab
 keybind = cmd+shift+right=next_tab
 keybind = cmd+w=close_surface
 
-# Splits: Cmd+D right, Cmd+Shift+D down, Cmd+Alt+Arrows navigate
+# 分屏: Cmd+D 右侧, Cmd+Shift+D 下方, Cmd+Alt+方向键 导航
 keybind = cmd+d=new_split:right
 keybind = cmd+shift+d=new_split:down
 keybind = cmd+alt+left=goto_split:left
@@ -107,25 +107,25 @@ keybind = cmd+alt+down=goto_split:bottom
 
 
 macos-option-as-alt = right
-# macos-option-as-alt = true  # alternative: both Options as Alt
+# macos-option-as-alt = true  # 备选: 两侧 Option 均作 Alt
 
-# Font size: Cmd+Plus/Minus/Zero
+# 字号: Cmd+加号/减号/零
 keybind = cmd+plus=increase_font_size:1
 keybind = cmd+minus=decrease_font_size:1
 keybind = cmd+zero=reset_font_size
 
-# Quick terminal global hotkey (Ctrl+` toggles dropdown)
+# Quick Terminal 全局热键（Ctrl+` 切换下拉）
 keybind = global:ctrl+grave_accent=toggle_quick_terminal
 
-# Splits management: equalize / zoom
+# 分屏管理: 均分 / 缩放
 keybind = cmd+shift+e=equalize_splits
 keybind = cmd+shift+f=toggle_split_zoom
 
-# Reload config
+# 重载配置
 # keybind = cmd+shift+comma=reload_config
 
-# --- Performance ---
-# Generous scrollback (64MB) 1024 * 1024 * 64
+# --- 性能 ---
+# 大回滚缓冲 (64MB) 1024 * 1024 * 64
 scrollback-limit = 67108864
 
 # 图像内存限制（防止 Kitty Graphics Protocol 图像占用过多 GPU 内存）256MB，适合 16GB 内存机型

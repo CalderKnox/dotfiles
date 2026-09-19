@@ -7,12 +7,12 @@
 # Guards      : 0600 必需 (0644 被 ssh 拒绝), ProxyCommand bash -c 探活
 # Author      : Payne
 # =============================================================================
-# SSH client config (chezmoi: private_dot_ssh/private_config -> ~/.ssh/config, 0600)
-# `private_` prefix ensures 0600 permissions (required by ssh; 0644 is rejected).
-# OrbStack Include must stay at top before any Host block to provide `orb` hosts.
-# Added by OrbStack: 'orb' SSH host for Linux machines
-# This only works if it's at the top of ssh_config (before any Host blocks).
-# This won't be added again if you remove it.
+# SSH 客户端配置（chezmoi: private_dot_ssh/private_config -> ~/.ssh/config, 0600）
+# `private_` 前缀确保部署后为 0600 权限（ssh 硬性要求；0644 会被拒绝）。
+# OrbStack 的 Include 必须置于任何 Host 块之前，以提供 `orb` 主机。
+# 由 OrbStack 添加：面向 Linux 机器的 'orb' SSH 主机
+# 仅当位于 ssh_config 顶部（任何 Host 块之前）时才生效。
+# 删除后 OrbStack 不会再次自动添加。
 
 
 # ssh -G dev              # 打印 dev 的最终生效配置（排错神器）
@@ -58,7 +58,7 @@ Host sec
     IdentityFile ~/.ssh/id_rsa_sec
     IdentitiesOnly yes
 
-# jump server
+# 跳板机
 # 直接 ssh inner 即可穿透跳板机。ProxyJump 支持多级：ProxyJump bastion,inner1
 ## 跳板机本身
 # 示例占位（example.com 为保留域名），按实际跳板机环境修改后再使用
@@ -77,14 +77,14 @@ Host inner
 # 多个git账号
 
 
-## private github
+## 私人 GitHub
 Host github.com ssh.github.com
-    # ssh.github.com:443 — HTTPS port, traverses firewalls that block 22
+    # ssh.github.com:443 —— HTTPS 端口，可穿越封锁 22 端口的防火墙
     HostName ssh.github.com
     User git
     Port 443
-    # Adaptive SOCKS5 proxy (127.0.0.1:5376): if the local proxy is listening, tunnel via SOCKS5;
-    # otherwise fall back to a direct connection.
+    # 自适应 SOCKS5 代理（127.0.0.1:5376）：本地代理在监听时经 SOCKS5 隧道；
+    # 否则回退直连。
     ProxyCommand bash -c 'if nc -z 127.0.0.1 5376; then nc -X 5 -x 127.0.0.1:5376 %h %p; else nc %h %p; fi'
 
 

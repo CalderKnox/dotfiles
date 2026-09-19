@@ -1,8 +1,8 @@
-# Alacritty Configuration File (chezmoi: private_dot_config/alacritty/alacritty.toml -> ~/.config/alacritty/alacritty.toml)
-# GPU-accelerated terminal. Theme: Catppuccin Mocha (active [colors] below, same Catppuccin Mocha theme family as ghostty & local starship, though ANSI bright variants differ from ghostty's bundled theme; the original Dracula block is kept fully commented as an alternative template).
-# `private_dot_config` ensures parent dir 0700 on deploy.
-# Docs: https://alacritty.org/config-alacritty.html | bindings: .../config-alacritty-bindings.html
-# Reference: https://www.kevnu.com/zh/posts/18
+# Alacritty 配置文件 (chezmoi: private_dot_config/alacritty/alacritty.toml -> ~/.config/alacritty/alacritty.toml)
+# GPU 加速终端。主题：Catppuccin Mocha（生效的 [colors] 见下方；与 ghostty 及本机 starship 同属 Catppuccin Mocha 主题家族，但 ANSI 亮色变体与 ghostty 内置主题不同；原 Dracula 配色块整块注释保留为备选模板）。
+# `private_dot_config` 前缀确保部署后父目录为 0700。
+# 文档: https://alacritty.org/config-alacritty.html | 键位: .../config-alacritty-bindings.html
+# 参考: https://www.kevnu.com/zh/posts/18
 
 shell = { program = "/opt/homebrew/bin/fish", args = [
   "-c",
@@ -10,12 +10,12 @@ shell = { program = "/opt/homebrew/bin/fish", args = [
 ] }
 
 [env]
-TERM = "xterm-256color"  # ensure 256-color + truecolor in tmux/ssh
+TERM = "xterm-256color"  # 确保 tmux/ssh 下 256 色 + 真彩
 COLORTERM = "truecolor"
 LANG = "zh_CN.UTF-8"
 
 # [terminal]
-# shell configuration for Alacritty with tmux
+# Alacritty + tmux 的 shell 配置
 # shell = { program = "/opt/homebrew/bin/fish", args = [
 #   "-c",
 #   "tmux new -A -s main",
@@ -26,14 +26,14 @@ LANG = "zh_CN.UTF-8"
 [font]
 size = 15
 
-# Requires JetBrainsMono Nerd Font Mono installed (via Homebrew `font-jetbrains-mono-nerd-font`).
+# 需要已安装 JetBrainsMono Nerd Font Mono（经 Homebrew `font-jetbrains-mono-nerd-font`）。
 normal = { family = "JetBrainsMono Nerd Font Mono", style = "Regular" }
 bold = { family = "JetBrainsMono Nerd Font Mono", style = "Bold" }
 italic = { family = "JetBrainsMono Nerd Font Mono", style = "Italic" }
 bold_italic = { family = "JetBrainsMono Nerd Font Mono", style = "Bold Italic" }
 builtin_box_drawing = true
 
-# Palette: Catppuccin Mocha (active) — same Catppuccin Mocha theme family as ghostty & local starship (ANSI bright variants differ from ghostty's bundled theme); the Dracula block below is kept fully commented as an alternative template.
+# 配色: Catppuccin Mocha（生效）——与 ghostty 及本机 starship 同属 Catppuccin Mocha 主题家族（ANSI 亮色变体与 ghostty 内置主题不同）；下方 Dracula 块整块注释保留为备选模板。
 [colors]
 # primary = { background = '0x282a36', foreground = '0xf8f8f2' }
 # cursor = { background = '0x44475a', foreground = '0xf8f8f2' }
@@ -50,10 +50,10 @@ resize_increments = true
 
 padding = { x = 10, y = 10 }
 # opacity = 0.85
-option_as_alt = "OnlyRight"  # left Option stays for input (e.g. umlauts), right Option = Alt/Meta
-dimensions = { columns = 160, lines = 48 }  # example: fixed startup size
-decorations = "full"  # example: full window decorations (traffic lights)
-# decorations = "Buttonless"                  # example: hide traffic lights
+option_as_alt = "OnlyRight"  # 左 Option 保留用于输入（如变音符），右 Option = Alt/Meta
+dimensions = { columns = 160, lines = 48 }  # 示例: 固定启动尺寸
+decorations = "full"  # 示例: 完整窗口装饰（红绿灯按钮）
+# decorations = "Buttonless"                  # 示例: 隐藏红绿灯按钮
 startup_mode = "Fullscreen"
 dynamic_title = true
 
@@ -62,10 +62,10 @@ history = 1000
 multiplier = 3
 
 [selection]
-save_to_clipboard = true  # copy selection directly to system clipboard
+save_to_clipboard = true  # 选区直接复制到系统剪贴板
 
 [keyboard]
-# Key bindings — see https://github.com/theniceboy/.config/blob/master/alacritty/alacritty.yml
+# 键位绑定 —— 见 https://github.com/theniceboy/.config/blob/master/alacritty/alacritty.yml
 bindings = [
   # { key = "Return", mods = "Command", action = "ToggleSimpleFullscreen" },
   { mods = "Command", key = "Enter", action = "ToggleFullscreen" },
@@ -73,6 +73,6 @@ bindings = [
   # { key = "F", mods = "Function", action = "ToggleFullscreen" },
   # { key = "N", mods = "Alt", action = "ReceiveChar" },
   # { key = "P", mods = "Alt", action = "ReceiveChar" },
-  { mods = "Command", key = "t", action = "None" },  # disable: let shell/tmux handle new tab
-  { mods = "Command", key = "n", action = "None" },  # disable: let shell/tmux handle new window
+  { mods = "Command", key = "t", action = "None" },  # 禁用: 交给 shell/tmux 处理新标签页
+  { mods = "Command", key = "n", action = "None" },  # 禁用: 交给 shell/tmux 处理新窗口
 ]

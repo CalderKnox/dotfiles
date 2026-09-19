@@ -1,20 +1,20 @@
-# Codex config (chezmoi: dot_codex/private_config.toml -> ~/.codex/config.toml, 0600)
-# `private_` prefix ensures 0600 permissions (no group/other read) on deploy.
+# Codex 配置（chezmoi: dot_codex/private_config.toml -> ~/.codex/config.toml, 0600）
+# `private_` 前缀确保部署后为 0600 权限（组/其他用户不可读）。
 # Provider 段（model_provider / [model_providers.*]，含 base_url、requires_openai_auth、wire_api）
 # 由 cc-switch 在各机器注入/改写，不入仓库；实际生效值以 ~/.codex/config.toml 为准，本文件仅作参考快照。
-# See: https://github.com/openai/codex — config reference.
+# 参考：https://github.com/openai/codex —— 配置文档。
 # MCP/notify 未配置；[marketplaces]/[plugins] 为激活的便携集合，openai-bundled 为无版本号的稳定路径，有意保持激活（见下）
 
-model = "gpt-5.6-sol"  # default model (override per-session if needed) gpt-6-astra
-review_model = "gpt-5.6-sol"  # model used for `codex review`
-model_reasoning_effort = "medium"  # low | medium | high | xhigh | ultra | persistent | max
+model = "gpt-5.6-sol"  # 默认模型（必要时可按会话覆盖）gpt-6-astra
+review_model = "gpt-5.6-sol"  # `codex review` 使用的模型
+model_reasoning_effort = "medium"  # 可选: low | medium | high | xhigh | ultra | persistent | max
 
-# --- Security & access control ---
-sandbox_mode = "workspace-write"  # workspace-write | danger-full-access | read-only
+# --- 安全与访问控制 ---
+sandbox_mode = "workspace-write"  # 可选: workspace-write | danger-full-access | read-only
 approval_policy = "on-request"
 approvals_reviewer = "auto_review"
 
-# --- Performance & resource limits ---
+# --- 性能与资源上限 ---
 service_tier = "ultrafast"
 model_context_window = 1000000
 model_auto_compact_token_limit = 900000
@@ -28,19 +28,18 @@ show-context-window-usage = true
 enabled-reasoning-efforts = ["minimal", "low", "medium", "high", "xhigh", "max", "ultra"]
 
 [agents]
-max_depth = 2  # maximum depth of reasoning / subagent calls
-max_concurrent_threads_per_session = 12  # maximum concurrent threads per session (across all subagents)
-default_subagent_model = "gpt-5.6-sol"  # default model for subagents (can be overridden per subagent)
-default_subagent_reasoning_effort = "medium"  # default reasoning effort for subagents (can be overridden per subagent)
+max_depth = 2  # 推理/子代理调用的最大深度
+max_concurrent_threads_per_session = 12  # 每会话最大并发线程数（跨全部子代理）
+default_subagent_model = "gpt-5.6-sol"  # 子代理默认模型（可按子代理覆盖）
+default_subagent_reasoning_effort = "medium"  # 子代理默认推理力度（可按子代理覆盖）
 
-# --- Marketplaces & plugins (generic) ---
-# Upstream marketplaces with local `source` paths (e.g. ~/.codex/.tmp/...,
-# ~/.cache/codex-runtimes/...) are machine-generated cache state with
-# version-pinned absolute paths. Other machine-generated cache paths
-# (version-pinned) are omitted here; exception: the openai-bundled path is
-# stable across machines and kept active — the plugins below depend on it.
-# The plugins below are the stable, portable set; add local marketplaces
-# per-machine via ~/.codex/config.local.toml if you need them.
+# --- 市场与插件（通用） ---
+# 上游市场经本地 `source` 路径（如 ~/.codex/.tmp/...、
+# ~/.cache/codex-runtimes/...）属机器生成的缓存状态，为版本钉死的
+# 绝对路径。其他机器生成的缓存路径（带版本号）在此省略；
+# 例外：openai-bundled 路径跨机器稳定，保持激活——下方插件依赖它。
+# 以下插件为稳定、可移植的集合；如需本地市场，
+# 请按机器经 ~/.codex/config.local.toml 追加。
 [marketplaces]
 openai-bundled = { source_type = "local", source = "~/.codex/.tmp/bundled-marketplaces/openai-bundled" }
 

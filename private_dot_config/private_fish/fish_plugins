@@ -1,12 +1,12 @@
-# fish_plugins — declarative plugin list for fisher
-# Plugin manager: fisher (https://github.com/jorgebucaran/fisher)
-# Sync: `fisher install` / `fisher update` / `fisher list` reads this file.
-# Each line is a GitHub repo (or local path); fisher ignores blank lines
-# and comment lines that contain spaces. Keep 13 plugins.
+# fish_plugins —— fisher 的声明式插件清单
+# 插件管理器: fisher (https://github.com/jorgebucaran/fisher)
+# 同步: `fisher install` / `fisher update` / `fisher list` 均读取本文件。
+# 每行一个 GitHub 仓库（或本地路径）；fisher 忽略空行
+# 与含空格的注释行。保持 13 个插件。
 # Note: edc/bass 仅被 01_dev.fish 中注释掉的 uv 模板引用，保留为模板依赖；
 #       oh-my-fish/plugin-foreign-env (fenv) 当前未被任何配置使用（预留）。
 #       移除任一项均为需显式确认的决定。
-# See also: config.fish (shell entry), conf.d/00_env.fish (PATH).
+# 另见: config.fish（shell 入口）、conf.d/00_env.fish（PATH）。
 
 jorgebucaran/fisher
 patrickf1/fzf.fish

@@ -147,6 +147,6 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 - 已验证版本（2026-08）：chezmoi v2.72 · zsh 5.9 · fzf 0.74.3 · starship 1.26 · Neovim 0.12
 - 维护者：[azwpayne](https://github.com/azwpayne)
 
-## License
+## 许可证
 
-Apache-2.0 - See the [LICENSE](LICENSE) file for details.
+Apache-2.0 —— 详见 [LICENSE](LICENSE) 文件。

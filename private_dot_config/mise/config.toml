@@ -1,4 +1,4 @@
-# mise global tool versions (chezmoi: private_dot_config/mise/config.toml -> ~/.config/mise/config.toml, dir 0700)
+# mise 全局工具版本 (chezmoi: private_dot_config/mise/config.toml -> ~/.config/mise/config.toml, 目录 0700)
 # `mise use -g <tool>@<version>` 更新本文件；`mise install` 同步安装。
 # 每个条目跟踪最新稳定版 ("latest")；如需锁定版本可改为具体版本号 (如 node = "20")。
 # 工具清单与安装说明见 docs/dev-tools.md 与 aliases.zsh 的 update-all。

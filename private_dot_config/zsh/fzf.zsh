@@ -168,7 +168,7 @@ fkill() {
 }
 
 # 寻找大文件，默认 100M 以上，也可以指定大小参数
-# Usage: find_large_files 500M
+# 用法: find_large_files 500M
 find_large_files() {
     local size=${1:-100M}
     fd -t f -S "+$size" -X du -h {} | sort -k1hr
@@ -232,22 +232,22 @@ fluser() {
 # 5. fzf-tab zstyle 配置（补全菜单模糊化；插件本体由 Zim 模块加载）
 # -----------------------------------------------------------------------------
 
-# disable sort when completing `git checkout`
+# 补全 `git checkout` 时禁用排序
 zstyle ':completion:*:git-checkout:*' sort false
-# set descriptions format to enable group support
-# NOTE: don't use escape sequences (like '%F{red}%d%f') here, fzf-tab will ignore them
+# 设置描述格式以启用分组支持
+# 注意: 此处不要用转义序列（如 '%F{red}%d%f'），fzf-tab 会忽略它们
 zstyle ':completion:*:descriptions' format '[%d]'
-# set list-colors to enable filename colorizing
+# 设置 list-colors 以启用文件名着色
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
-# force zsh not to show completion menu, which allows fzf-tab to capture the unambiguous prefix
+# 强制 zsh 不显示补全菜单，让 fzf-tab 能捕获无歧义前缀
 zstyle ':completion:*' menu no
 # preview directory's content with lsd when completing cd（与全仓 lsd 工具链保持一致）
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'lsd -1 --color=always --icon=always $realpath'
-# custom fzf flags
-# NOTE: fzf-tab does not follow FZF_DEFAULT_OPTS by default
+# 自定义 fzf 参数
+# 注意: fzf-tab 默认不跟随 FZF_DEFAULT_OPTS
 zstyle ':fzf-tab:*' fzf-flags --color=fg:1,fg+:2 --bind=tab:accept
-# To make fzf-tab follow FZF_DEFAULT_OPTS.
-# NOTE: This may lead to unexpected behavior since some flags break this plugin. See Aloxaf/fzf-tab#455.
+# 让 fzf-tab 跟随 FZF_DEFAULT_OPTS。
+# 注意: 某些参数会破坏该插件，可能导致意外行为。参见 Aloxaf/fzf-tab#455。
 zstyle ':fzf-tab:*' use-fzf-default-opts yes
-# switch group using `<` and `>`
+# 用 `<` 与 `>` 切换分组
 zstyle ':fzf-tab:*' switch-group '<' '>'

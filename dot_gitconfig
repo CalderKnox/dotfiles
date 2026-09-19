@@ -1,6 +1,6 @@
-# Git configuration (chezmoi: dot_gitconfig -> ~/.gitconfig)
-# Core / LFS / safe settings. See dot_gitignore_global for `core.excludesfile`.
-# Proxy: see NOTE next to [http "https://github.com"] below (single source of truth).
+# Git 配置（chezmoi: dot_gitconfig -> ~/.gitconfig）
+# 核心 / LFS / safe 设置；`core.excludesfile` 见 dot_gitignore_global。
+# 代理：见下方 [http "https://github.com"] 旁的 NOTE（单一事实来源）。
 
 [core]
 	# git config 仅将双引号视为引用；单引号是字面字符（旧值 'code' 靠 sh 启动编辑器剥离引号才可用），
@@ -9,7 +9,7 @@
 	autocrlf = input
 	excludesfile = ~/.gitignore_global
 [filter "lfs"]
-	# Git LFS — keep required for large-file smudge/clean; installed via `git lfs install`.
+	# Git LFS —— 大文件 smudge/clean 必须保持 required = true；经 `git lfs install` 安装。
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
@@ -29,6 +29,6 @@
 	default = current
 	autoSetupRemote = true
 [safe]
-	# `*` marks any directory safe (needed for OrbStack/Docker/sudo-owned repos).
-	# Tighten to explicit paths (e.g. `/work/*`) if you prefer stricter checks.
+	# `*` 表示任意目录均视为安全（OrbStack/Docker/sudo 属主仓库所需）。
+	# 如需更严格校验，可收紧为显式路径（如 `/work/*`）。
 	directory = *

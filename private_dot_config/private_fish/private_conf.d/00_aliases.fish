@@ -59,12 +59,12 @@ alias cbpaste="pbpaste"
 # ---------------------------------------------------------------------------
 # 智能 cd / mkdir (自动 ls / cd)
 # ---------------------------------------------------------------------------
-function cdd --wraps='builtin cd' --description 'cd with automatic listing'
+function cdd --wraps='builtin cd' --description 'cd 后自动列目录'
     builtin cd $argv
     ls -la --group-directories-first 2>/dev/null
 end
 
-function mkcd --description 'Create directory and cd into it'
+function mkcd --description '创建目录并进入'
     mkdir -p $argv[1]; and builtin cd $argv[1]
 end
 
@@ -73,7 +73,7 @@ end
 # ---------------------------------------------------------------------------
 # 查找大文件（按字节阈值，默认 100M；接受 100M / 500M / 1G 等）
 # 用法: find-large [size]  e.g. find-large 500M
-function find-large --description 'Find large files by size (default 100M)'
+function find-large --description '按大小查找大文件（默认 100M）'
     set -l size_limit 100M
     if test (count $argv) -gt 0
         set size_limit $argv[1]
@@ -82,15 +82,15 @@ function find-large --description 'Find large files by size (default 100M)'
     find . -type f -size +$size_limit -exec ls -lh {} \; 2>/dev/null | awk '{ print $9 ": " $5 }' | sort -k2hr
 end
 
-function dus --description 'Disk usage summary (sorted)'
+function dus --description '磁盘占用汇总（排序）'
     du -sh */ 2>/dev/null | sort -hr
 end
 
-function filestats --description 'Show file type statistics in current directory'
+function filestats --description '统计当前目录的文件类型'
     find . -type f 2>/dev/null | sed 's/.*\.//' | sort | uniq -c | sort -rn | head -20
 end
 
-function recent --description 'Show recently modified files (default 10)'
+function recent --description '显示最近修改的文件（默认 10 个）'
     set -l count 10
     if test (count $argv) -gt 0
         set count $argv[1]
@@ -98,7 +98,7 @@ function recent --description 'Show recently modified files (default 10)'
     ls -lt 2>/dev/null | head -n (math $count + 1)
 end
 
-function tree-size --description 'Visualize directory sizes'
+function tree-size --description '可视化目录大小'
     # command 绕开本文件 du='du -kh' 别名；-d 1 为 BSD/GNU 通用的深度写法
     # （原 --max-depth=1 仅 GNU du 支持，BSD 下静默失败输出为空）
     command du -h -d 1 2>/dev/null | sort -hr | head -20
@@ -107,7 +107,7 @@ end
 # ---------------------------------------------------------------------------
 # 进程与网络
 # ---------------------------------------------------------------------------
-function psgrep --description 'Search processes by pattern'
+function psgrep --description '按模式搜索进程'
     if test (count $argv) -eq 0
         echo "Usage: psgrep <pattern>"
         return 1
@@ -115,7 +115,7 @@ function psgrep --description 'Search processes by pattern'
     ps aux 2>/dev/null | grep -v grep | grep $argv[1]
 end
 
-function port --description 'Check what is using a port'
+function port --description '查看端口占用'
     if test (count $argv) -eq 0
         echo "Usage: port <port>"
         return 1
@@ -123,7 +123,7 @@ function port --description 'Check what is using a port'
     lsof -i :$argv[1] 2>/dev/null
 end
 
-function colortest --description 'Display 256 color palette'
+function colortest --description '显示 256 色调色板'
     for i in (seq 0 255)
         printf "\x1b[38;5;%dmcolor %3d\x1b[0m " $i $i
         if test (math $i % 6) -eq 5
@@ -133,7 +133,7 @@ function colortest --description 'Display 256 color palette'
     echo
 end
 
-function netcheck --description 'Quick network diagnostics'
+function netcheck --description '快速网络诊断'
     echo (set_color cyan)"🌐 External IP:"(set_color normal)
     curl -s icanhazip.com; echo
 
@@ -148,7 +148,7 @@ end
 # 快速 HTTP 服务器
 # ---------------------------------------------------------------------------
 # 用法: serve [port]  默认 8000
-function serve --description 'Start a simple HTTP server (default 8000)'
+function serve --description '启动简易 HTTP 服务器（默认 8000）'
     set -l port 8000
     if test (count $argv) -gt 0
         set port $argv[1]
@@ -298,7 +298,7 @@ end
 # ---------------------------------------------------------------------------
 # yazi 包装：退出时自动 cd 到最后浏览的目录
 # ---------------------------------------------------------------------------
-function y --description 'yazi wrapper: cd to last dir on exit'
+function y --description 'yazi 包装: 退出时 cd 到最后浏览目录'
     set -l tmp (mktemp -t "yazi-cwd.XXXXXX")
     command yazi $argv --cwd-file="$tmp"
     # 读取 yazi 写入的 cwd（null 分隔或换行）；fish 的 read -z 读 NUL 分隔
@@ -311,7 +311,7 @@ end
 # ---------------------------------------------------------------------------
 # 并行构建 helpers (半核并行, 与 zsh 的 makes/xargsp 一致)
 # ---------------------------------------------------------------------------
-function __half_cpu_count --description "Return half the available CPU count, minimum 1"
+function __half_cpu_count --description "返回可用 CPU 数的一半，最小为 1"
     set -l cpu_count 1
     if type -q nproc
         set cpu_count (nproc)
@@ -325,11 +325,11 @@ function __half_cpu_count --description "Return half the available CPU count, mi
     echo $half_count
 end
 
-function makes --description "Run make using half the available CPUs"
+function makes --description "用一半可用 CPU 并行执行 make"
     make -j (__half_cpu_count) $argv
 end
 
-function xargsp --description "Run xargs using half the available CPUs"
+function xargsp --description "用一半可用 CPU 并行执行 xargs"
     xargs -P (__half_cpu_count) $argv
 end
 
@@ -402,7 +402,7 @@ function decide --description "从多个选项中随机选择一个"
         return 1
     end
     set -l idx (random choice $argv)
-    # fallback for older fish where `random choice` not available
+    # 兼容旧版 fish：无 `random choice` 时的回退
     if test -z "$idx"
         set idx $argv[(random 1 (count $argv))]
     end
