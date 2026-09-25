@@ -13,10 +13,10 @@
 # Author      : Payne
 # =============================================================================
 
-alias chezc='code ~/.local/share/chezmoi'        # 编辑 chezmoi 源目录 (~/.local/share/chezmoi)
-alias chezs='chezmoi status'                     # 查看 chezmoi 状态
-alias chezdf='chezmoi diff'                      # 预览 chezmoi 变更 (apply 前必跑)
-alias chezap='chezmoi apply -v'                  # 应用 chezmoi 变更 (verbose)
+alias chezc='code ~/.local/share/chezmoi' # 编辑 chezmoi 源目录 (~/.local/share/chezmoi)
+alias chezs='chezmoi status' # 查看 chezmoi 状态
+alias chezdf='chezmoi diff' # 预览 chezmoi 变更 (apply 前必跑)
+alias chezap='chezmoi apply -v' # 应用 chezmoi 变更 (verbose)
 
 # ---------------------------------------------------------------------------
 # Kubernetes / 容器 (与 zsh sdk.zsh 的 k→kubectl 一致，fish 侧别名形态)
@@ -135,10 +135,12 @@ end
 
 function netcheck --description 'Quick network diagnostics'
     echo (set_color cyan)"🌐 External IP:"(set_color normal)
-    curl -s icanhazip.com; echo
+    curl -s icanhazip.com
+    echo
 
     echo (set_color cyan)"📡 DNS Test:"(set_color normal)
-    dig google.com +short 2>/dev/null | head -1; echo
+    dig google.com +short 2>/dev/null | head -1
+    echo
 
     echo (set_color cyan)"⚡ Speed Test (Download):"(set_color normal)
     curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python3 - --simple 2>/dev/null | head -1
@@ -187,9 +189,13 @@ function onproxy --description "启用终端代理 (127.0.0.1:5376, socks5/http)
     echo -e "   SOCKS5: $socks_url"
 end
 
-function ofproxy --description "关闭终端代理"
-    set -e all_proxy; set -e http_proxy; set -e https_proxy
-    set -e ALL_PROXY; set -e HTTP_PROXY; set -e HTTPS_PROXY
+function ofproxy --description 关闭终端代理
+    set -e all_proxy
+    set -e http_proxy
+    set -e https_proxy
+    set -e ALL_PROXY
+    set -e HTTP_PROXY
+    set -e HTTPS_PROXY
     echo -e "⛵️ 终端代理已关闭。"
 end
 
@@ -209,7 +215,7 @@ end
 function update-all --description "一键更新所有开发环境 (fish 版)"
     # 默认清单与 zsh 有意不同：fish 含 pi 不含 sdk（sdkman 插件已移除，
     # 与 zsh 的能力差异属有意决定）；目标名 rust 对应 zsh 侧的 rustup
-    set -l tasks brew rust tldr uv mise pi
+    set -l tasks brew rust tldr uv mise pi sdk
 
     set -l targets
     if test (count $argv) -eq 0
@@ -232,7 +238,6 @@ function update-all --description "一键更新所有开发环境 (fish 版)"
                 else
                     echo (set_color yellow)"⚠️  brew not found, skipped"(set_color normal)
                 end
-
 
             case rust
                 if type -q rustup
@@ -274,6 +279,14 @@ function update-all --description "一键更新所有开发环境 (fish 版)"
                     echo (set_color yellow)"⚠️  pi not found, skipped"(set_color normal)
                 end
 
+            case sdk
+                if type -q sdk
+                    sdk update && sdk upgrade && sdk selfupdate
+                    or set failed (math $failed + 1)
+                else
+                    echo (set_color yellow)"⚠️  sdk not found, skipped"(set_color normal)
+                end
+
             case '*'
                 echo (set_color red)"❌ Unknown target: $name"(set_color normal)
                 echo "Available: "(string join ", " $tasks)
@@ -302,7 +315,7 @@ function y --description 'yazi wrapper: cd to last dir on exit'
     set -l tmp (mktemp -t "yazi-cwd.XXXXXX")
     command yazi $argv --cwd-file="$tmp"
     # 读取 yazi 写入的 cwd（null 分隔或换行）；fish 的 read -z 读 NUL 分隔
-    if read -z cwd < "$tmp"; and test "$cwd" != "$PWD"; and test -d "$cwd"
+    if read -z cwd <"$tmp"; and test "$cwd" != "$PWD"; and test -d "$cwd"
         builtin cd -- "$cwd"
     end
     rm -f -- "$tmp"
@@ -381,7 +394,7 @@ function bak --description "备份文件，添加时间戳后缀"
     end
 end
 
-function timer --description "简单倒计时"
+function timer --description 简单倒计时
     set -l seconds $argv[1]
     if test -z "$seconds"
         echo "Usage: timer <seconds>"
@@ -396,7 +409,7 @@ function timer --description "简单倒计时"
     printf '\a'
 end
 
-function decide --description "从多个选项中随机选择一个"
+function decide --description 从多个选项中随机选择一个
     if test (count $argv) -lt 2
         echo "Usage: decide <option1> <option2> ..."
         return 1
