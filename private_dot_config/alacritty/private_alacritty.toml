@@ -1,13 +1,3 @@
-# Alacritty Configuration File (chezmoi: private_dot_config/alacritty/alacritty.toml -> ~/.config/alacritty/alacritty.toml)
-# GPU-accelerated terminal. Theme: Catppuccin Mocha (active [colors] below, same Catppuccin Mocha theme family as ghostty & local starship, though ANSI bright variants differ from ghostty's bundled theme; the original Dracula block is kept fully commented as an alternative template).
-# `private_dot_config` ensures parent dir 0700 on deploy.
-# Docs: https://alacritty.org/config-alacritty.html | bindings: .../config-alacritty-bindings.html
-# Reference: https://www.kevnu.com/zh/posts/18
-
-shell = { program = "/opt/homebrew/bin/fish", args = [
-  "-c",
-  "tmux new -A -s main",
-] }
 
 [env]
 TERM = "xterm-256color"  # ensure 256-color + truecolor in tmux/ssh
@@ -76,3 +66,15 @@ bindings = [
   { mods = "Command", key = "t", action = "None" },  # disable: let shell/tmux handle new tab
   { mods = "Command", key = "n", action = "None" },  # disable: let shell/tmux handle new window
 ]
+
+[terminal]
+# Alacritty Configuration File (chezmoi: private_dot_config/alacritty/alacritty.toml -> ~/.config/alacritty/alacritty.toml)
+# GPU-accelerated terminal. Theme: Catppuccin Mocha (active [colors] below, same Catppuccin Mocha theme family as ghostty & local starship, though ANSI bright variants differ from ghostty's bundled theme; the original Dracula block is kept fully commented as an alternative template).
+# `private_dot_config` ensures parent dir 0700 on deploy.
+# Docs: https://alacritty.org/config-alacritty.html | bindings: .../config-alacritty-bindings.html
+# Reference: https://www.kevnu.com/zh/posts/18
+
+shell = { program = "/opt/homebrew/bin/fish", args = [
+  "-c",
+  "tmux new -A -s main",
+] }
