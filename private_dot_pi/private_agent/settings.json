@@ -1,7 +1,7 @@
 {
   "theme": "dark",
-  "lastChangelogVersion": "0.85.1",
-  "hideThinkingBlock": true,
+  "lastChangelogVersion": "0.87.1",
+  "hideThinkingBlock": false,
   "packages": [
     "npm:@gotgenes/pi-permission-system",
     "npm:pi-landstrip",
@@ -52,5 +52,6 @@
   "defaultProvider": "cc-switch-zhipu-glm",
   "defaultModel": "glm-5.3-flash",
   "defaultThinkingLevel": "max",
-  "httpProxy": "http://127.0.0.1:5376"
+  "httpProxy": "http://127.0.0.1:5376",
+  "steeringMode": "all"
 }

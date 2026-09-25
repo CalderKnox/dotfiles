@@ -1,9 +1,43 @@
 {
   "$schema": "https://raw.githubusercontent.com/gotgenes/pi-packages/main/packages/pi-permission-system/schemas/permissions.schema.json",
+  "debugLog": false,
+  "permissionReviewLog": false,
   "yoloMode": false,
   "promptMaxRows": 8,
   "permission": {
     "*": "allow",
+    "path": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow",
+      "*.pem": "deny",
+      "*.key": "deny",
+      "~/.ssh/*": "deny",
+      "~/.aws/*": "deny",
+      "~/.gnupg/*": "deny",
+      "/etc/*": "deny",
+      "/var/*": "deny",
+      "/private/etc/*": "deny",
+      "/private/var/*": "deny"
+    },
+    "external_directory": {
+      "*": "ask",
+      "~/.cargo/registry/*": "allow",
+      "~/.npm/*": "allow",
+      "~/.cache/*": "allow"
+    },
+    "bash": {
+      "*": "allow",
+      "sudo *": "deny",
+      "mv *": "deny",
+      "rm *": "deny",
+      "unlink *": "deny",
+      "dd *": "deny",
+      "mkfs.*": "deny",
+      "python3 *": "allow",
+      "node *": "allow"
+    },
     "read": {
       "*": "allow",
       "*.env": "deny",
@@ -28,40 +62,6 @@
       "~/.ssh/*": "deny",
       "~/.aws/*": "deny",
       "~/.gnupg/*": "deny"
-    },
-    "bash": {
-      "*": "allow",
-      "sudo *": "deny",
-      "mv *": "deny",
-      "rm *": "deny",
-      "unlink *": "deny",
-      "dd *": "deny",
-      "mkfs.*": "deny",
-      "python3 *": "allow",
-      "node *": "allow"
-    },
-    "path": {
-      "*": "allow",
-      "*.env": "deny",
-      "*.env.*": "deny",
-      "*.env.example": "allow",
-      "*.pem": "deny",
-      "*.key": "deny",
-      "~/.ssh/*": "deny",
-      "~/.aws/*": "deny",
-      "~/.gnupg/*": "deny",
-      "/etc/*": "deny",
-      "/var/*": "deny",
-      "/private/etc/*": "deny",
-      "/private/var/*": "deny"
-    },
-    "external_directory": {
-      "*": "ask",
-      "~/.cargo/registry/*": "allow",
-      "~/.npm/*": "allow",
-      "~/.cache/*": "allow"
     }
-  },
-  "debugLog": false,
-  "permissionReviewLog": true
+  }
 }
