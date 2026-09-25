@@ -36,3 +36,5 @@ node_modules/
 # codex 配置含机器本地状态（cc-switch 注入 provider、hooks/projects trust），由各机本地维护，不入部署
 .codex/config.toml
 .claude/setting.json
+
+**/.orca
