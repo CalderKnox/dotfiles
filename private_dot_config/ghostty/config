@@ -15,7 +15,7 @@ command = /opt/homebrew/bin/fish -l
 #--- Typography ---
 font-family = "JetBrainsMono Nerd Font Mono"
 font-feature = "+calt"
-font-size = 15
+font-size = 16
 
 # 精细调整字重与渲染（macOS 独有优化）
 font-thicken = true
@@ -126,31 +126,32 @@ keybind = cmd+shift+f=toggle_split_zoom
 
 # --- Performance ---
 # Generous scrollback (64MB) 1024 * 1024 * 64
-scrollback-limit = 67108864
+# scrollback-limit = 67108864
 
 # 图像内存限制（防止 Kitty Graphics Protocol 图像占用过多 GPU 内存）256MB，适合 16GB 内存机型
-image-storage-limit = 268435456
+# image-storage-limit = 268435456
 
 
 # GTK 单实例模式（Linux 性能关键）
-gtk-single-instance = true
+# gtk-single-instance = true
 # 关闭退出前确认提示；滚动缓冲并非无限，见上方 scrollback-limit（64MB）
-confirm-close-surface = false
+# confirm-close-surface = false
 
 
 # Quick Terminal 生效值（历史重复键已去重，按末次赋值保留，行为不变）
-quick-terminal-screen = main
-quick-terminal-animation-duration = 0.15
+# quick-terminal-screen = main
+# quick-terminal-animation-duration = 0.15
 
 # 启用自动更新检查但异步进行，不阻塞启动
-auto-update = check
-auto-update-channel = stable
+# auto-update = check
+# auto-update-channel = stable
 
 # macOS 特有的单实例模式优化
 ## 减少 Core Animation 开销
-macos-window-shadow = false
+# macos-window-shadow = false
 
 # 禁用调整大小时的浮层提示（更干净）
 resize-overlay = never
 
-quit-after-last-window-closed = true
+# quit-after-last-window-closed = true
+
