@@ -15,6 +15,7 @@
 **/.orca
 **/.pi
 nvim.payne
+**/.omc
 
 # --- Coding agent 运行时（本地状态，不入库）---
 .pi/
