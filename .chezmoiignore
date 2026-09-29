@@ -10,6 +10,7 @@
 *.local
 *.local.*
 *.bak
+**/.pi
 
 # OS 与编辑器运行时产物
 **/.DS_Store

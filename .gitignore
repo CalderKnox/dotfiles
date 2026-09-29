@@ -13,6 +13,7 @@
 **/.DS_Store
 *.log
 **/.orca
+**/.pi
 
 # --- Coding agent 运行时（本地状态，不入库）---
 .pi/
