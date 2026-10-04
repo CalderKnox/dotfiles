@@ -20,6 +20,7 @@
 .vscode
 .idea
 *.iml
+**/*.orca
 
 # --- Logs / LaTeX intermediates ---
 *.aux
