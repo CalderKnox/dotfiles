@@ -1,38 +1,14 @@
--- =============================================================================
--- keymaps.lua — 自定义键位 (chezmoi: lua/config/keymaps.lua)
--- =============================================================================
--- Description : 在 LazyVim 默认之后加载，可直接覆盖上游键位；全部带 desc 供
---               which-key 与 :map 查询，使用 vim.keymap.set（noremap+silent）。
--- Usage       : Leader 为 <Space>（LazyVim 默认）；按 <leader> 等待 which-key
--- Guards      : 无；键位定义幂等，重复加载覆盖同名映射
--- Author      : Payne
--- =============================================================================
--- Custom keymaps loaded *after* LazyVim defaults, so you can override LazyVim here.
--- All mappings include `desc` for which-key and `:map`. Uses vim.keymap.set
--- (noremap + silent by default).
+--[[
+  自定义按键映射（keymaps）
 
--- Insert mode: `jk` as quick Escape — hands stay on home row.
-vim.keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
+  作用：定义个人快捷键，在 LazyVim 默认按键之上追加，不替换其核心映射表。
+  加载时机：LazyVim 在 VeryLazy 事件时自动加载本文件，因此映射在启动稍晚、
+            UI 与插件基本就绪后才生效；适合日常编辑用的快捷键。
+  用法：用 vim.keymap.set 注册；模式、按键、动作按需填写。
+  参考：https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
+]]
 
--- Normal mode — leader mappings
-
--- Clear hlsearch highlight without disabling hlsearch globally.
--- Deliberate override: this shadows LazyVim's default <leader><space>
--- "Find Files (Root Dir)" (fzf-lua, auto-enabled as LazyVim's default picker);
--- user keymaps load later on VeryLazy
--- and win — same documented-override precedent as the <leader>bd note below.
-vim.keymap.set("n", "<leader><space>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlights" })
-
--- Splits (discoverable via leader; same as <C-w>v / <C-w>s).
-vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })
--- Deliberate override: shadows fzf default-picker <leader>sh "Help Pages"
--- (same documented-override precedent as <leader><space> above).
-vim.keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
-
--- Buffer: no custom <leader>bd — LazyVim already ships <leader>bd
--- (Snacks.bufdelete, keeps window layout) and <leader>bD (raw :bd).
--- A former raw `bdelete` on <leader>bd silently clobbered the Snacks variant
--- while its comment claimed to complement it.
-
--- Toggle relative numbers (useful for pair/mob or presentations).
-vim.keymap.set("n", "<leader>rl", "<cmd>set relativenumber!<CR>", { desc = "Toggle relative line numbers" })
+-- 插入模式下连按 jk 退出到 Normal 模式。
+-- 动机：减少伸手去 Esc 的次数；jk 在英文输入中较少连打，误触成本低。
+-- 生效：仅 insert 模式（"i"）；每次按键序列匹配时触发。
+vim.keymap.set("i", "jk", "<ESC>")

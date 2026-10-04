@@ -1,8 +1,12 @@
-tt.*
 .tests
 doc/tags
 debug
 .repro
 foo.*
-*.log
 data
+.neoconf.json
+**/*.log
+
+**/.omc
+**/.pi
+**/.cursor

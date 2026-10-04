@@ -1,32 +1,22 @@
--- =============================================================================
--- autocmds.lua — 自定义自动命令 (chezmoi: lua/config/autocmds.lua)
--- =============================================================================
--- Description : 在 VeryLazy 事件后加载，仅追加用户覆盖；LazyVim 已定义部分
---               autocmd，此文件仅增量。上游已接管 format-on-save，此处不重复。
--- Usage       : 每个 autocmd 使用独立 augroup + { clear = true }，重载不重叠
--- Guards      : 事件均幂等；TextYankPost/VimResized 上游 v16 已覆盖，不重复定义
--- Author      : Payne
--- =============================================================================
--- Custom autocmds loaded on the VeryLazy event (after LazyVim defaults).
--- LazyVim already defines its own autocmds; this file only adds user overrides.
--- Upstream v16 covers TextYankPost (on_yank highlight, default IncSearch) and
--- VimResized (`tabdo wincmd =` + restores the current tab), so neither is
--- re-defined here.
--- Each autocmd uses a dedicated augroup with { clear = true } so reloading
--- the config does not duplicate handlers.
+--[[
+  自动命令（autocmd）配置
 
--- Show cursorline only in Normal mode; hide it while typing.
--- LazyVim enables cursorline by default; this toggles it off on InsertEnter.
+  作用：在特定事件发生时自动执行逻辑，扩展或覆盖 LazyVim 的默认行为。
+  加载时机：LazyVim 在 VeryLazy 事件时自动加载本文件（启动后、插件就绪后），
+            不会在 Neovim 最早期启动阶段执行。
+  与默认的关系：LazyVim 自带一组 autocmd；此处只追加个人定制，不重复定义默认项。
+  参考：https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/autocmds.lua
+]]
+
+-- 仅在 Normal 模式显示光标行高亮：进入插入模式时关闭，离开插入模式时开启。
+-- 动机：插入编辑时 cursorline 容易干扰视线；Normal 模式下保留便于定位当前行。
+-- 触发：任意缓冲区的 InsertEnter / InsertLeave（pattern = "*"）。
+-- 实现：用 augroup 包住，clear = true 保证重复加载配置时不会重复注册同一组回调。
 vim.api.nvim_create_autocmd({ "InsertEnter", "InsertLeave" }, {
-  group = vim.api.nvim_create_augroup("user_cursorline_toggle", { clear = true }),
-  desc = "Hide cursorline in Insert mode, restore in Normal mode",
+  group = vim.api.nvim_create_augroup("HighlightCursorLine", { clear = true }),
+  pattern = "*",
   callback = function(ev)
-    vim.opt.cursorline = ev.event == "InsertLeave"
+    -- InsertLeave 时打开 cursorline；InsertEnter 时关闭
+    vim.wo.cursorline = (ev.event == "InsertLeave")
   end,
 })
-
--- NOTE: Python indentation (tabstop=4 / shiftwidth=4 / expandtab) is already
--- set globally in lua/config/options.lua and applies to every filetype.
--- A dedicated FileType autocmd for `python` would be redundant unless you
--- need a per-filetype override (e.g. different width). Add it here only
--- when you diverge from the global default.

@@ -1,37 +1,17 @@
--- =============================================================================
--- options.lua — 全局编辑器选项 (chezmoi: lua/config/options.lua)
--- =============================================================================
--- Description : 增量覆盖 LazyVim 默认的全局 vim.opt（与上游相同的项一律不写）。
---               分组：缩进宽度、显示滚动、搜索锚点与标尺；剪贴板/补全
---               刻意不覆盖（上游默认更优，见下方说明）。
--- Usage       : 在 LazyVim defaults 之后加载，值在此覆盖同名项；`:h <option>`
--- Guards      : 无外部依赖；所有选项幂等，重复加载安全
--- Author      : Payne
--- =============================================================================
--- Global editor options. Loaded *after* LazyVim's defaults, so values here
--- override LazyVim where they overlap. See `:h <option>` for details.
--- Only overrides and additions are set here; LazyVim handles the rest.
+--[[
+  编辑器选项与 LazyVim 全局变量覆盖
 
--- Clipboard / completion: deliberately NOT overridden. LazyVim's defaults are
--- smarter than static values here:
---   clipboard   — upstream is SSH-aware (empty over SSH_CONNECTION, enabling
---                 the OSC52 provider); a bare `unnamedplus` would break remote
---                 sessions, so it was removed from this file.
---   completeopt — upstream default is exactly `menu,menuone,noselect`; the
---                 former duplicate override (mislabeled as a customization)
---                 was removed.
+  作用：只声明与 LazyVim 默认值不同的 vim.opt / vim.g，保持配置精简、意图清晰。
+  加载时机：LazyVim 启动早期加载 options（早于 VeryLazy），因此此处设置会尽快生效，
+            影响打开缓冲区后的编辑体验与部分 extras（LSP/格式化）的选型。
+  原则：默认行为交给 LazyVim；本文件只放有意识的差异。
+]]
 
--- Indentation width: 4 spaces (LazyVim default is 2). expandtab/smartindent
--- already match upstream and are not re-set; per-filetype overrides can be
--- added in autocmds.lua if a language needs a different width.
-vim.opt.tabstop = 4 -- display width of <Tab>
-vim.opt.shiftwidth = 4 -- size of >> / << and autoindent step
+-- 指定 Python LSP 使用 pyrefly（覆盖 LazyVim 默认的 pyright/basedpyright 等选型）。
+-- 在打开 Python 相关缓冲区、LazyVim 装配 LSP 时生效。
+vim.g.lazyvim_python_lsp = "pyrefly"
 
--- Display & scrolling
-vim.opt.scrolloff = 8 -- keep 8 lines above/below cursor for context while scrolling (upstream: 4)
-vim.opt.colorcolumn = "100" -- ruler at 100 cols as line-length guide
-
--- Search: hlsearch/incsearch are Neovim defaults and are not re-set here;
--- clear highlights with <leader><space> (see keymaps.lua). showmatch below is
--- a genuine override (Vim default: off).
-vim.opt.showmatch = true -- briefly jump to matching bracket when cursor is on one
+vim.opt.scrolloff = 8 -- 光标上下至少保留 8 行可视区域，滚动时不易贴边
+vim.opt.colorcolumn = "120" -- 在第 120 列画参考线，提示行宽约束（不强制换行）
+vim.opt.showmatch = true -- 输入闭合括号时短暂跳到匹配括号，辅助核对配对
+vim.opt.modeline = false -- 禁用 modeline，避免不可信文件通过 modeline 改选项（安全）

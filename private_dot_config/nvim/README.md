@@ -2,7 +2,7 @@
 
 A starter template for [LazyVim](https://github.com/LazyVim/LazyVim) — deployed via [chezmoi](https://www.chezmoi.io/) from `private_dot_config/nvim/` → `~/.config/nvim/`.
 
-> **chezmoi 视角**：本文件由源目录 `.chezmoiignore` 的 `**/README.md` 排除、**不**部署到 `~/.config/nvim/README.md`，仅仓库内查阅。仓库级一致性校验（extras 清单 / 43 锁定 / 选项与键位逐行核对）见 [`docs/neovim.md`](../../docs/neovim.md)，二者互补不重复；改动配置以 `lua/config/*.lua` 与 `lazy-lock.json` 为权威。
+> **chezmoi 视角**：本文件由源目录 `.chezmoiignore` 的 `**/README.md` 排除、**不**部署到 `~/.config/nvim/README.md`，仅仓库内查阅。仓库级一致性校验（extras 清单 / 选项与键位逐行核对）见 [`docs/neovim.md`](../../docs/neovim.md)，二者互补不重复；改动配置以 `lua/config/*.lua` 为唯一权威（`lazy-lock.json` 已不入库）。
 
 ## Overview
 
@@ -12,9 +12,9 @@ setup. This configuration is managed as static files (no templates) and has been
 enhanced with comprehensive comments throughout `lua/config/*.lua`.
 
 - **Target**: Neovim ≥ 0.9 (verified on 0.12)
-- **Manager**: [lazy.nvim](https://github.com/folke/lazy.nvim) with commit-level lock (`lazy-lock.json`, 43 plugins)
+- **Manager**: [lazy.nvim](https://github.com/folke/lazy.nvim) — auto-install at latest versions (`lazy-lock.json` untracked since 3c3d65f; no commit-level lock)
 - **Extras**: 10 extras (9 `lang.*` + 1 `ui.mini-animate`, see `lua/config/lazy.lua`)
-- **Style**: `stylua.toml` — Spaces, width 2, column 120; `catppuccin` as default colorscheme (via `lua/plugins/example.lua`)
+- **Style**: `stylua.toml` — Spaces 2, width 120; colorscheme inherits the LazyVim default (the former `example.lua` catppuccin override was removed with that file)
 
 ## Installation
 
@@ -25,7 +25,7 @@ enhanced with comprehensive comments throughout `lua/config/*.lua`.
 chezmoi diff
 chezmoi apply
 
-# 2. Start Neovim — first launch bootstraps lazy.nvim and installs 43 plugins (needs network)
+# 2. Start Neovim — first launch bootstraps lazy.nvim and installs all plugins at their latest versions (needs network)
 nvim
 # :Lazy sync  — if you add plugins later
 # :checkhealth — verify LSP / treesitter / provider health
@@ -60,13 +60,11 @@ nvim
 │   │   ├── options.lua       global options (numbers / 4-space indent / search / truecolor; clipboard & completion inherit LazyVim defaults)
 │   │   ├── keymaps.lua       custom keymaps (loaded after LazyVim defaults)
 │   │   └── autocmds.lua      autocmds (loaded on VeryLazy)
-│   └── plugins/
-│       └── example.lua       example specs (effective: catppuccin / fzf-lua(<leader>fp) / pyright / treesitter / lualine 😄 / mason; trouble spec removed, nvim-cmp & second lualine spec disabled; 4-space indent, stylua.toml Spaces-2 pass pending)
-├── lazy-lock.json            43 plugins locked by commit (reproducible)
+│   └── plugins/              custom spec entry point — currently EMPTY (`example.lua` removed; new files here are auto-loaded)
+├── lazy-lock.json            NOT in the repo — runtime-generated per machine; plugin versions not pinned (untracked in 3c3d65f)
 ├── lazyvim.json              LazyVim metadata (extras=[], news 11866, version 8 — extras empty is expected, real list is in lazy.lua)
 ├── stylua.toml               Spaces 2 / 120 columns
 ├── .gitignore                ignores tag / log / data
-├── LICENSE                   Apache-2.0 (LazyVim starter, 与根 LICENSE 同源同哈希)；仓库内，**/LICENSE 排除，不部署
 └── README.md                 this file（仓库内，**/README.md 排除，不部署）
 ```
 
@@ -91,7 +89,9 @@ See [`docs/neovim.md`](../../docs/neovim.md) for the full chezmoi mapping (`dot_
 
 9 language extras + `mini-animate`. LSP / formatting / lint are handled by mason + nvim-lspconfig + conform + nvim-lint; mason prompts to install the server on first open of the relevant filetype. `lazyvim.json` `extras: []` is expected — LazyVim writes that file at runtime; the source of truth is `lazy.lua`.
 
-### Locked Plugins (lazy-lock.json — 43)
+### Plugin Set (not pinned)
+
+`lazy-lock.json` is no longer tracked (3c3d65f): each machine installs the latest plugin versions on first launch and writes its own local lock; the repo does not pin versions, so cross-machine installs are **not** guaranteed identical. The list below is the historical lock snapshot (43 entries), kept for reference only:
 
 `LazyVim`, `SchemaStore.nvim`, `blink.cmp`, `bufferline.nvim`, `catppuccin`, `cmake-tools.nvim`,
 `conform.nvim`, `crates.nvim`, `flash.nvim`, `friendly-snippets`, `fzf-lua`, `gitsigns.nvim`,
@@ -103,21 +103,11 @@ See [`docs/neovim.md`](../../docs/neovim.md) for the full chezmoi mapping (`dot_
 `todo-comments.nvim`, `tokyonight.nvim`, `trouble.nvim`, `ts-comments.nvim`,
 `venv-selector.nvim`, `which-key.nvim`.
 
-> Update via `:Lazy update` (syncs lock file) / `:Lazy restore` (rollback). The shell `update-all` (brew/mise/sdk/…) does **not** touch Neovim plugins — the two channels are independent.
+> Update via `:Lazy update` (refreshes the local lock) / `:Lazy restore` (rollback). The shell `update-all` (brew/mise/sdk/…) does **not** touch Neovim plugins — the two channels are independent.
 
-### Plugin Highlights (from lua/plugins/example.lua)
+### Custom Plugin Specs (`lua/plugins/`)
 
-- **catppuccin** — set as LazyVim default `colorscheme` (overrides tokyonight)
-- **trouble.nvim** — no custom spec: the former `use_diagnostic_signs = true` was a trouble v2-era option (absent from v3 at lock bd67efe); v3 renders diagnostic icons via its own defaults
-- **telescope.nvim** — `<leader>fp` "Find Plugin File" + `horizontal / prompt_position=top / ascending` layout
-- **nvim-lspconfig** — `pyright` enabled; `tsserver` example kept commented (use the `lang.typescript` extra instead)
-- **nvim-treesitter** — `ensure_installed` includes bash/html/javascript/json/lua/markdown/markdown_inline/python/query/regex/tsx/typescript/vim/yaml (single spec; tsx/typescript listed once — the former duplicate spec was merged)
-- **mason.nvim** — `ensure_installed` includes stylua / shellcheck / shfmt / flake8
-- **lualine.nvim** — appends `😄` component (the second "empty override" spec is now commented out — an opts-function return value replaces merged opts and would wipe LazyVim's entire lualine config)
-- **nvim-cmp + cmp-emoji** — **disabled (commented out)**: inert dead config — LazyVim v14 ships blink.cmp and drops nvim-cmp specs unless the `lazyvim.plugins.extras.coding.nvim-cmp` extra is imported, so it never loaded (cmp-emoji is absent from the lock). To enable, import that extra first and run `:Lazy sync`
-- *(commented, inactive)*: gruvbox, mini.starter, dap.python, gitsigns/json extras — keep as templates.
-
-> `lazy-lock.json` still pins `fzf-lua`, but no spec references it anymore; a future manual `:Lazy sync` / `:Lazy clean` will drop it (committed lock stays 43 entries, reproducible).
+`lua/plugins/` is currently **empty** — the former `example.lua` (catppuccin colorscheme override, telescope `<leader>fp`, pyright, treesitter `ensure_installed`, mason tool list, lualine `😄` component, commented nvim-cmp) was removed with the file, so **none of those overrides are active anymore**; colorscheme falls back to the LazyVim default (tokyonight). Add new spec files under `lua/plugins/` to customize — every spec there is auto-loaded by lazy.nvim.
 
 ### Built-in Settings (lua/config/options.lua)
 
@@ -163,14 +153,12 @@ All other keys are LazyVim defaults (flash, neo-tree, snacks, bufferline, which-
 
 #### Adding Plugins
 
-Create new files in `lua/plugins/` (or edit `lua/plugins/example.lua`). Every spec under `lua/plugins/` is auto-loaded by lazy.nvim:
+Create new files in `lua/plugins/`. Every spec under `lua/plugins/` is auto-loaded by lazy.nvim:
 
 ```lua
 -- lua/plugins/my.lua
 return { "mbbill/undotree", cmd = "UndotreeToggle" }
 ```
-
-The guard `-- if true then return {} end` at the top of `example.lua` is currently **commented out** (specs are active). Uncomment it to disable the file and use it as a pure template.
 
 #### Modifying Options
 
@@ -195,8 +183,8 @@ vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" }
 
 - This README = **repository view** (kept in the source tree; excluded by `.chezmoiignore` `**/README.md`, not deployed to `~/.config/nvim/README.md`) — installation, features, keymaps, settings.
 - [`docs/neovim.md`](../../docs/neovim.md) = **repository view (maintainer)** — source structure, file-by-file mapping, extras provenance, lock verification, autocmd groups, and the `update-all` boundary.
-- Both share the same numbers: **10 extras (9 lang + mini-animate)** and **43 locked plugins** / **5 custom keymaps**; conflicts — `lua/config/*.lua` + `lazy-lock.json` win.
+- Both share the same numbers: **10 extras (9 lang + mini-animate)** and **5 custom keymaps**; conflicts — `lua/config/*.lua` wins (`lazy-lock.json` not tracked).
 
 ## License
 
-Apache-2.0 — See the [LICENSE](LICENSE) file for details.
+Apache-2.0 — the `LICENSE` file has been removed from this repo (former LazyVim starter copy); this statement is retained, full text at the [LazyVim starter](https://github.com/LazyVim/starter).
