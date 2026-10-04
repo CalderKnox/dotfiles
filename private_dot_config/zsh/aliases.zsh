@@ -121,7 +121,7 @@ alias ksys='kubectl -n kube-system'
 alias kctx='kubectl config current-context'
 alias kctxs='kubectl config get-contexts'
 
-
+alias format='biome format --write --files-max-size=10485760'
 # =============================================================================
 # 编辑器 (Neovim) —— EDITOR 契约
 # =============================================================================
