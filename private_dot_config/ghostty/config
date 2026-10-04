@@ -13,7 +13,7 @@ command = /opt/homebrew/bin/fish -l
 # command = /opt/homebrew/bin/tmux new -As main
 
 #--- Typography ---
-font-family = "JetBrainsMono Nerd Font Mono"
+font-family = "JetBrainsMonoNL Nerd Font Mono"
 font-feature = "+calt"
 font-size = 16
 

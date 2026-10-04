@@ -14,7 +14,7 @@ LANG = "zh_CN.UTF-8"
 # shell = { program = "/opt/homebrew/bin/fish", args = ["-l"] }
 
 [font]
-size = 15
+size = 16
 
 # Requires JetBrainsMono Nerd Font Mono installed (via Homebrew `font-jetbrains-mono-nerd-font`).
 normal = { family = "JetBrainsMono Nerd Font Mono", style = "Regular" }
