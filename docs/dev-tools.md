@@ -23,7 +23,7 @@
 
 ## mise — `private_dot_config/mise/config.toml`
 
-mise 工具链由 `private_dot_config/mise/config.toml` 声明（工具与版本见该文件，当前为若干工具的 `latest`），由 `private_dot_config/zsh/dot_zshrc` 中的 `eval "$(mise activate zsh)"` 接管 zsh 环境；实际声明以源文件为准。常用操作见 `mise` 文档与 `aliases.zsh` 的 `update-all` 复用。
+mise 工具链由 `private_dot_config/mise/config.toml` 声明（已钉版：bun 1.4.2 / deno 2.9.7 / go 1.27.1 / node 26.10.0 / pnpm 12.8.1，以该文件为准），由 `private_dot_config/zsh/dot_zshrc` 中的 `eval "$(mise activate zsh)"` 接管 zsh 环境（fish 侧由 `conf.d/02_mise.fish` 守卫激活）；实际声明以源文件为准。常用操作见 `mise` 文档与 `aliases.zsh` 的 `update-all` 复用。
 
 ### 包管理器更新：`aliases.zsh` 的 `auto-update` 与 `update-all`
 
@@ -32,7 +32,7 @@ mise 工具链由 `private_dot_config/mise/config.toml` 声明（工具与版本
 | 函数 | 位置 | 覆盖目标 | 核心机制 | 适用场景 |
 | --- | --- | --- | --- | --- |
 | `auto-update` | `aliases.zsh` | 与 `update-all` 相同 | 薄包装：打印横幅后委托 `update-all` 执行，详见源文件 | 兼容旧习惯的一键入口 |
-| `update-all` | `aliases.zsh` | 多项（`brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 等，详见源文件） | 关联数组声明任务，支持参数过滤、守卫、失败计数与彩色输出，详见 `aliases.zsh` | 需灵活选择目标、查看统计 |
+| `update-all` | `aliases.zsh` | 多项（`brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`/`pi` 等，详见源文件） | 关联数组声明任务，支持参数过滤、守卫、失败计数与彩色输出，详见 `aliases.zsh` | 需灵活选择目标、查看统计 |
 
 要点：
 
@@ -55,13 +55,13 @@ mise 工具链由 `private_dot_config/mise/config.toml` 声明（工具与版本
 
 ### sandbox.json — 文件系统与网络沙箱
 
-`private_dot_pi/private_agent/sandbox.json` 定义 agent 的文件系统与网络沙箱策略。沙箱总开关开启后，文件系统采用窄白名单读取（`allowRead`）与大范围 `denyRead` / `denyWrite` 拒绝读写；`shell.readAccess = "policy"` 使该读策略对 bash/shell 命令同样生效（denied 路径无法用 `cat` 等绕过；曾为 `host` 全豁免，已收紧），网络默认关闭（禁网）但允许本地端口绑定与全部 Unix socket，并仅对 github.com 系列域名开放白名单；Windows 容器模式在 macOS 上不生效。所有规则条目以 `private_dot_pi/private_agent/sandbox.json` 为唯一权威。
+`private_dot_pi/private_agent/sandbox.json` 定义 agent 的文件系统与网络沙箱策略。沙箱总开关开启后，文件系统采用窄白名单读取（`allowRead`）与大范围 `denyRead` / `denyWrite` 拒绝读写；`shell.readAccess = "policy"` 使该读策略对 bash/shell 命令同样生效（denied 路径无法用 `cat` 等绕过；曾为 `host` 全豁免，已收紧），网络已启用（`allowNetwork: true`）：出站域名限 `allowedDomains` 白名单（github.com 系列），`deniedDomains` 为空，另放行本地端口绑定与全部 Unix socket；Windows 容器模式在 macOS 上不生效。所有规则条目以 `private_dot_pi/private_agent/sandbox.json` 为唯一权威。
 
-> 网络默认关闭（禁网策略）：沙箱内禁止出站网络，仅放行本地端口绑定与 Unix socket；`allowedDomains` 域名白名单仅在网络启用时作为出站限制生效（当前不生效），`deniedDomains` 为空。
+> 网络已启用（`allowNetwork: true`）：出站仅放行 `allowedDomains` 白名单内的 github.com 系列域名，`deniedDomains` 为空；本地端口绑定与全部 Unix socket 亦放行。
 
 ### landstrip.json — 子代理与任务权限
 
-`private_dot_pi/private_agent/landstrip.json` 控制子代理派生的任务级权限：任务级 `*`（`task` 执行类）默认 `ask`，即派生子代理前需用户确认；landstrip.json 未配置 `review` 条目，只读审查类子代理与执行类同样按 `task` 规则处理（不因「只读」豁免确认）。它与 `workflows/settings.json` 的 `progressPanelMaxAgents` 职责不同、相互独立：后者限制工作流进度面板的并发 / 展示代理数上限，前者指定沙箱复用。详见 [layout.md](layout.md) 与下节。
+`private_dot_pi/private_agent/landstrip.json` 控制子代理派生的任务级权限：任务级 `*`（`task` 执行类）为 `allow`，即派生子代理默认放行、无需逐次用户确认；landstrip.json 未配置 `review` 条目，只读审查类子代理与执行类同样按 `task` 规则处理（同为 `allow`，不因「只读」另有规则）。它与 `workflows/settings.json` 的 `progressPanelMaxAgents` 职责不同、相互独立：后者限制工作流进度面板的并发 / 展示代理数上限，前者指定沙箱复用。详见 [layout.md](layout.md) 与下节。
 
 ### workflows/settings.json — 动态工作流设置
 

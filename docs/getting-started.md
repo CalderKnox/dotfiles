@@ -37,8 +37,8 @@ brew install fzf starship zoxide mise fd ripgrep
 ### 弱网环境：bootstrap 前先设代理（可选但推荐）
 
 本仓库引导链共有三次直连 GitHub 的网络动作：`chezmoi init` 拉取本仓库（方式 A）、
-首次启动 `zsh` 时 `zimfw` 下载全部 Zim 模块、首次运行 `nvim` 时 `lazy.nvim` 安装 43 个
-插件。弱网/受限网络环境建议在执行下面任何 bootstrap 步骤**之前**先临时设置代理：
+首次启动 `zsh` 时 `zimfw` 下载全部 Zim 模块、首次运行 `nvim` 时 `lazy.nvim` 安装全部
+插件（各插件最新版，`lazy-lock.json` 已不入库）。弱网/受限网络环境建议在执行下面任何 bootstrap 步骤**之前**先临时设置代理：
 
 ```bash
 # 示例：本机代理监听 5376（与 dot_gitconfig / ~/.ssh/config 中的代理端口一致）
@@ -75,7 +75,7 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 ### .chezmoiignore 的影响
 新机器执行 `chezmoi apply` 时，根目录的 `.chezmoiignore` 会自动**跳过**以下内容不渲染到 `$HOME`（见 [layout.md](layout.md)）：
 
-- 根级与全部嵌套的 `README.md` / `LICENSE`（模式 `**/README.md` / `**/LICENSE`，含 `zsh/README.md`、`nvim/README.md`、`nvim/LICENSE`）—— 仓库文档仅留在源目录，不污染目标机
+- 根级与全部嵌套的 `README.md`（模式 `**/README.md`，含 `zsh/README.md`、`nvim/README.md`）—— 仓库文档仅留在源目录，不污染目标机；`LICENSE` 文件（根级与 `nvim/LICENSE`）已删除，`**/LICENSE` 模式防御性保留
 - `docs/` —— 本文档所在目录整体不部署
 - `*.local` / `*.local.*` / `*.bak` / `**/.DS_Store` / `node_modules/` / `.pnpm-store/` 等本地覆盖与构建产物
 - `*token*` / `*secret*` / `*credential*` 等敏感文件名匹配
@@ -96,7 +96,7 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 | `PATH` / `brew` | 按 `dot_zshrc` 中守卫逻辑注入 Homebrew 与本地路径（前置 `~/bin` 等，cargo/rustup 按目录存在性守卫，详见 `private_dot_config/zsh/dot_zshrc`） | 每次启动 `zsh` |
 | `zoxide` / `mise` / `starship` / `fzf` | 按 `command -v` 守卫 `eval` 初始化，未安装静默跳过；`fzf` 键位绑定唯一收敛于 `fzf.zsh`（详见 `dot_zshrc` 与 `fzf.zsh`） | 每次启动 `zsh` |
 | `zsh` 三模块 | 按序 `source ~/.config/zsh/aliases.zsh` → `fzf.zsh`（含 `fzf` 前缀探测与 `~/.fzf_prefix_cache` 缓存）→ `sdk.zsh`（`pnpm` / `SDKMAN` **惰性加载** / `Go` / `Rust` / `Docker` / `kubectl`，补全走 `~/.cache/zsh/` 缓存 + `zcompile`，均有守卫） | 每次启动 `zsh` |
-| Neovim | 首次运行 `nvim` 时 `lazy.nvim` 自动 `bootstrap` 并按 `lazy-lock.json` 安装 43 个插件（需网络） | 首次运行 `nvim` |
+| Neovim | 首次运行 `nvim` 时 `lazy.nvim` 自动 `bootstrap` 并安装全部插件最新版（`lazy-lock.json` 已停止跟踪，需网络） | 首次运行 `nvim` |
 | `mise` 工具链 | `mise activate` 已挂接；按需执行 `mise install` 安装 `private_dot_config/mise/config.toml` 声明的工具（详见该文件） | 手动执行 |
 
 > `~/.config/zsh/.zshrc` 以 glob（`for file in ~/.config/zsh/*.zsh(N)`）加载三模块，没有逐文件 source 行；
@@ -195,6 +195,6 @@ git config --get-regexp proxy        # 应为 socks5h://127.0.0.1:5376（与 SSH
                                      # git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy
 ```
 
-> **日常更新速览**：`private_dot_config/zsh/aliases.zsh` 提供 `auto-update`（若定义了 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行，覆盖目标一致）与更细粒度的 `update-all [brew|mise|rustup|tldr|uv|sdk]`（关联数组 6 项，支持参数过滤、失败计数与耗时统计，**含 `mise`**；**失败即红**——失败目标打印红色 `✗` 与错误摘要、结尾汇总 `N/M 目标失败` 并返回非零，成功目标保持绿色 `✓`）；验证通过后可按需执行 `zsh -ic 'auto-update'` 或 `zsh -ic 'update-all'`，详见 [maintenance.md](maintenance.md) 与 [dev-tools.md](dev-tools.md) 的对比表及 `aliases.zsh` 源码。
+> **日常更新速览**：`private_dot_config/zsh/aliases.zsh` 提供 `auto-update`（若定义了 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行，覆盖目标一致）与更细粒度的 `update-all [brew|mise|rustup|tldr|uv|sdk|pi]`（关联数组 7 项，支持参数过滤、失败计数与耗时统计，**含 `mise` 与 `pi`**；**失败即红**——失败目标打印红色 `✗` 与错误摘要、结尾汇总 `N/M 目标失败` 并返回非零，成功目标保持绿色 `✓`）；验证通过后可按需执行 `zsh -ic 'auto-update'` 或 `zsh -ic 'update-all'`，详见 [maintenance.md](maintenance.md) 与 [dev-tools.md](dev-tools.md) 的对比表及 `aliases.zsh` 源码。
 
 全部通过后即可进入日常使用；更多维护流程见 [maintenance.md](maintenance.md)，完整映射见 [layout.md](layout.md)。

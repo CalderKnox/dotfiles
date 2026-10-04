@@ -45,7 +45,7 @@ git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi commit -m 
 | `zimfw init` | 重建 `${ZIM_HOME}/init.zsh`（改动 `~/.config/zsh/.zimrc` 后需要，`dot_zshrc` 会按 `-nt` 时间戳自动重建） |
 | `zimfw info` | 查看 `zimfw` 版本与模块信息 |
 | `auto-update` | 一键全量更新入口：若定义了 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行（覆盖目标一致）；定义于 `private_dot_config/zsh/aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
-| `update-all [targets...]` | 关联数组驱动的批量更新，支持参数选择目标（如 `update-all brew mise`）、带失败计数与耗时统计；覆盖 `brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise` 共 6 项（**已覆盖 `mise`**，与 `auto-update` 的核心差异）；定义于 `aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
+| `update-all [targets...]` | 关联数组驱动的批量更新，支持参数选择目标（如 `update-all brew mise`）、带失败计数与耗时统计；覆盖 `brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise` / `pi` 共 7 项（**已覆盖 `mise`**，与 `auto-update` 的核心差异）；定义于 `aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
 
 > `auto-update` 与 `update-all` 均定义于 `private_dot_config/zsh/aliases.zsh`；`auto-update` 为兼容旧习惯的一键入口（内部委托 `update-all`），`update-all` 为支持参数过滤、失败计数与耗时统计的实际实现，二者覆盖目标一致（均含 `mise`）；详见 [dev-tools.md](dev-tools.md) 对比表。
 
@@ -90,11 +90,11 @@ git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy
 
 # fish 配置语法检查（fish -n 只校验首个文件，必须逐个检查；实测多文件传参时后续文件被静默跳过）
 for f in ~/.config/fish/config.fish ~/.config/fish/conf.d/*.fish; fish -n $f; or exit 1; end
-# conf.d 现含四文件：00_env / 00_aliases / 01_dev / 01_rev（fish 侧 fzf 键位由 fisher 插件 patrickf1/fzf.fish 运行时生成 conf.d/fzf.fish，不入库）
+# conf.d 现含五文件：00_env / 00_aliases / 01_dev / 01_rev / 02_mise（02_mise 以 type -q mise 守卫激活，与 zsh 侧 dot_zshrc 的 activate 对应；fisher 插件安装于 ~/.config/fish/fisher = fisher_path，退出 chezmoi 管理域，config.fish 注入其 functions/completions/conf.d，不写入仓库 private_functions/）
 
 # mise 环境体检
 mise doctor
-mise ls                                     # 应列出 bun/deno/go/node/pnpm（均为 latest）
+mise ls                                     # 应列出 bun/deno/go/node/pnpm（已钉版：bun 1.4.2 / deno 2.9.7 / go 1.27.1 / node 26.10.0 / pnpm 12.8.1，见 private_dot_config/mise/config.toml）
 
 # alacritty：CLI 无 --print-config 子命令（0.17 实测报错），配置解析在启动时进行，
 # 冒烟启动（瞬间退出）即可验证配置可解析
@@ -136,7 +136,7 @@ HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/private_config` 的 `Pro
 | 维度 | `auto-update` | `update-all` |
 | --- | --- | --- |
 | 定义位置 | `aliases.zsh:53` | `aliases.zsh:206` |
-| 覆盖目标 | 6 项（同 `update-all`，经委托实现） | 6 项：`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise`（含 `mise upgrade`） |
+| 覆盖目标 | 7 项（同 `update-all`，经委托实现） | 7 项：`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise` / `pi`（含 `mise upgrade`、`pi update --all`） |
 | 参数 | 无参数，固定调用 `update-all` 全量 | 支持 `update-all brew mise` 参数过滤，未传参则全量；未知目标报错并提示可用列表 |
 | 守卫与容错 | 由 `update-all` 实现 | 循环内 `command -v $name` 守卫 + `eval` 失败则 `failed++` |
 | 统计与输出 | 由 `update-all` 提供（另加 🚀 横幅与可选 `onproxy`） | 失败计数 `failed`、耗时 `mins` / `secs`、`print -P` 彩色输出（蓝标题/绿成功/黄跳过/红失败） |
@@ -169,11 +169,13 @@ HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/private_config` 的 `Pro
 
 `.chezmoiignore`（仓库根）控制 `chezmoi add` / `apply` 时忽略的**目标名**模式（模式按部署后的目标路径匹配，不是源文件名），当前包括：
 
-- 本地覆盖与备份：`*.local`、`*.local.*`、`*.bak`、`**/.DS_Store`、`nvim.log`
-- 仓库文档：`**/README.md`（根级与嵌套，含 `zsh/README.md`、`nvim/README.md`）、`**/LICENSE`（含 `nvim/LICENSE`）、`docs/`
+- 本地覆盖与备份：`**/*.local`、`**/*.local.*`、`**/*.bak`（`**/` 前缀覆盖嵌套路径，如 `.config/kitty/kitty.local.conf` 仅入库不部署）、`**/.DS_Store`、`nvim.log`
+- 仓库文档：`**/README.md`（根级与嵌套，含 `zsh/README.md`、`nvim/README.md`）、`docs/`；`**/LICENSE` 行保留为防御（根级与 `nvim/LICENSE` 文件均已删除）
 - 敏感信息：`**/*token*`、`**/*secret*`、`**/*credential*`（`**` 前缀覆盖嵌套目录）
 - 构建产物：`node_modules/`、`.pnpm-store/`
 - fish 机器本地状态：`.config/fish/fish_variables`（fish Universal Variables，仅本机）
+- 机器本地配置（不跨机部署，源已移出或仅作参考）：`.claude/settings.json`、`.codex/config.toml`
+- pi 运行时数据：`.pi/agent/{sessions,npm,missions}/**`、`.pi/tasks/**`、`.pi/workflows/projects/**`、`.pi/agent/mcp*.json` 系列与 `auth.json`、`models-store.json`（其余 `.pi` 配置正常部署）
 
 > 历史修正（2026-08 收口）：旧版曾按源名书写 `**/dot_git` / `**/dot_DS_Store` / `dot_gitconfig`（均不匹配目标名 `.git` / `.DS_Store` / `.gitconfig`，从未生效），且 `**/README.md` 误拼为 `**/REAMDME.md`、缺 `**/LICENSE`——现已全部按目标名改写、删除无效行并补齐。因此 `dot_gitconfig` → `~/.gitconfig` 为**正常部署目标**（旧文档称其被排除、"仅作本地参考快照"系对无效行的误读）；修复后 `chezmoi managed` 目标数 59→55；后续去重又删除了被更宽模式覆盖或已无对应文件的冗余行（根级 `README.md` / `LICENSE`、`docs/**`、`**/.git`、`*client_secret*`、两条 `**.md` 及已不存在的 `REPO-INSIGHT.md`），目标数保持 55 不变（核心 targets 不变），其后 fish 配置扩容实测曾达 81（纳入 `.config/fish/fish_variables` 后为 82，详见 [layout.md](layout.md)）。随后添加 `.config/fish/fish_variables` 至 `.chezmoiignore` 进一步排除。详见 [layout.md](layout.md)。
 
