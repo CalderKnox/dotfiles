@@ -20,7 +20,7 @@
 FZF_PREFIX_CACHE="${ZDOTDIR:-${HOME}}/.fzf_prefix_cache"
 
 if [[ -f "$FZF_PREFIX_CACHE" ]]; then
-    FZF_PREFIX=$(cat "$FZF_PREFIX_CACHE")
+    FZF_PREFIX=$(<"$FZF_PREFIX_CACHE")    # $(<file) 纯内建读取：$(cat) 会被 cat=bat 别名展开，多一次子进程
     # 自愈：缓存失效（fzf 已卸载/移动）则丢弃，触发重新探测
     if [[ ! -x "$FZF_PREFIX/bin/fzf" ]]; then
         rm -f "$FZF_PREFIX_CACHE"
