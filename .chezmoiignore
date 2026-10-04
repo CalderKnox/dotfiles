@@ -7,10 +7,24 @@
 # =============================================================================
 
 # 本地覆盖与备份（机器特定覆盖，不跨机同步）
-*.local
-*.local.*
-*.bak
-**/.pi
+**/*.local
+**/*.local.*
+**/*.bak
+
+# .pi 运行时数据（sessions/npm/missions/tasks/凭据缓存/models-store/workflow 状态），不部署；其余 .pi 配置仍随仓库部署
+# 注：目录型条目以 `/**` 显式覆盖目录内容（chezmoi 按目标路径匹配，裸目录名不保护子内容）
+.pi/agent/sessions/**
+.pi/agent/npm/**
+.pi/agent/mcp.json
+.pi/agent/mcp-adapter.json
+.pi/agent/mcp-auth.json
+.pi/agent/mcp-cache.json
+.pi/agent/mcp-npx-cache.json
+.pi/agent/auth.json
+.pi/agent/missions/**
+.pi/agent/models-store.json
+.pi/tasks/**
+.pi/workflows/projects/**
 
 # OS 与编辑器运行时产物
 **/.DS_Store
@@ -36,6 +50,8 @@ node_modules/
 
 # codex 配置含机器本地状态（cc-switch 注入 provider、hooks/projects trust），由各机本地维护，不入部署
 .codex/config.toml
-.claude/setting.json
+# claude 源已移出仓库（~/.claude/settings.json 各机本地维护，参照 .codex 模式），此行为防御性保留
+.claude/settings.json
 
 **/.orca
+

@@ -11,14 +11,19 @@
 **/.idea
 **/node_modules
 **/.DS_Store
-*.log
+**/*.log*
 **/.orca
+.orca/
 **/.pi
 nvim.payne
 **/.omc
 
 # --- Coding agent 运行时（本地状态，不入库）---
 .pi/
+# 凭据纵深防御：防止未来 `chezmoi add` 把 ~/.pi 凭据以源文件形式带入公开仓库
+private_dot_pi/**/mcp*.json
+private_dot_pi/**/auth.json
+private_dot_pi/private_agent/sessions/
 
 # --- 审计/测试残留（防复发，替代本地 .git/info/exclude）---
 .tmp-empty-config.toml

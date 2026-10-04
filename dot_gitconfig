@@ -8,6 +8,7 @@
 	editor = code --wait
 	autocrlf = input
 	excludesfile = ~/.gitignore_global
+
 [filter "lfs"]
 	# Git LFS — keep required for large-file smudge/clean; installed via `git lfs install`.
 	smudge = git-lfs smudge -- %f
@@ -18,6 +19,7 @@
 [user]
 	name = azwpayne
 	email = paynewu0719@gmail.com
+
 [init]
 	defaultBranch = main
 
@@ -25,10 +27,13 @@
 # 临时恢复直连：git config --global --unset http.https://github.com.proxy
 [http "https://github.com"]
 	proxy = socks5h://127.0.0.1:5376
+
 [push]
 	default = current
 	autoSetupRemote = true
+
 [safe]
-	# `*` marks any directory safe (needed for OrbStack/Docker/sudo-owned repos).
-	# Tighten to explicit paths (e.g. `/work/*`) if you prefer stricter checks.
-	directory = *
+	# 安全审计收紧：原通配符写法会把任意目录标记为安全（任何被篡改/可疑的仓库
+	# 都能绕过 git 的 ownership 检查），风险过大；现改为仅显式信任 chezmoi 仓库目录。
+	# 如 OrbStack/Docker/sudo 场景再报 dubious ownership，请按需逐条追加显式路径。
+	directory = ~/.local/share/chezmoi
