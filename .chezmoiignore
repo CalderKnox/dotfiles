@@ -11,20 +11,15 @@
 **/*.local.*
 **/*.bak
 
-# .pi 运行时数据（sessions/npm/missions/tasks/凭据缓存/models-store/workflow 状态），不部署；其余 .pi 配置仍随仓库部署
-# 注：目录型条目以 `/**` 显式覆盖目录内容（chezmoi 按目标路径匹配，裸目录名不保护子内容）
-.pi/agent/sessions/**
-.pi/agent/npm/**
-.pi/agent/mcp.json
-.pi/agent/mcp-adapter.json
-.pi/agent/mcp-auth.json
-.pi/agent/mcp-cache.json
-.pi/agent/mcp-npx-cache.json
-.pi/agent/auth.json
-.pi/agent/missions/**
-.pi/agent/models-store.json
-.pi/tasks/**
-.pi/workflows/projects/**
+# .pi 运行时数据（sessions/npm/missions/tasks/凭据缓存/models-store/workflow 状态）不部署，仅部署以下 3 个配置
+# 注：chezmoi 忽略目录时会整棵剪枝，目录内文件的 ! 反选不生效，故每层目录都要显式 ! 回来
+.pi/**
+!.pi
+!.pi/agent
+!.pi/workflows
+!.pi/agent/settings.json
+!.pi/agent/pi-goal.json
+!.pi/workflows/settings.json
 
 # OS 与编辑器运行时产物
 **/.DS_Store
