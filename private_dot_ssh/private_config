@@ -26,11 +26,11 @@ Include ~/.orbstack/ssh/config
 # server（模板占位：主机/密钥均为示例，按实际环境修改后再使用；
 # ~/.ssh 下并无 id_rsa_dev/tst/ops/sec，直接连接会认证失败）
 Host dev
-    HostName 192.168.1.100
-    User ubuntu
-    Port 2222
-    IdentityFile ~/.ssh/id_rsa_dev
-    IdentitiesOnly yes
+  HostName 192.168.1.100
+  User ubuntu
+  Port 2222
+  IdentityFile ~/.ssh/id_rsa_dev
+  IdentitiesOnly yes
 
 # 注意：tst/ops/sec 的 user@host:port 完全相同（ubuntu@192.168.1.101:2222），
 # 在 Host * ControlMaster auto + ControlPersist 600 下共享同一个复用 socket
@@ -38,54 +38,54 @@ Host dev
 # ops/sec 会静默复用该 master，各自的 IdentityFile 并不会生效。
 # 切换身份：`ssh -O exit tst` 关闭复用连接，或 `ssh -o ControlPath=none ops` 直连。
 Host tst
-    HostName 192.168.1.101
-    User ubuntu
-    Port 2222
-    IdentityFile ~/.ssh/id_rsa_tst
-    IdentitiesOnly yes
+  HostName 192.168.1.101
+  User ubuntu
+  Port 2222
+  IdentityFile ~/.ssh/id_rsa_tst
+  IdentitiesOnly yes
 
 Host ops
-    HostName 192.168.1.101
-    User ubuntu
-    Port 2222
-    IdentityFile ~/.ssh/id_rsa_ops
-    IdentitiesOnly yes
+  HostName 192.168.1.101
+  User ubuntu
+  Port 2222
+  IdentityFile ~/.ssh/id_rsa_ops
+  IdentitiesOnly yes
 
 Host sec
-    HostName 192.168.1.101
-    User ubuntu
-    Port 2222
-    IdentityFile ~/.ssh/id_rsa_sec
-    IdentitiesOnly yes
+  HostName 192.168.1.101
+  User ubuntu
+  Port 2222
+  IdentityFile ~/.ssh/id_rsa_sec
+  IdentitiesOnly yes
 
 # jump server
 # 直接 ssh inner 即可穿透跳板机。ProxyJump 支持多级：ProxyJump bastion,inner1
 ## 跳板机本身
 # 示例占位（example.com 为保留域名），按实际跳板机环境修改后再使用
 Host bastion
-    HostName jump.example.com
-    User jumpuser
-    IdentityFile ~/.ssh/id_bastion
+  HostName jump.example.com
+  User jumpuser
+  IdentityFile ~/.ssh/id_bastion
 
 ## 内网机器，通过 bastion 跳转（同属模板：id_inner 密钥缺省，需自备）
 Host inner
-    HostName 10.0.0.5
-    User root
-    IdentityFile ~/.ssh/id_inner
-    ProxyJump bastion
+  HostName 10.0.0.5
+  User root
+  IdentityFile ~/.ssh/id_inner
+  ProxyJump bastion
 
 # 多个git账号
 
 
 ## private github
 Host github.com ssh.github.com
-    # ssh.github.com:443 — HTTPS port, traverses firewalls that block 22
-    HostName ssh.github.com
-    User git
-    Port 443
-    # Adaptive SOCKS5 proxy (127.0.0.1:5376): if the local proxy is listening, tunnel via SOCKS5;
-    # otherwise fall back to a direct connection.
-    ProxyCommand bash -c 'if nc -z 127.0.0.1 5376; then nc -X 5 -x 127.0.0.1:5376 %h %p; else nc %h %p; fi'
+  # ssh.github.com:443 — HTTPS port, traverses firewalls that block 22
+  HostName ssh.github.com
+  User git
+  Port 443
+  # Adaptive SOCKS5 proxy (127.0.0.1:5376): if the local proxy is listening, tunnel via SOCKS5;
+  # otherwise fall back to a direct connection.
+  ProxyCommand bash -c 'if nc -z 127.0.0.1 5376; then nc -X 5 -x 127.0.0.1:5376 %h %p; else nc %h %p; fi'
 
 
 ## github work（模板，当前未启用）
@@ -109,11 +109,11 @@ Host github.com ssh.github.com
 
 # 对所有主机生效的默认配置（必须放最后）
 Host *
-    ServerAliveInterval 60
-    ServerAliveCountMax 3
-    StrictHostKeyChecking accept-new
-    ControlMaster auto
-    # 目录由 chezmoi run_once 脚本创建（.chezmoiscripts/run_once_create-ssh-sockets.sh）
-    ControlPath ~/.ssh/sockets/%r@%h-%p
-    ControlPersist 600
+  ServerAliveInterval 60
+  ServerAliveCountMax 3
+  StrictHostKeyChecking accept-new
+  ControlMaster auto
+  # 目录由 chezmoi run_once 脚本创建（.chezmoiscripts/run_once_create-ssh-sockets.sh）
+  ControlPath ~/.ssh/sockets/%r@%h-%p
+  ControlPersist 600
 
