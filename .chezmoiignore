@@ -28,7 +28,7 @@
 
 # OS 与编辑器运行时产物
 **/.DS_Store
-nvim.log
+**.log
 
 # 仓库文档与许可（仅仓库内查阅，不部署到 $HOME）
 **/README.md
@@ -55,3 +55,4 @@ node_modules/
 
 **/.orca
 
+**/README.md
