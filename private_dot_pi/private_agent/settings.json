@@ -1,57 +1,32 @@
 {
-  "theme": "dark",
-  "lastChangelogVersion": "0.87.1",
-  "hideThinkingBlock": false,
+  "lastChangelogVersion": "1.0.0",
   "packages": [
-    "npm:@gotgenes/pi-permission-system",
-    "npm:pi-landstrip",
     "npm:pi-subagents",
-    "npm:@narumitw/pi-goal",
-    {
-      "source": "npm:@juicesharp/rpiv-todo",
-      "extensions": [
-        "-index.ts"
-      ]
-    },
-    {
-      "source": "npm:@asermax/pi-cc-plugins",
-      "extensions": [
-        "-index.ts"
-      ]
-    },
-    {
-      "source": "npm:@narumitw/pi-btw",
-      "extensions": [
-        "-dist/index.ts"
-      ]
-    },
+    "npm:pi-background-tasks",
+    "npm:@quintinshaw/pi-dynamic-workflows",
+    "npm:@czottmann/pi-automode",
     {
       "source": "npm:pi-web-access",
       "extensions": [
         "-index.ts"
       ]
     },
-    {
-      "source": "npm:pi-lens",
-      "extensions": [
-        "-dist/index.js"
-      ]
-    },
-    "npm:@quintinshaw/pi-dynamic-workflows",
-    "npm:pi-background-tasks@latest"
+    "npm:@narumitw/pi-goal",
+    "npm:@narumitw/pi-btw",
+    "npm:@narumitw/pi-statusline"
   ],
   "defaultTools": [
     "read",
-    "write",
-    "edit",
     "bash",
+    "edit",
+    "write",
     "grep",
     "find",
     "ls"
   ],
-  "defaultProvider": "cc-switch-zhipu-glm",
-  "defaultModel": "glm-5.3-flash",
+  "defaultProvider": "zai-coding-cn",
+  "defaultModel": "glm-5.3",
   "defaultThinkingLevel": "max",
-  "httpProxy": "http://127.0.0.1:5376",
-  "steeringMode": "all"
+  "steeringMode": "all",
+  "hideThinkingBlock": true
 }

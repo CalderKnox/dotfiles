@@ -1,4 +1,0 @@
-{
-  "toolFilesystemPolicy": "sandbox",
-  "permission": { "task": { "*": "allow" } }
-}
