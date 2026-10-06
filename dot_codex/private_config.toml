@@ -28,7 +28,7 @@ show-context-window-usage = true
 enabled-reasoning-efforts = ["minimal", "low", "medium", "high", "xhigh", "max", "ultra"]
 
 [agents]
-max_depth = 2  # maximum depth of reasoning / subagent calls
+max_depth = 1  # maximum depth of reasoning / subagent calls
 max_concurrent_threads_per_session = 12  # maximum concurrent threads per session (across all subagents)
 default_subagent_model = "gpt-5.6-sol"  # default model for subagents (can be overridden per subagent)
 default_subagent_reasoning_effort = "medium"  # default reasoning effort for subagents (can be overridden per subagent)
