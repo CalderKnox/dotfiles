@@ -29,25 +29,26 @@ if [[ -f "$FZF_PREFIX_CACHE" ]]; then
 fi
 
 if [[ -z "${FZF_PREFIX:-}" ]]; then
-    if [[ -d "/opt/homebrew/opt/fzf/bin" ]]; then
+    if [[ -x "/opt/homebrew/opt/fzf/bin/fzf" ]]; then
         FZF_PREFIX="/opt/homebrew/opt/fzf"      # macOS ARM (Apple Silicon)
-    elif [[ -d "/usr/local/opt/fzf/bin" ]]; then
+    elif [[ -x "/usr/local/opt/fzf/bin/fzf" ]]; then
         FZF_PREFIX="/usr/local/opt/fzf"         # macOS Intel
-    elif [[ -d "$HOME/.fzf/bin" ]]; then
+    elif [[ -x "$HOME/.fzf/bin/fzf" ]]; then
         FZF_PREFIX="$HOME/.fzf"                 # 手动安装路径（git 安装方式）
     elif [[ -x "/usr/bin/fzf" ]]; then
         FZF_PREFIX="/usr"                       # Linux 发行版仓库安装（可执行文件，用 -x 测试）
     fi
-    [[ -n "${FZF_PREFIX:-}" ]] && echo "$FZF_PREFIX" > "$FZF_PREFIX_CACHE"
+    [[ -n "${FZF_PREFIX:-}" && -x "$FZF_PREFIX/bin/fzf" ]] && print -r -- "$FZF_PREFIX" >! "$FZF_PREFIX_CACHE"
 fi
 
 # 仅当探测成功且 PATH 尚未包含时追加，避免死路径与重复累积（冒号定界去重）
-if [[ -n "${FZF_PREFIX:-}" && ":$PATH:" != *":$FZF_PREFIX/bin:"* ]]; then
+if [[ -n "${FZF_PREFIX:-}" && -x "$FZF_PREFIX/bin/fzf" && ":$PATH:" != *":$FZF_PREFIX/bin:"* ]]; then
     export PATH="${PATH:+$PATH:}$FZF_PREFIX/bin"
 fi
 
 # 唯一初始化点：fzf 键位/补全（带守卫；dot_zshrc 不再重复 eval，避免双重加载）
-command -v fzf >/dev/null 2>&1 && eval "$(fzf --zsh)"
+if command -v fzf >/dev/null 2>&1 && _fzf_init="$(fzf --zsh)"; then eval "$_fzf_init"; fi
+unset _fzf_init
 
 # -----------------------------------------------------------------------------
 # 2. 文件/目录列表命令（fd 为主，rg 兜底）
@@ -111,9 +112,9 @@ export FZF_DEFAULT_OPTS="
   --preview-window=right:50%:wrap                             # 预览窗口默认右侧,50%宽度，自动换行
   --with-shell='sh -c'                                        # preview 执行 shell 固定为 sh（tmux 内 zsh 会话继承 SHELL=fish，preview 经 $SHELL -c 执行会报 fish 语法错误；fzf ≥0.48 支持，本机 0.74.4 实测可与行内注释共存）
   --bind='ctrl-/:change-preview-window(down|hidden|)'         # Ctrl+/ 切换预览位置/隐藏
-  --bind='ctrl-g:execute($EDITOR {} &> /dev/tty)'             # Ctrl-G（激活）：用 $EDITOR 打开选中项（$EDITOR 由 aliases.zsh 导出）
+  --bind='ctrl-g:execute($EDITOR -- {} >/dev/tty 2>&1)'             # Ctrl-G（激活）：用 $EDITOR 打开选中项（$EDITOR 由 aliases.zsh 导出）
   # --bind='ctrl-e:execute(code {} &> /dev/tty)'              # Ctrl-E（已停用）：用 VS Code 打开选中项
-  --bind='ctrl-y:execute-silent(echo {} | pbcopy)+abort'      # Ctrl+Y 复制路径
+  --bind='ctrl-y:execute-silent(printf \"%s\\n\" {} | pbcopy)+abort'      # Ctrl+Y 复制路径
   --bind='ctrl-p:toggle-preview'                              # Ctrl+P 切换预览
   --bind='ctrl-a:select-all'                                  # Ctrl+A 全选
   --bind='ctrl-d:deselect-all'                                # Ctrl+D 取消全选
@@ -134,14 +135,14 @@ export FZF_CTRL_R_OPTS="
 
 # 文件选择（Ctrl+T）优化
 export FZF_CTRL_T_OPTS="
-  --preview='if [ -d {} ]; then lsd --tree --depth 5 --color=always --icon=always {} | head -50; else bat --color=always --style=header,grid --line-range :100 {}; fi'
+  --preview='if [ -d {} ]; then lsd --tree --depth 5 --color=always --icon=always -- {} | head -50; else bat --color=always --style=header,grid --line-range :100 -- {}; fi'
   --prompt='files>'
   --multi
 "
 
 # 目录跳转（Alt+C）优化
 export FZF_ALT_C_OPTS="
-  --preview 'lsd --tree --depth 5 --color=always --icon=always {} | head -50'
+  --preview 'lsd --tree --depth 5 --color=always --icon=always -- {} | head -50'
   --prompt='dir>'
 "
 
@@ -151,20 +152,34 @@ export FZF_ALT_C_OPTS="
 
 # 通过 fzf 交互式搜索文件内容并跳转到对应行（回车在 nvim 中打开并定位到该行）
 frg() {
-  rg --line-number --color=always --smart-case "$@" | fzf --ansi \
+  # shell quoting 由 fzf 处理；行号必须先校验，防止冒号文件名变成 Neovim +Ex 命令。
+  # 非数字字段安全拒绝；含冒号的路径仍不支持按此协议导航。
+  rg --with-filename --no-heading --line-number --color=always --smart-case "$@" | fzf --ansi \
       --delimiter : \
-      --preview "bat --style=full --color=always '{1}' --highlight-line={2}" \
-      --bind "enter:execute(nvim '{1}' +{2})+abort" \
+      --preview 'line={2}; [ "$line" -gt 0 ] 2>/dev/null && bat --style=full --color=always --highlight-line="$line" -- {1}' \
+      --bind 'enter:execute(line={2}; [ "$line" -gt 0 ] 2>/dev/null && nvim +"$line" -- {1})+abort' \
       --exit-0
 }
 
 # 通过 fzf 交互式选择并杀死进程（可选信号，默认 -9）
 fkill() {
-    local pid=$(ps -ef | sed 1d | fzf -m | awk '{print $2}')
-
-    if [ "x$pid" != "x" ]; then
-        echo "$pid" | xargs kill -"${1:-9}"
-    fi
+    emulate -L zsh
+    local selection line
+    local -a fields
+    local -aU pids
+    selection=$(ps -ef | fzf -m --header-lines=1) || return 0
+    for line in "${(@f)selection}"; do
+        [[ -n "$line" ]] || continue
+        fields=(${=line})
+        if [[ "${fields[2]:-}" != <-> || "${fields[2]:-0}" -le 0 ]]; then
+            print -u2 -- "Invalid PID selection; no processes killed."
+            return 1
+        fi
+        pids+=("${fields[2]}")
+    done
+    (( ${#pids} )) || return 0
+    # PID 0 会向整个进程组发送信号；必须在全部验证后一次性传递独立参数。
+    kill -"${1:-9}" -- "${pids[@]}"
 }
 
 # 寻找大文件，默认 100M 以上，也可以指定大小参数
@@ -184,12 +199,19 @@ ftm() {
       tmux "$change" -t "$1" 2>/dev/null || { tmux new-session -d -s "$1" && tmux "$change" -t "$1"; }
       return
   fi
-  local session
-  session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf +m --height 60% --exit-0) && tmux "$change" -t "$session" || echo "No sessions found."
+  local sessions session rc
+  sessions=$(tmux list-sessions -F "#{session_name}" 2>/dev/null) || { echo "No sessions found."; return 1; }
+  session=$(print -r -- "$sessions" | fzf +m --height 60% --exit-0)
+  rc=$?
+  # 没有选择/取消不是 attach 失败；操作错误不能被最后一个 echo 吞掉。
+  (( rc == 1 || rc == 130 )) && return 0
+  (( rc == 0 )) || return "$rc"
+  [[ -n "$session" ]] || return 0
+  tmux "$change" -t "$session"
 }
 
 # lsof 预览片段：显示选中行 PID 对应的进程详情（供下方 fl* 系列函数复用）
-LSOF_PREVIEW='pid=$(echo {} | awk "{print \$2}"); [ -n "$pid" ] && ps -fp "$pid" 2>/dev/null || echo "No PID"'
+LSOF_PREVIEW='ps -fp {2} 2>/dev/null || echo "No PID"'
 
 # 交互式查看进程打开的文件（带预览）
 # 使用：flf —— 模糊搜索过滤，回车仅高亮选中，Ctrl-C 退出。
@@ -199,18 +221,40 @@ flf() {
 }
 
 # 交互式杀死进程（无二次确认）
-# 使用：flkill —— 选择一个打开文件的进程，提取 PID 并执行 kill -9。
+# 使用：flkill —— 可多选；先校验全部行，再以独立参数杀死去重后的正整数 PID。
 flkill() {
-  local pid
-  pid=$(lsof 2>/dev/null | fzf --preview "$LSOF_PREVIEW" \
-        --preview-window=right:50% --header 'Select a process to kill' | awk '{print $2}')
-
-  if [ -n "$pid" ]; then
-    echo "Killing process $pid ..."
-    kill -9 "$pid" && echo "Killed." || echo "Failed to kill $pid"
-  else
+  emulate -L zsh
+  local selection line
+  local -a fields
+  local -aU pids
+  if ! selection=$(lsof 2>/dev/null | fzf --header-lines=1 --preview "$LSOF_PREVIEW" \
+        --preview-window=right:50% --header 'Select processes to kill'); then
     echo "No process selected."
+    return 0
   fi
+
+  for line in "${(@f)selection}"; do
+    [[ -n "$line" ]] || continue
+    fields=(${=line})
+    if [[ "${fields[2]:-}" != <-> || "${fields[2]:-0}" -le 0 ]]; then
+      print -u2 -- "Invalid PID selection; no processes killed."
+      return 1
+    fi
+    pids+=("${fields[2]}")
+  done
+
+  if (( ${#pids} == 0 )); then
+    echo "No process selected."
+    return 0
+  fi
+  echo "Killing processes ${(j:, :)pids} ..."
+  local rc=0
+  kill -9 -- "${pids[@]}" || rc=$?
+  if (( rc )); then
+    print -u2 -- "Failed to kill processes (exit=$rc)."
+    return "$rc"
+  fi
+  echo "Killed."
 }
 
 # 快速查看网络连接
@@ -245,7 +289,8 @@ zstyle ':completion:*' menu no
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'lsd -1 --color=always --icon=always $realpath'
 # custom fzf flags
 # NOTE: fzf-tab does not follow FZF_DEFAULT_OPTS by default
-zstyle ':fzf-tab:*' fzf-flags --color=fg:1,fg+:2 --bind=tab:accept
+# fzf-tab 预览的初始化模板含 Zsh 语法；覆盖全局 sh -c（CLI flags 最后生效）。
+zstyle ':fzf-tab:*' fzf-flags --with-shell='zsh -f -c' --color=fg:1,fg+:2 --bind=tab:accept
 # To make fzf-tab follow FZF_DEFAULT_OPTS.
 # NOTE: This may lead to unexpected behavior since some flags break this plugin. See Aloxaf/fzf-tab#455.
 zstyle ':fzf-tab:*' use-fzf-default-opts yes
