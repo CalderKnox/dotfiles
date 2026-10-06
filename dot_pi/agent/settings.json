@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "1.0.2",
+  "lastChangelogVersion": "1.0.4",
   "packages": [
     "npm:pi-subagents",
     "npm:pi-background-tasks",
@@ -13,7 +13,9 @@
     },
     "npm:@narumitw/pi-goal",
     "npm:@narumitw/pi-btw",
-    "npm:@narumitw/pi-statusline"
+    "npm:@narumitw/pi-statusline",
+    "npm:@patimweb/pi-cron",
+    "npm:@calesennett/pi-codex-fast"
   ],
   "defaultTools": [
     "read",
@@ -24,9 +26,13 @@
     "find",
     "ls"
   ],
-  "defaultProvider": "zai-coding-cn",
-  "defaultModel": "glm-5.3",
-  "defaultThinkingLevel": "max",
+  "defaultProvider": "openai",
+  "defaultModel": "gpt-6.1-sol",
+  "defaultThinkingLevel": "medium",
   "steeringMode": "all",
-  "hideThinkingBlock": true
+  "hideThinkingBlock": true,
+  "pi-codex-fast": {
+    "enabled": true,
+    "mode": "ultrafast"
+  }
 }
