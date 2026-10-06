@@ -1,7 +1,17 @@
 {
-  "defaultConcurrency": 8,
+  "keywordTriggerEnabled": true,
+  "keywordTriggerWord": "ultracode",
+
+  "defaultEffort": "off",
+  "defaultConcurrency": 6,
   "defaultAgentRetries": 3,
-  "progressPanelMode": "compact",
-  "progressPanelMaxAgents": 10,
-  "persistAgentSessions": false
+  "defaultAgentTimeoutMs": 900000,
+  "defaultTokenBudget": 1000000,
+
+  "progressPanelMode": "detailed",
+  "persistAgentSessions": false,
+
+  "providerMiddlewareExtensions": [ ],
+  "inheritMainModel": false
+
 }
