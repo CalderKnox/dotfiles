@@ -21,6 +21,11 @@ brew install git-lfs && git lfs install
 # —— 启动必需工具（首次启动 zsh 即被使用，建议随本节一并装；完整清单与说明见 §4）——
 #    fzf-tab 无需手动安装：由 zimfw 首次启动时按 private_dot_config/zsh/dot_zimrc 自动拉取
 brew install fzf starship zoxide mise fd ripgrep
+
+# —— 终端入口必需 ——
+brew install fish  # Ghostty/Alacritty 配置直接使用 /opt/homebrew/bin/fish
+# 若使用 Alacritty 的既定入口（Fish -> tmux main）：
+brew install tmux
 ```
 
 > **为什么要在 `apply` 之前**：`apply` 后一般会立即 `exec zsh` 首次启动（Zim 拉模块、
@@ -91,7 +96,7 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 
 | 组件 | 行为 | 触发时机 |
 | --- | --- | --- |
-| `fish` / `pi` | `private_dot_config/private_fish/config.fish`（interactive 时初始化 Starship，插件由 `fish_plugins` 清单管理）、`private_dot_pi/**`（pi agent 配置）直接生效，均随 `apply` 写入 `$HOME`；本文档只覆盖 `zsh` 栈，其余见 [layout.md](layout.md) | 首次启动 `fish` / `pi` 时 |
+| `fish` / `pi` | `private_dot_config/private_fish/config.fish`（interactive 时初始化 Starship，插件由 `fish_plugins` 清单管理）、`dot_pi/**`（Pi 的三个配置；不提供沙箱）直接生效，均随 `apply` 写入 `$HOME`；本文档只覆盖 `zsh` 栈，其余见 [layout.md](layout.md) | 首次启动 `fish` / `pi` 时 |
 | Zim 框架 | `~/.config/zsh/.zshrc` 检测 `~/.zim/zimfw.zsh` 缺失时自动下载并 `zimfw init` 安装 `dot_zimrc` 中声明的全部模块（详见 `private_dot_config/zsh/dot_zimrc`） | 首次启动 `zsh` |
 | `PATH` / `brew` | 按 `dot_zshrc` 中守卫逻辑注入 Homebrew 与本地路径（前置 `~/bin` 等，cargo/rustup 按目录存在性守卫，详见 `private_dot_config/zsh/dot_zshrc`） | 每次启动 `zsh` |
 | `zoxide` / `mise` / `starship` / `fzf` | 按 `command -v` 守卫 `eval` 初始化，未安装静默跳过；`fzf` 键位绑定唯一收敛于 `fzf.zsh`（详见 `dot_zshrc` 与 `fzf.zsh`） | 每次启动 `zsh` |
@@ -125,12 +130,11 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 ### 体验增强（别名 / 函数指向的目标，未安装时对应别名退化）
 
 ```bash
-brew install bat lsd htop fastfetch neovim tmux yazi gh lazygit tldr coreutils \
-             kubecolor uv rustup
+brew install bat lsd htop fastfetch neovim yazi gh lazygit tldr coreutils kubecolor uv rustup
 ```
 
 - `coreutils` 提供 `nproc`（`makes` / `xargsp` 半核并行依赖它）
-- Fish 侧：`brew install fish fisher`——`~/.config/fish/` 的 13 个插件由 `fish_plugins` 清单管理（`fisher update` 安装/更新）；提示符复用 `starship`、fzf 键位复用 `fzf.fish`（均已在上方依赖中）
+- Fish 侧：Fish 已作为终端入口依赖安装；另需 `brew install fisher`——`~/.config/fish/` 的 13 个插件由 `fish_plugins` 清单管理（`fisher update` 安装/更新）；提示符复用 `starship`、fzf 键位复用 `fzf.fish`（均已在上方依赖中）
 - `bat` / `lsd` / `htop` 分别接管 `cat` / `ls` / `top`；脚本中需要原生行为时用 `command cat` 等
 - `gh` 配合 `~/.ssh/config` 的 `Host github.com → ssh.github.com:443` 与 `dot_gitconfig` 的 `socks5h://127.0.0.1:5376` 代理共同保证 GitHub 可达。代理已统一为 `5376`，不再区分 `7890`（详见 [dev-tools.md](dev-tools.md) 中的代理配置说明）。
 
@@ -139,6 +143,8 @@ brew install bat lsd htop fastfetch neovim tmux yazi gh lazygit tldr coreutils \
 ```bash
 # Python lint：ruff_auto 函数的目标
 brew install ruff
+# Fish netcheck 的本地下载测速工具（不再下载并执行远程 Python 源码）
+brew install speedtest-cli
 # Android 逆向：jdx / scr 别名的目标（jadx-gui / scrcpy）
 brew install jadx scrcpy
 ```
@@ -155,7 +161,7 @@ SDKMAN（Java）、Android NDK（`/opt/homebrew/share/android-ndk`）、Docker�
 brew install --cask ghostty alacritty
 ```
 
-两者均在 `font-jetbrains-mono-nerd-font` 就绪后开箱可用；Ghostty 为主力，Alacritty 为备用。详见 [terminals.md](terminals.md)。
+两者需要字体与 `/opt/homebrew/bin/fish` 就绪；Alacritty 的配置入口还需 `tmux`。Ghostty 为主力，Alacritty 为备用。详见 [terminals.md](terminals.md)。
 
 ## 5. 应用后验证清单
 

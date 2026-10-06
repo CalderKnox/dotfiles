@@ -15,9 +15,7 @@
 前缀可叠加，如 `private_dot_config` = 隐藏目录 + 该目录本身权限 0700，`private_dot_ssh` 同理。
 
 > 注：`private_` 前缀只作用于它直接修饰的那一级——目录得 0700、文件得 0600，目录内未再带前缀的子项保持默认 0644。
-> 实测（stat）：`~/.config`、`~/.config/fish`、`~/.pi`、`~/.pi/agent` 均为 0700，而其内部文件（`config.fish`、
-> `~/.pi/agent/*.json` 等）均为 0644；仅文件本身带前缀的 `~/.ssh/config` 为 0600（`~/.codex/config.toml` 源文件同为
-> `private_` 0600，但已被 `.chezmoiignore` 排除不再部署，见下文 Codex 行）。
+> `private_dot_config`、`private_fish`、`private_dot_ssh` 声明对应目标目录为 0700；未加 `private_` 的子文件默认 0644。`dot_pi/agent` 没有私有前缀，默认目录属性为 0755、文件为 0644，不能据历史 `stat` 推断当前部署权限。`~/.ssh/config` 的源文件本身带前缀，目标为 0600；Codex 参考文件虽带前缀，但不部署。
 
 ## 完整映射表
 
@@ -47,15 +45,15 @@
 | `private_dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`update-all`、`auto-update`、`y`、`ruff_auto` 等）；`update-all` 为关联数组 7 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`/`pi`，支持传参过滤、失败计数与耗时统计；`auto-update` 为兼容旧习惯的一键入口（可选 `onproxy` 切代理后直接委托 `update-all`，覆盖目标一致，均含 `mise`）；新增 `chezc/chezdf/chezap` 三别名 |
 | `private_dot_config/zsh/fzf.zsh` | `~/.config/zsh/fzf.zsh` | fzf 前缀探测/缓存、全局选项、Ctrl-R/T/Alt-C 及 `frg`/`fkill`/`ftm`/`fl*` 函数 |
 | `private_dot_config/zsh/sdk.zsh` | `~/.config/zsh/sdk.zsh` | SDK 环境与补全（pnpm/SDKMAN(可选)/Android NDK/Python(uv)/Go/Rust/Docker/kubectl+kubecolor） |
-| `private_dot_config/zsh/dot_gitignore` | `~/.config/zsh/.gitignore` | 忽略运行时产物（`*.zwc`、`.fzf_prefix_cache`、`.DS_Store`） |
+| `private_dot_config/zsh/dot_gitignore` | `~/.config/zsh/.gitignore` | 忽略运行时产物（实际模式见文件，当前仅 `*.zwc`） |
 | `private_dot_config/zsh/README.md` | —（不部署） | 模块内部文档（加载顺序契约、函数速查）；由 `**/README.md` 排除，仅仓库内查阅 |
 
 ### 终端与提示符
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_config/ghostty/config` | `~/.config/ghostty/config` | Ghostty 主终端配置（JetBrainsMono Nerd Font Mono，`command = /opt/homebrew/bin/fish -l` 启动登录 Fish，Catppuccin Mocha 主题；`zsh -l` / `tmux` 方案注释保留） |
-| `private_dot_config/alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` | Alacritty 备用配置（活跃配色为 Catppuccin Mocha，Dracula 调色板整块注释保留为模板；`shell = fish -c "tmux new -A -s main"` 经 Fish 进 tmux） |
+| `private_dot_config/ghostty/config` | `~/.config/ghostty/config` | Ghostty 主终端配置（JetBrainsMonoNL Nerd Font Mono，`command = /opt/homebrew/bin/fish -l` 启动登录 Fish，Catppuccin Mocha 主题；`zsh -l` / `tmux` 方案注释保留） |
+| `private_dot_config/alacritty/private_alacritty.toml` | `~/.config/alacritty/alacritty.toml` | Alacritty 备用配置（活跃配色为 Catppuccin Mocha，Dracula 调色板整块注释保留为模板；`shell = fish -c "tmux new -A -s main"` 经 Fish 进 tmux） |
 | `private_dot_config/kitty/kitty.local.conf` | —（不部署，机器本地维护） | kitty 增量个人配置（字体/光标/Catppuccin Mocha/快捷键，`shell = fish`）仅入库作参考，不随 apply 部署（被 `.chezmoiignore` 的 `**/*.local.*` 排除，`chezmoi ignored` 含 `.config/kitty/kitty.local.conf`）；目标机 `~/.config/kitty/kitty.local.conf` 各机本地维护，在 kitty 首次生成的 `~/.config/kitty/kitty.conf` 末尾手工添加 `include kitty.local.conf` 引入（仓库有意不含 kitty.conf） |
 | `dot_tmux.conf` | `~/.tmux.conf` | tmux 配置：`default-shell` 经 if-shell 回退链设定（Homebrew fish → `/usr/bin/fish` → `/bin/bash`，无 fish 环境自动回退；不设 default-command，保持登录语义）、tpm 插件（yank/sensible/open/cpu/battery）、Catppuccin Mocha 状态栏、鼠标与 100k 历史 |
 | （starship.toml 不在仓库） | `~/.config/starship.toml`（机器本地） | Starship 提示符配置未入库（已于 0ad1efc 移除）；zsh/fish 两侧仅负责 `starship init`，跨机迁移需自行拷贝该文件 |
@@ -64,7 +62,7 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_config/nvim/**` | `~/.config/nvim/**` | LazyVim 配置（`init.lua` + `lua/config/*` + `lua/plugins/*`、`lazyvim.json`（extras 清单当前为空，extras 实际由 `lua/config/lazy.lua` import 引入）、`stylua.toml`；`lazy-lock.json` 已停止跟踪（3c3d65f），运行时生成不入库） |
+| `private_dot_config/nvim/**` | `~/.config/nvim/**` | LazyVim 配置（`init.lua` + `lua/config/*` + `lua/plugins/*`、`lazyvim.json`（extras 声明的事实来源）、本地 colorscheme/Mason/Sidekick 插件 specs、`stylua.toml`；`lazy-lock.json` 已停止跟踪（3c3d65f），运行时生成不入库） |
 | `private_dot_config/nvim/README.md` | —（不部署） | LazyVim 上游模板自带；由 `**/README.md` 排除，仅仓库内查阅（历史排除模式误写为 `**/REAMDME.md` 未生效，已修复） |
 | `private_dot_config/nvim/dot_gitignore` | `~/.config/nvim/.gitignore` | 忽略插件数据等运行时目录 |
 | `private_dot_config/mise/config.toml` | `~/.config/mise/config.toml` | mise 工具链声明（工具与版本见 `private_dot_config/mise/config.toml`） |
@@ -87,20 +85,17 @@
 | `.../themes/.keep` | —（`.keep` 仅保留空目录，不部署） | 主题目录占位 |
 | `.../private_fish_variables` | —（已加入 `.chezmoiignore`，不部署） | fish Universal Variables 机器本地状态 |
 
-> Fish 是 Ghostty 的登录 shell（`command = /opt/homebrew/bin/fish -l`）；Alacritty 经 `shell = fish -c "tmux new -A -s main"` 进入 tmux；tmux `default-shell` 同为 Fish（含 if-shell 回退链，无 fish 环境自动回退）。Zsh 栈（XDG 收敛 + Zim 三模块）完整保留为次选入口。Starship 提示符双侧复用；fisher 管理的 13 插件与 OrbStack docker/kubectl/orbctl 补全随源部署。
+> Fish 是 Ghostty 的登录 shell（`command = /opt/homebrew/bin/fish -l`）；Alacritty 经 `shell = fish -c "tmux new -A -s main"` 进入 tmux；tmux `default-shell` 同为 Fish（含 if-shell 回退链，无 fish 环境自动回退）。Zsh 栈（XDG 收敛 + Zim 三模块）完整保留为次选入口。Starship 提示符双侧复用；源部署 Fisher 的 13 插件**清单**与三条 OrbStack 补全链接，插件本体由 Fisher 在目标机安装。
 
-### pi coding agent（四件套 + workflows）
+### pi coding agent（三文件 allowlist）
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `private_dot_pi/private_agent/settings.json` | `~/.pi/agent/settings.json` (0644) | pi coding agent 主题、扩展包、默认 provider/tools/model、代理配置 |
-| `private_dot_pi/private_agent/sandbox.json` | `~/.pi/agent/sandbox.json` (0644) | 文件系统与网络沙箱策略（读写 deny 规则、网络策略） |
-| `private_dot_pi/private_agent/landstrip.json` | `~/.pi/agent/landstrip.json` (0644) | 子代理与任务权限配置 |
-| `private_dot_pi/private_agent/extensions/pi-permission-system/config.json` | `~/.pi/agent/extensions/pi-permission-system/config.json` (0644) | 工具级权限矩阵（允许优先：默认 allow，敏感路径/高危命令 deny） |
-| `private_dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` (0644) | workflow 运行时配置（并发、进度面板） |
+| `dot_pi/agent/settings.json` | `~/.pi/agent/settings.json` (0644) | 扩展包、默认 provider/tools/model 等 |
+| `dot_pi/agent/pi-goal.json` | `~/.pi/agent/pi-goal.json` (0644) | Goal 扩展设置 |
+| `dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` (0644) | `ultracode` 触发与工作流并发/预算/进度等 |
 
-> 权限实测（stat）：`private_dot_pi`/`private_agent` 目录前缀使 `~/.pi`、`~/.pi/agent` 为 0700，其内文件（含 `extensions/**`）均为 0644；
-> `workflows/` 目录无 `private_` 前缀，`~/.pi/workflows` 为 0755。
+> 上述目录无 `private_` 前缀，默认目标属性为 0755。仓库不含沙箱或工具权限矩阵；安全边界与忽略规则限制见 [dev-tools.md](dev-tools.md)。
 
 ## .chezmoiignore —— 排除部分源文件不参与部署
 
@@ -109,22 +104,16 @@
 
 效果：`chezmoi diff` / `chezmoi apply` 自动跳过上述模式匹配的目标，避免污染家目录。
 
-✅ 历史失配已修复（2026-08 收口）：旧版按**源名**书写了 `**/dot_git` / `**/dot_DS_Store` / `dot_gitconfig`
-（模式按目标名匹配，从不命中 `.git` / `.DS_Store` / `.gitconfig`，均未生效），且 `**/README.md`
-误拼为 `**/REAMDME.md`——现全部改写为目标名形式、删除无效行 `dot_gitconfig` 并追加 `**/LICENSE`。
-`dot_gitconfig` → `~/.gitconfig` 恢复其本来的正常部署语义；`chezmoi managed`
-目标数由 59 降至 55（不再包含嵌套 README×2、`nvim/LICENSE`）。后续去重又删除了被更宽模式
-覆盖或已无对应文件的冗余行（根级 `README.md` / `LICENSE`、`docs/**`、`**/.git`、`*client_secret*`、
-两条 `**.md` 与已不存在的 `REPO-INSIGHT.md`），`managed` 目标数保持 55 不变（核心 targets 不变），其后 fish 配置扩容实测曾达 81（纳入 `.config/fish/fish_variables` 后为 82，详见布局映射）；2026-09 zsh XDG 收敛（`dot_zshrc/dot_zimrc` → `private_dot_config/zsh/dot_*` + 2 条 `symlink_*.tmpl`）后核心再度上升；2026-09-04 `model-tiers.json` 入库，2026-09-07 又随提交 `3018345` 删除（`private_dot_pi/workflows/` 仅余 `settings.json`），同日 `private_dot_config/nvim/dot_neoconf.json` 亦删除，总计相应减二；2026-09-09 删 conf.d/fzf.fish、2026-09-15 增 kitty.local.conf、本次删 `private_completions/sdk.fish`、增 `conf.d/02_mise.fish`、删 `nvim/LICENSE` 与 `lua/plugins/example.lua`、`private_dot_claude` 移出仓库、kitty.local.conf 改由 `**/*.local.*` 排除不部署，重新实测 `chezmoi managed | wc -l` 为 60（核心 45 + fish 15，按目标路径是否以 `.config/fish` 开头划分，以重新实测为准）。
+历史上的源名/目标名混淆与 README 拼写失配已修复。现在请以 `chezmoi managed` / `chezmoi ignored` 的实时输出为准：条目包含目录和脚本，不能把历史总数当作文件数或安全验收条件。新增验证资料（`docs/validation/`、[optimization.md](optimization.md)）仍由 `docs/` 整体排除；离线部署边界检查见 [validation/README.md](validation/README.md)。
 
 ## 仓库特性说明
 
 - **极简模板**：仅有的 `*.tmpl` 是 `symlink_dot_zshrc.tmpl` / `symlink_dot_zimrc.tmpl`（各一行 `{{ .chezmoi.homeDir }}/.config/zsh/...`，将 `~/.zshrc` 收敛至 XDG）—— 其余全部为静态文件，无 `.chezmoidata.*` 数据；仅有一个 `run_*` 脚本 `.chezmoiscripts/run_once_create-ssh-sockets.sh`（每机仅执行一次的 ssh socket 目录初始化）。所有机器 `chezmoi apply` 拿到同一套内容；如需进一步按机器差异化，可在现有模板基础上扩展。
 - **运行时产物不入库**：`~/.config/zsh/.gitignore` 和 `~/.config/nvim/.gitignore`
-  分别忽略 `*.zwc`、`.fzf_prefix_cache` 及插件数据目录。
+  分别忽略 `*.zwc` 及 Neovim 插件数据等运行时目录；fzf 前缀缓存位于 HOME/ZDOTDIR，不应假定该 `.gitignore` 覆盖它。
 - **仅服务于仓库管理、不部署的文件**：根目录的 `.gitignore` 与 `.chezmoiignore` 被 chezmoi 默认忽略（源目录中点开头文件不参与 apply）；根级 `README.md`、`docs/`（本文档所在）以及全部嵌套 `README.md`（如 `zsh/README.md`、`nvim/README.md`）被 `.chezmoiignore` 排除；根级与 `nvim/LICENSE` 文件已删除，`**/LICENSE` 模式防御性保留。
 - **不在仓库内的重要文件**：
   - `~/.config/gh/hosts.yml` / `config.yml`——由 `gh auth login` 生成，含凭据，切勿加入仓库；
   - `~/.zim/`——由 zimfw 自动管理（`~/.config/zsh/.zimrc` 仅为其配置，`~/.zimrc` 为符号链接）；
-  - `~/.ssh/` 除 `config` 外的密钥——不在仓库内，`.chezmoiignore` 的 `**/*secret*`/`**/*token*` 等模式可防止误入库；
+  - `~/.ssh/` 除 `config` 外的密钥——不在仓库内，切勿添加；`.chezmoiignore` 只影响部署，不能防止 Git 提交，也不会按内容识别密钥；
   - Neovim 插件本体（`~/.local/share/nvim/`）——由 lazy.nvim 安装（`lazy-lock.json` 为目标机运行时产物，已不入库）。

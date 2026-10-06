@@ -23,7 +23,7 @@
 
 ## mise — `private_dot_config/mise/config.toml`
 
-mise 工具链由 `private_dot_config/mise/config.toml` 声明（已钉版：bun 1.4.2 / deno 2.9.7 / go 1.27.1 / node 26.10.0 / pnpm 12.8.1，以该文件为准），由 `private_dot_config/zsh/dot_zshrc` 中的 `eval "$(mise activate zsh)"` 接管 zsh 环境（fish 侧由 `conf.d/02_mise.fish` 守卫激活）；实际声明以源文件为准。常用操作见 `mise` 文档与 `aliases.zsh` 的 `update-all` 复用。
+mise 工具链由 `private_dot_config/mise/config.toml` 声明（当前各工具使用 `latest` 浮动选择器，非钉版；以源文件为准），由 `private_dot_config/zsh/dot_zshrc` 中的 `eval "$(mise activate zsh)"` 接管 zsh 环境（fish 侧由 `conf.d/02_mise.fish` 守卫激活）；实际声明以源文件为准。常用操作见 `mise` 文档与 `aliases.zsh` 的 `update-all` 复用。
 
 ### 包管理器更新：`aliases.zsh` 的 `auto-update` 与 `update-all`
 
@@ -45,28 +45,20 @@ mise 工具链由 `private_dot_config/mise/config.toml` 声明（已钉版：bun
 
 `config.toml` **不随 `chezmoi apply` 部署**：已被 `.chezmoiignore` 的排除行 `.codex/config.toml` 排除（该配置含 provider、hooks/projects trust 等机器本地状态，由各机 cc-switch 注入维护，不入部署）。仓库内的 `dot_codex/private_config.toml` 仅作参考快照（`private_` 前缀对应 `0600` 权限语义），实际生效值以各机 `~/.codex/config.toml` 为准。
 
-## pi coding agent — `private_dot_pi/private_agent/`
+## pi coding agent — `dot_pi/`
 
-为 [pi](https://github.com/earendil-works/pi) 编码代理准备的受限运行环境（部署到 `~/.pi/agent/`）。四个文件各司其职：由于 chezmoi 目标名均无 `private_` 前缀，文件应用后为默认权限 `0644`，仅父目录因 `private_dot_pi/private_agent` 命名为 `0700`。以下各文件的实际字段、列表与策略条目，一律以对应源文件为唯一权威。
+本仓库仅部署三个 [pi](https://github.com/earendil-works/pi) 配置，值与扩展清单以对应源文件为准：
 
-### settings.json — 主题与扩展包
+| 源文件 | 目标 | 用途 |
+| --- | --- | --- |
+| `dot_pi/agent/settings.json` | `~/.pi/agent/settings.json` | 扩展包、默认 provider/tools/model、思考等级等 |
+| `dot_pi/agent/pi-goal.json` | `~/.pi/agent/pi-goal.json` | Goal 扩展设置 |
+| `dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` | `ultracode` 触发词、工作流并发/重试/预算/进度面板等 |
 
-`private_dot_pi/private_agent/settings.json` 配置 pi 的主题、扩展包、默认 provider / tools / model 与出站代理。它声明一组 npm 扩展包（含若干带 `extensions` 过滤的条目），并固定 `defaultProvider`、`defaultTools`、`defaultModel`、`defaultThinkingLevel` 与 `httpProxy`（与 git / SSH 同端口 5376）；实值以 `private_dot_pi/private_agent/settings.json` 为唯一权威。
+`dot_pi`、`agent`、`workflows` 均无 `private_` 前缀：默认目标目录属性为 `0755`，配置文件为 `0644`；不代表当前机器上的实际权限。`.chezmoiignore` 按目标名只开放上述三文件，`.gitignore` 按源名镜像该 allowlist，其余 Pi 运行时、会话与凭据默认排除。Git 忽略规则不保护已跟踪文件或强制添加；部署忽略规则不能阻止提交。
 
-### sandbox.json — 文件系统与网络沙箱
+### 安全边界
 
-`private_dot_pi/private_agent/sandbox.json` 定义 agent 的文件系统与网络沙箱策略。沙箱总开关开启后，文件系统采用窄白名单读取（`allowRead`）与大范围 `denyRead` / `denyWrite` 拒绝读写；`shell.readAccess = "policy"` 使该读策略对 bash/shell 命令同样生效（denied 路径无法用 `cat` 等绕过；曾为 `host` 全豁免，已收紧），网络已启用（`allowNetwork: true`）：出站域名限 `allowedDomains` 白名单（github.com 系列），`deniedDomains` 为空，另放行本地端口绑定与全部 Unix socket；Windows 容器模式在 macOS 上不生效。所有规则条目以 `private_dot_pi/private_agent/sandbox.json` 为唯一权威。
+本仓库**没有** `sandbox.json`、`landstrip.json` 或 `pi-permission-system` 权限矩阵。扩展声明、项目 trust、代理地址与工作流预算都不构成 OS 安全边界；不能据此承诺拒绝读取 `.env`/SSH 凭据或禁止 `sudo`/`rm`。
 
-> 网络已启用（`allowNetwork: true`）：出站仅放行 `allowedDomains` 白名单内的 github.com 系列域名，`deniedDomains` 为空；本地端口绑定与全部 Unix socket 亦放行。
-
-### landstrip.json — 子代理与任务权限
-
-`private_dot_pi/private_agent/landstrip.json` 控制子代理派生的任务级权限：任务级 `*`（`task` 执行类）为 `allow`，即派生子代理默认放行、无需逐次用户确认；landstrip.json 未配置 `review` 条目，只读审查类子代理与执行类同样按 `task` 规则处理（同为 `allow`，不因「只读」另有规则）。它与 `workflows/settings.json` 的 `progressPanelMaxAgents` 职责不同、相互独立：后者限制工作流进度面板的并发 / 展示代理数上限，前者指定沙箱复用。详见 [layout.md](layout.md) 与下节。
-
-### workflows/settings.json — 动态工作流设置
-
-位于 `private_dot_pi/workflows/settings.json`（部署到 `~/.pi/workflows/settings.json`）。它配置工作流运行时的并发、重试、进度面板与会话持久化等行为；实值以 `private_dot_pi/workflows/settings.json` 为唯一权威。`progressPanelMaxAgents` 用于 `pi-dynamic-workflows` 的进度面板，与 `landstrip.json` 的 `toolFilesystemPolicy` 相互独立。详见 [layout.md](layout.md)。
-
-### extensions/pi-permission-system/config.json — 工具级权限矩阵
-
-`private_dot_pi/private_agent/extensions/pi-permission-system/config.json` 定义工具级权限矩阵：默认全局 `allow`，对 `read` / `write` / `edit` / `path` 中的敏感路径（如 `*.env`、`~/.ssh/*`、`~/.aws/*`、`/etc/*`、`/var/*`）与高危 bash 命令（`sudo` / `mv` / `rm` / `dd` / `mkfs.*` 等）硬拒绝（`deny`）；`external_directory` 为需确认（`ask`，仅 `~/.cargo/registry`、`~/.npm`、`~/.cache` 白名单放行），`python3 *` / `node *` 显式保持放行（`allow`）；`yoloMode` 开启时所有 `ask` 自动批准、硬 `deny` 仍生效。其目标是让 agent 完成日常编码与受控编辑，同时杜绝误删、密钥外泄与敏感路径写入；完整矩阵与 `$schema` 指向 pi-permission-system 的 JSON Schema，实值以源文件 `private_dot_pi/private_agent/extensions/pi-permission-system/config.json` 为唯一权威。
+Pi、扩展和子进程通常拥有启动账户的权限。需要强隔离时，应另外部署容器、VM 或操作系统沙箱，并限制挂载、凭据和网络。请参阅上游 [security.md](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/security.md) 与 [containerization.md](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/containerization.md)。本次修正只更新说明与 Git 排除，不改 provider/model、扩展策略或目录权限。

@@ -8,7 +8,7 @@
 2. **PATH 注入**：前置 `~/bin`、Homebrew、`/usr/local/bin`、`~/.local/bin` 等，并按目录存在性守卫注入 cargo/rustup 路径。
 3. **工具初始化**：`zoxide` / `mise` / `starship` 按 `command -v` 守卫顺序 `eval` 初始化，未安装静默跳过；`brew shellenv` 由 Zim 的 `zimfw/homebrew` 模块在 init.zsh 阶段注入（早于 rustup 守卫，避免重复 eval）；`fzf` 键位绑定唯一收敛于 `fzf.zsh`（`~/.zshrc` 不再重复）。
 4. **三模块加载**：依次 `source` `aliases.zsh`（导出 `$EDITOR`/`$VISUAL`）→ `fzf.zsh`（依赖 `$EDITOR` 的 Ctrl-G 绑定）→ `sdk.zsh`（惰性加载 SDKMAN、缓存补全等）。
-5. **SDK 环境**：`sdk.zsh` 无条件加载，内部逐项守卫（SDKMAN 惰性、kubectl/docker 补全缓存）。
+5. **SDK 环境**：`sdk.zsh` 无条件加载，内部逐项守卫（SDKMAN 惰性、kubectl/docker 补全缓存）。SDKMAN 初始化失败不再递归，重 source 不替换已初始化函数。补全缓存按真实路径/stat 身份失效；每工具内建 flock 覆盖检查、发布与加载，compiled artifact 以最终源码名生成。
 
 完整命令与守卫细节以 `private_dot_config/zsh/dot_zshrc` 与三模块源文件为准，模块契约详见 [`private_dot_config/zsh/README.md`](../private_dot_config/zsh/README.md)。
 
@@ -40,7 +40,7 @@ fzf 前缀按平台自适应探测（Apple Silicon `/opt/homebrew` → Intel `/u
 
 `FZF_DEFAULT_OPTS`（布局、颜色、全部键位绑定）集中在 `fzf.zsh` 中定义——**键位绑定直接写在源文件里，以 `fzf.zsh` 源码为准**，本节不再逐字抄录。要点：
 
-- 编辑器打开键位原为 `ctrl-o`，现改为 `ctrl-g`（`ctrl-g:execute($EDITOR {} &> /dev/tty)`，`$EDITOR` 由 `aliases.zsh` 导出）；
+- 编辑器打开键位原为 `ctrl-o`，现改为 `ctrl-g`（`ctrl-g:execute($EDITOR -- {} >/dev/tty 2>&1)`，`$EDITOR` 由 `aliases.zsh` 导出）；
 - 原 `ctrl-e:execute(code {} &> /dev/tty)` 的 VS Code 打开绑定已**注释**（仅保留注释行，不再生效）；
 - 保留 Tab/Shift-Tab 默认多选切换行为，不重绑定为纯移动。
 
@@ -48,7 +48,7 @@ fzf 前缀按平台自适应探测（Apple Silicon `/opt/homebrew` → Intel `/u
 
 ### 交互函数
 
-`fzf.zsh` 提供 `frg`（内容搜索预览并跳转）、`fkill`/`find_large_files`/`ftm`（进程/大文件/tmux 会话）以及 `flf`/`flkill`/`flnet`/`fluser`（`lsof` 浏览）等交互函数，函数列表与依赖见源文件 `private_dot_config/zsh/fzf.zsh`。预览共享 `LSOF_PREVIEW` 片段，详见源文件。
+`fzf.zsh` 提供 `frg`（内容搜索预览并跳转）、`fkill`/`find_large_files`/`ftm`（进程/大文件/tmux 会话）以及 `flf`/`flkill`/`flnet`/`fluser`（`lsof` 浏览）等交互函数，函数列表与依赖见源文件 `private_dot_config/zsh/fzf.zsh`。预览共享 `LSOF_PREVIEW` 片段（直接使用 fzf 的 PID 字段，不再启动 awk）。`fkill`/`flkill` 在发信号前校验全部正整数 PID 并去重；`frg` 拒绝非正整数行号，避免文件名中的冒号变成 Neovim `+Ex` 命令，含冒号文件名仍不支持可靠导航。详见源文件。
 
 ### 包管理更新函数（aliases.zsh）
 
@@ -56,7 +56,7 @@ fzf 前缀按平台自适应探测（Apple Silicon `/opt/homebrew` → Intel `/u
 
 ### fzf-tab
 
-`Aloxaf/fzf-tab` 由 `private_dot_config/zsh/dot_zimrc` 经 zimfw 加载，`fzf.zsh` 仅保留 `zstyle` 配置（补全排序、描述格式、颜色、`fzf-preview`、`fzf-flags` 等）。完整 `zstyle` 列表以 `fzf.zsh` 为唯一权威。
+`Aloxaf/fzf-tab` 由 `private_dot_config/zsh/dot_zimrc` 经 zimfw 加载，`fzf.zsh` 仅保留 `zstyle` 配置（补全排序、描述格式、颜色、`fzf-preview`、`fzf-flags` 等）。完整 `zstyle` 列表以 `fzf.zsh` 为唯一权威。普通 fzf 动作使用 `sh -c`；fzf-tab 的 CLI flags 单独覆盖为 `zsh -f -c`，因为其预览初始化包含 Zsh 专属语法。
 
 ## Fish 的角色
 

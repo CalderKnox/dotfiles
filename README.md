@@ -18,12 +18,12 @@
 | Fish | Fish + [Fisher](https://github.com/jorgebucaran/fisher) + Starship | Ghostty 登录 shell（`fish -l`，tmux `default-shell` 同步）；`fish_plugins` 锁定 13 个插件（fzf.fish / forgit / autopair / done 等），`conf.d` 五文件（含 `02_mise.fish` 守卫激活 mise）设定 PATH/LANG/EDITOR 等环境，补全含 OrbStack docker/kubectl/orbctl 符号链接 |
 | 提示符 | [Starship](https://starship.rs/) | Catppuccin Mocha powerline 风格（`starship.toml` 为机器本地文件，未入库） |
 | 模糊搜索 | fzf + fzf-tab + fd | Ctrl-R 历史、Ctrl-T 文件、Alt-C 目录、`frg`/`fkill`/`ftm`/`fl*` 交互函数 |
-| 终端 | Ghostty（主力）/ Alacritty（备用） | JetBrainsMono Nerd Font Mono，Catppuccin Mocha 配色（Dracula 以注释模板保留于 alacritty） |
-| 编辑器 | Neovim + [LazyVim](https://www.lazyvim.org/) | 10 个 extras（9 语言 + 1 UI，见 `lua/config/lazy.lua`），插件由 lazy.nvim 自动安装（`lazy-lock.json` 已停止跟踪，版本不再锁定） |
+| 终端 | Ghostty（主力）/ Alacritty（备用） | Ghostty 使用 JetBrainsMonoNL，Alacritty 使用 JetBrainsMono Nerd Font Mono；Catppuccin Mocha 配色（Dracula 以注释模板保留于 alacritty） |
+| 编辑器 | Neovim + [LazyVim](https://www.lazyvim.org/) | extras 由 `private_dot_config/nvim/lazyvim.json` 声明，本地插件见 `lua/plugins/`；插件由 lazy.nvim 自动安装（`lazy-lock.json` 未入库） |
 | 运行时管理 | mise | 多运行时一键切换（工具清单见 `private_dot_config/mise/config.toml`） |
 | Git 工作流 | git + gh (CLI) | LFS、GitHub 走本地 SOCKS5 代理、`push.default=current` + `autoSetupRemote` |
 | SSH | OpenSSH `~/.ssh/config` | `ssh.github.com:443` + 自适应 `ProxyCommand`（探活 `127.0.0.1:5376` SOCKS5，失败直连）+ OrbStack `Include` |
-| AI Agent | pi coding agent | 受限运行环境：文件系统与网络沙箱、细粒度权限矩阵与工作流分层（并发/进度/模型），详见 `private_dot_pi/` 配置与 [dev-tools.md](docs/dev-tools.md) |
+| AI Agent | pi coding agent | `dot_pi/` 管理 agent、Goal 与工作流三个配置；本仓库不提供操作系统级沙箱，详见 [dev-tools.md](docs/dev-tools.md) |
 
 ## 🚀 快速开始
 
@@ -88,7 +88,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │   │   ├── dot_gitignore              →  ~/.config/zsh/.gitignore
 │   │   └── README.md                  →  (不部署) 模块文档，由 **/README.md 排除
 │   ├── ghostty/config                 →  ~/.config/ghostty/config     Ghostty 终端（command = fish -l）
-│   ├── alacritty/alacritty.toml       →  ~/.config/alacritty/alacritty.toml  Alacritty 备用
+│   ├── alacritty/private_alacritty.toml → ~/.config/alacritty/alacritty.toml Alacritty 备用（文件 0600）
 │   ├── kitty/kitty.local.conf         →  (不部署) 仅入库作参考（.chezmoiignore 的 **/*.local.* 排除）；目标机 ~/.config/kitty/kitty.local.conf 机器本地维护，由本机 kitty.conf 末尾 include 引入（仓库不含 kitty.conf）
 │   ├── mise/config.toml               →  ~/.config/mise/config.toml   mise 工具链
 │   ├── nvim/                          →  ~/.config/nvim/              LazyVim 配置（含 stylua.toml；lazy-lock.json 已停止跟踪、不入库）
@@ -101,17 +101,15 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │       └── themes/                    →  ~/.config/fish/themes/       空占位目录（仅 .keep）
 ├── private_dot_ssh/
 │   └── private_config                 →  ~/.ssh/config                ★ GitHub 走 ssh.github.com:443 + 自适应 SOCKS5 ProxyCommand（含 OrbStack Include；~/.ssh 目录 0700）
-└── private_dot_pi/
-    ├── private_agent/                 →  ~/.pi/agent/                 pi coding agent 主配置（目录 0700）
-    │   ├── settings.json              →  ~/.pi/agent/settings.json     pi coding agent 主题/扩展/默认 provider/tools/model/代理
-    │   ├── sandbox.json               →  ~/.pi/agent/sandbox.json     文件系统与网络沙箱策略
-    │   ├── landstrip.json             →  ~/.pi/agent/landstrip.json   子代理与任务权限
-    │   └── extensions/pi-permission-system/config.json → 细粒度工具权限矩阵（允许优先：默认 allow，敏感路径/高危命令 deny）
+└── dot_pi/
+    ├── agent/                        →  ~/.pi/agent/                 默认目录属性（无 private_ 前缀）
+    │   ├── settings.json              →  ~/.pi/agent/settings.json     扩展/默认 provider/tools/model
+    │   └── pi-goal.json               →  ~/.pi/agent/pi-goal.json      Goal 设置
     └── workflows/
         └── settings.json              →  ~/.pi/workflows/settings.json 工作流设置（并发/进度面板）
 ```
 
-> 根级 `README.md` / `docs/` 与全部嵌套 `README.md`（含 `zsh/README.md`、`nvim/README.md`）均由 `.chezmoiignore`（`**/README.md` 等按目标名书写的模式）排除、不部署；根级与 `nvim/LICENSE` 文件已删除，`**/LICENSE` 模式防御性保留。历史上的 `**/REAMDME.md` 拼写失配与 `dot_git`/`dot_DS_Store`/`dot_gitconfig` 源名失配已修复。`managed` 目标数演进：核心 55 → zsh 收敛后 57（`dot_zshrc/dot_zimrc` → `private_dot_config/zsh/dot_*` + 2 条 `symlink_*.tmpl`），鱼 shell 扩容后曾达 81（纳入 `.config/fish/fish_variables` 后为 82）；当前 `chezmoi managed | wc -l` 为 60（核心 45 + fish 15，2026-09-30 重新实测：本次 `private_dot_claude` 移出仓库、`nvim/LICENSE` 与 `lua/plugins/example.lua` 删除、`kitty.local.conf` 改由 `**/*.local.*` 排除不部署、删 `private_completions/sdk.fish` 增 `conf.d/02_mise.fish` 后，以重新实测为准），详见 [docs/layout.md](docs/layout.md) 目标映射；后续去重又清理了被更宽模式覆盖的冗余行，目标数不再单调变化。
+> 仓库文档、`docs/` 与许可文件由 `.chezmoiignore` 排除，不部署。模式按**目标名**匹配；Git 提交排除另由 `.gitignore` 负责。目标数量随配置与 chezmoi 版本变化（含目录与脚本条目），请执行 `chezmoi managed`，不要依赖历史硬编码数量。
 
 ## 📚 文档索引
 
@@ -124,26 +122,27 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 | [docs/neovim.md](docs/neovim.md) | LazyVim 结构、extras、键位、插件管理与升级 |
 | [docs/dev-tools.md](docs/dev-tools.md) | git / gh / mise / codex / pi agent 配置说明 |
 | [docs/maintenance.md](docs/maintenance.md) | 日常维护流程、常用命令、验收清单、常见问题 |
+| [docs/validation/README.md](docs/validation/README.md) | 离线语法/部署边界/隔离回归检查 |
+| [docs/optimization.md](docs/optimization.md) | UltraCode 审查结论、优化证据与保留事项 |
 | [private_dot_config/zsh/README.md](private_dot_config/zsh/README.md) | zsh 三模块内部契约（加载顺序、依赖、函数速查） |
 | [private_dot_config/nvim/README.md](private_dot_config/nvim/README.md) | Neovim/LazyVim 使用说明 |
 
-> 索引与 `docs/` 目录保持一致（7 篇主文档 + 2 篇子目录 README），新增配置请同步更新 [docs/layout.md](docs/layout.md)。
+> 新增配置请同步更新 [docs/layout.md](docs/layout.md)；新文档请更新此索引。
 
 ## 🔒 安全与隐私
 
-- 敏感度较高的路径使用 `private_` 前缀收紧权限：目录 `0700`（如 `~/.ssh/`、
-    `~/.pi/agent/`、`~/.config/fish/`），文件 `0600`（如 `~/.ssh/config`）。
+- `private_` 前缀收紧对应一级权限：目录 `0700`（如 `~/.ssh/`、`~/.config/fish/`），文件 `0600`（如 `~/.ssh/config`）。`dot_pi/` 无此前缀，不应假定部署后的 `.pi` 目录为 `0700`。
 - `~/.config/gh/` 下的 `config.yml` 与 `hosts.yml` 均由 `gh auth login`
   在目标机器上生成，含凭据，不入仓库。
-- pi agent 的沙箱与权限策略显式拒绝读取 `*.env`、`~/.ssh/*`、`~/.aws/*` 等，
-  并禁止 `sudo` / `rm` 类命令——细节见 [docs/dev-tools.md](docs/dev-tools.md)。
+- Pi 通常以启动账户的权限运行；本仓库不含 `sandbox.json`、`landstrip.json` 或工具权限矩阵，不能保证拒绝敏感路径或高危命令。需要隔离时请单独配置容器/VM/OS 沙箱，见 [docs/dev-tools.md](docs/dev-tools.md)。
+- `.gitignore` 对 Pi 源布局仅开放三个配置，其余运行时/凭据默认不入库；它不保护已跟踪或 `git add -f` 的文件，提交前仍需检查 diff。
 - `dot_gitconfig` 与 `private_dot_ssh/private_config` 中包含本地代理地址（`socks5h://127.0.0.1:5376`，git 一处（gitconfig 单条代理行）与 SSH 探测均统一为 5376，仅对 `github.com`/`ssh.github.com` 生效）
   与个人身份信息，公开 fork 前请先脱敏。
 
 ## 🧾 环境
 
 - 目标平台：macOS (Apple Silicon)，Homebrew 前缀 `/opt/homebrew`
-- 已验证版本（2026-08）：chezmoi v2.72 · zsh 5.9 · fzf 0.74.3 · starship 1.26 · Neovim 0.12
+- 本轮验证版本（2026-10）：chezmoi v2.73.0 · zsh 5.9 · Fish 4.9.3 · fzf 0.74.4 · tmux 3.7c · Neovim 0.12.5 · kitty 0.49.2（验证范围见 docs/optimization.md）
 - 维护者：[azwpayne](https://github.com/azwpayne)
 
 ## License

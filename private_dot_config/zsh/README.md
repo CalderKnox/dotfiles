@@ -27,7 +27,7 @@
 
 ### 编辑器契约
 
-`EDITOR`/`VISUAL` 的定义位置、值与导出方式以 `aliases.zsh` 源码为准（当前为 `nvim`，环境变量而非 alias，供 git/crontab/fzf 等读取）。`fzf.zsh` 的 `FZF_DEFAULT_OPTS` 中 `ctrl-g:execute($EDITOR {} &> /dev/tty)` 在 source 时展开该变量，故 `aliases.zsh` 必须先于 `fzf.zsh` 加载。不要将 `export EDITOR=...` 改为 `alias`。详见两文件的相关注释。
+`EDITOR`/`VISUAL` 的定义位置、值与导出方式以 `aliases.zsh` 源码为准（当前为 `nvim`，环境变量而非 alias，供 git/crontab/fzf 等读取）。`fzf.zsh` 的 `FZF_DEFAULT_OPTS` 中 `ctrl-g:execute($EDITOR -- {} >/dev/tty 2>&1)` 在 source 时展开该变量，故 `aliases.zsh` 必须先于 `fzf.zsh` 加载。不要将 `export EDITOR=...` 改为 `alias`。详见两文件的相关注释。
 
 ### 前缀缓存
 
@@ -71,7 +71,7 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.fzf_prefix_cache`）�
 
 ### 有守卫的可选组件（未安装时静默跳过）
 
-`pnpm`（tabtab 补全）、SDKMAN（惰性加载，详见 `sdk.zsh` 注释）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/` 并 `zcompile`，二进制更新自动重建；`k` 别名带守卫）、krew、`~/.cargo/env`。`update-all` 的 6 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise` 逐项 `command -v` 守卫，未安装跳过、失败汇总并返回非零；其中 `brew` 任务依赖 `brew tap buo/homebrew-cask-upgrade`（提供 `brew cu`），新机器上未 tap 时该任务会在 `brew cu` 处失败。详见 `sdk.zsh` 与 `aliases.zsh` 源码。
+`pnpm`（tabtab 补全）、SDKMAN（惰性加载，详见 `sdk.zsh` 注释）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/`，按二进制 stat 身份失效并使用带锁的 zcompile，二进制替换自动重建；`k` 别名带守卫）、krew、`~/.cargo/env`。`update-all` 的 7 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`/`pi` 逐项 `command -v` 守卫，未安装跳过、失败汇总并返回非零；其中 `brew` 任务依赖 `brew tap buo/homebrew-cask-upgrade`（提供 `brew cu`），新机器上未 tap 时该任务会在 `brew cu` 处失败。详见 `sdk.zsh` 与 `aliases.zsh` 源码。
 
 ### 运行时工具（对应别名/函数调用时才需要）
 
@@ -79,14 +79,14 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.fzf_prefix_cache`）�
 
 ## 注意事项
 
-1. **破坏性命令**：`uv_resync` 会先删除 `~/.venv` 与 `~/uv.lock` 再执行 `uv sync`（目标为家目录路径而非当前项目），使用前请确认。定义见 `aliases.zsh`。
-2. **`~/.config/zsh/.zshrc`（即仓库内 `private_dot_config/zsh/dot_zshrc`，兼容 `~/.zshrc` 符号链接）已收敛单一初始化点**：fzf 键位/补全仅在 `fzf.zsh` 内带守卫地 `eval "$(fzf --zsh)"` 一次，`dot_zshrc` 不再重复 eval；`sdk.zsh` 为无条件 `source` 但内部逐项守卫。详见 `dot_zshrc` 注释。
+1. **破坏性命令**：`uv_resync` 先检查 uv 可用，随后删除 `~/.venv` 与 `~/uv.lock` 再执行 `uv sync`（目标为家目录路径而非当前项目），使用前请确认。定义见 `aliases.zsh`。
+2. **`~/.config/zsh/.zshrc`（即仓库内 `private_dot_config/zsh/dot_zshrc`，兼容 `~/.zshrc` 符号链接）已收敛单一初始化点**：fzf 键位/补全仅在 `fzf.zsh` 内成功生成后 eval `fzf --zsh` 的完整输出一次，`dot_zshrc` 不再重复 eval；`sdk.zsh` 为无条件 `source` 但内部逐项守卫。详见 `dot_zshrc` 注释。
 3. **强绑定的个人路径与镜像**：`GOPATH`、`GOPROXY`、清华 pip 镜像别名、`ANDROID_NDK_HOME` 等以 `sdk.zsh`/`aliases.zsh` 源码为准。
 4. **被别名替换的原生命令**：`cat→bat`、`ls→lsd`、`top→htop`、`rm/cp/mv→-i` 等见 `aliases.zsh`；脚本中需原生行为时用 `command cat` 等形式。
 
 ## 修改与验收流程
 
 1. 改完后逐文件跑语法检查（实测 `zsh -n` 多文件传参时只解析首个）：`for f in aliases.zsh fzf.zsh sdk.zsh dot_zshrc dot_zimrc; do zsh -n "$f" || exit 1; done`（或 `zsh -n ~/.config/zsh/.zshrc`）
-2. 干净启动验证无报错：`zsh -ic 'exit'`
-3. 抽查关键定义：`zsh -ic 'type k df du; echo $EDITOR; echo $LANG'`
+2. 提交前离线检查：从仓库根执行 `python3 docs/validation/check.py`（隔离 HOME + stub；不执行更新器）。
+3. 仅在主动验证已部署配置时执行 `zsh -ic 'exit'` / `zsh -ic 'type k df du; echo $EDITOR; echo $LANG'`；这些命令使用真实 HOME，首次启动可能下载插件。
 4. 提交：小步提交，说明动机；重大重构前先打 tag 以便回退（本仓库历史上并无 `baseline` 标签，不要创建同名标签造成混淆）。

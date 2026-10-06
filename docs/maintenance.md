@@ -51,6 +51,20 @@ git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi commit -m 
 
 ## 验收清单
 
+### 源文件离线检查（建议提交前先跑）
+
+从仓库根执行，不部署到真实 HOME，不联网、不加载真实插件或运行更新器：
+
+```sh
+python3 docs/validation/check.py --strict
+```
+
+依赖、跳过项与隔离边界见 [validation/README.md](validation/README.md)，本次审查结论见 [optimization.md](optimization.md)。
+
+### 应用后检查（手动选择，不是离线测试）
+
+**下方命令使用真实 HOME**；交互 shell 与 Neovim 首次启动可能下载插件，`zimfw update/init` 会更新或重建插件。仅在确认要对当前机器操作时逐项执行，勿整块复制进 CI 或误当纯验证。
+
 改动不同组件后至少跑过对应检查（覆盖 `zsh` / `zim` / `starship` / `ghostty` / `alacritty` / `nvim` / `fish` / `mise` / `git` / `chezmoi`）：
 
 ```bash
@@ -89,12 +103,12 @@ git config --get-regexp proxy               # 应为 socks5h://127.0.0.1:5376（
 git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy
 
 # fish 配置语法检查（fish -n 只校验首个文件，必须逐个检查；实测多文件传参时后续文件被静默跳过）
-for f in ~/.config/fish/config.fish ~/.config/fish/conf.d/*.fish; fish -n $f; or exit 1; end
+for f in ~/.config/fish/config.fish ~/.config/fish/conf.d/*.fish; do fish --no-config -n "$f" || exit 1; done
 # conf.d 现含五文件：00_env / 00_aliases / 01_dev / 01_rev / 02_mise（02_mise 以 type -q mise 守卫激活，与 zsh 侧 dot_zshrc 的 activate 对应；fisher 插件安装于 ~/.config/fish/fisher = fisher_path，退出 chezmoi 管理域，config.fish 注入其 functions/completions/conf.d，不写入仓库 private_functions/）
 
 # mise 环境体检
 mise doctor
-mise ls                                     # 应列出 bun/deno/go/node/pnpm（已钉版：bun 1.4.2 / deno 2.9.7 / go 1.27.1 / node 26.10.0 / pnpm 12.8.1，见 private_dot_config/mise/config.toml）
+mise ls                                     # 工具声明见 private_dot_config/mise/config.toml，当前使用 latest 浮动选择器
 
 # alacritty：CLI 无 --print-config 子命令（0.17 实测报错），配置解析在启动时进行，
 # 冒烟启动（瞬间退出）即可验证配置可解析
@@ -135,7 +149,7 @@ HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/private_config` 的 `Pro
 
 | 维度 | `auto-update` | `update-all` |
 | --- | --- | --- |
-| 定义位置 | `aliases.zsh:53` | `aliases.zsh:206` |
+| 定义位置 | `aliases.zsh` 的 `auto-update` | `aliases.zsh` 的 `update-all` |
 | 覆盖目标 | 7 项（同 `update-all`，经委托实现） | 7 项：`brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise` / `pi`（含 `mise upgrade`、`pi update --all`） |
 | 参数 | 无参数，固定调用 `update-all` 全量 | 支持 `update-all brew mise` 参数过滤，未传参则全量；未知目标报错并提示可用列表 |
 | 守卫与容错 | 由 `update-all` 实现 | 循环内 `command -v $name` 守卫 + `eval` 失败则 `failed++` |
@@ -169,13 +183,13 @@ HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/private_config` 的 `Pro
 
 `.chezmoiignore`（仓库根）控制 `chezmoi add` / `apply` 时忽略的**目标名**模式（模式按部署后的目标路径匹配，不是源文件名），当前包括：
 
-- 本地覆盖与备份：`**/*.local`、`**/*.local.*`、`**/*.bak`（`**/` 前缀覆盖嵌套路径，如 `.config/kitty/kitty.local.conf` 仅入库不部署）、`**/.DS_Store`、`nvim.log`
-- 仓库文档：`**/README.md`（根级与嵌套，含 `zsh/README.md`、`nvim/README.md`）、`docs/`；`**/LICENSE` 行保留为防御（根级与 `nvim/LICENSE` 文件均已删除）
+- 本地覆盖与备份：`**/*.local`、`**/*.local.*`、`**/*.bak`（`**/` 前缀覆盖嵌套路径，如 `.config/kitty/kitty.local.conf` 仅入库不部署）、`**/.DS_Store`、`**.log`
+- 仓库文档：`**/*.md`（包括根级与嵌套 README 和其他 Markdown）、`docs/`；`**/LICENSE` 行保留为防御（根级与 `nvim/LICENSE` 文件均已删除）
 - 敏感信息：`**/*token*`、`**/*secret*`、`**/*credential*`（`**` 前缀覆盖嵌套目录）
 - 构建产物：`node_modules/`、`.pnpm-store/`
 - fish 机器本地状态：`.config/fish/fish_variables`（fish Universal Variables，仅本机）
 - 机器本地配置（不跨机部署，源已移出或仅作参考）：`.claude/settings.json`、`.codex/config.toml`
-- pi 运行时数据：`.pi/agent/{sessions,npm,missions}/**`、`.pi/tasks/**`、`.pi/workflows/projects/**`、`.pi/agent/mcp*.json` 系列与 `auth.json`、`models-store.json`（其余 `.pi` 配置正常部署）
+- Pi：`.pi/**` 默认不部署，仅开放 `.pi/agent/settings.json`、`.pi/agent/pi-goal.json` 与 `.pi/workflows/settings.json` 三个配置及其父目录。Git 提交域另由 `.gitignore` 的源名 allowlist 保护，不能用部署规则代替提交审查
 
 > 历史修正（2026-08 收口）：旧版曾按源名书写 `**/dot_git` / `**/dot_DS_Store` / `dot_gitconfig`（均不匹配目标名 `.git` / `.DS_Store` / `.gitconfig`，从未生效），且 `**/README.md` 误拼为 `**/REAMDME.md`、缺 `**/LICENSE`——现已全部按目标名改写、删除无效行并补齐。因此 `dot_gitconfig` → `~/.gitconfig` 为**正常部署目标**（旧文档称其被排除、"仅作本地参考快照"系对无效行的误读）；修复后 `chezmoi managed` 目标数 59→55；后续去重又删除了被更宽模式覆盖或已无对应文件的冗余行（根级 `README.md` / `LICENSE`、`docs/**`、`**/.git`、`*client_secret*`、两条 `**.md` 及已不存在的 `REPO-INSIGHT.md`），目标数保持 55 不变（核心 targets 不变），其后 fish 配置扩容实测曾达 81（纳入 `.config/fish/fish_variables` 后为 82，详见 [layout.md](layout.md)）。随后添加 `.config/fish/fish_variables` 至 `.chezmoiignore` 进一步排除。详见 [layout.md](layout.md)。
 

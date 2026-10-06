@@ -1,190 +1,69 @@
 # 💤 LazyVim
 
-A starter template for [LazyVim](https://github.com/LazyVim/LazyVim) — deployed via [chezmoi](https://www.chezmoi.io/) from `private_dot_config/nvim/` → `~/.config/nvim/`.
-
-> **chezmoi 视角**：本文件由源目录 `.chezmoiignore` 的 `**/README.md` 排除、**不**部署到 `~/.config/nvim/README.md`，仅仓库内查阅。仓库级一致性校验（extras 清单 / 选项与键位逐行核对）见 [`docs/neovim.md`](../../docs/neovim.md)，二者互补不重复；改动配置以 `lua/config/*.lua` 为唯一权威（`lazy-lock.json` 已不入库）。
-
-## Overview
-
-This is a Neovim configuration based on LazyVim, designed to provide a modern,
-highly customizable editor experience with sensible defaults and a great out-of-the-box
-setup. This configuration is managed as static files (no templates) and has been
-enhanced with comprehensive comments throughout `lua/config/*.lua`.
-
-- **Target**: Neovim ≥ 0.9 (verified on 0.12)
-- **Manager**: [lazy.nvim](https://github.com/folke/lazy.nvim) — auto-install at latest versions (`lazy-lock.json` untracked since 3c3d65f; no commit-level lock)
-- **Extras**: 10 extras (9 `lang.*` + 1 `ui.mini-animate`, see `lua/config/lazy.lua`)
-- **Style**: `stylua.toml` — Spaces 2, width 120; colorscheme inherits the LazyVim default (the former `example.lua` catppuccin override was removed with that file)
+This static Neovim configuration is deployed by chezmoi from
+`private_dot_config/nvim/` to `~/.config/nvim/`. This README stays in the repository;
+`.chezmoiignore` excludes documentation from deployment.
 
 ## Installation
 
-### Recommended: via chezmoi (this dotfiles repo)
+Preview the source-to-HOME changes before applying:
 
-```bash
-# 1. Preview and apply (source is ~/.local/share/chezmoi)
+```sh
 chezmoi diff
 chezmoi apply
-
-# 2. Start Neovim — first launch bootstraps lazy.nvim and installs all plugins at their latest versions (needs network)
-nvim
-# :Lazy sync  — if you add plugins later
-# :checkhealth — verify LSP / treesitter / provider health
-```
-
-No separate `git clone` is needed; `chezmoi apply` already places this directory at `~/.config/nvim/`.
-
-### Standalone (without chezmoi)
-
-If you use this `nvim/` directory outside chezmoi:
-
-```bash
-# 1. Backup existing config (optional but recommended)
-mv ~/.config/nvim ~/.config/nvim.bak
-
-# 2. Clone / copy this directory
-git clone <your-fork-url> ~/.config/nvim
-# NOTE: raw cp keeps chezmoi names like dot_gitignore/.gitignore unrenamed — prefer chezmoi apply over manual copy
-
-# 3. Start Neovim (auto-bootstrap)
 nvim
 ```
 
-## Structure
+The first Neovim launch bootstraps lazy.nvim and downloads plugins if missing.
+Current local verification uses Neovim 0.12.5 / LuaJIT; the inspected LazyVim
+16.0.1 requires Neovim ≥ 0.11.2. Check upstream requirements when upgrading.
 
-```
-~/.config/nvim/  (source: private_dot_config/nvim)
-├── init.lua                  → require("config.lazy") only
-├── lua/
-│   ├── config/
-│   │   ├── lazy.lua          bootstrap + spec (LazyVim + 10 extras + plugins)
-│   │   ├── options.lua       global options (numbers / 4-space indent / search / truecolor; clipboard & completion inherit LazyVim defaults)
-│   │   ├── keymaps.lua       custom keymaps (loaded after LazyVim defaults)
-│   │   └── autocmds.lua      autocmds (loaded on VeryLazy)
-│   └── plugins/              custom spec entry point — currently EMPTY (`example.lua` removed; new files here are auto-loaded)
-├── lazy-lock.json            NOT in the repo — runtime-generated per machine; plugin versions not pinned (untracked in 3c3d65f)
-├── lazyvim.json              LazyVim metadata (extras=[], news 11866, version 8 — extras empty is expected, real list is in lazy.lua)
-├── stylua.toml               Spaces 2 / 120 columns
-├── .gitignore                ignores tag / log / data
-└── README.md                 this file（仓库内，**/README.md 排除，不部署）
-```
+## Configuration
 
-See [`docs/neovim.md`](../../docs/neovim.md) for the full chezmoi mapping (`dot_gitignore` → `.gitignore`, etc.) and `.chezmoiignore` notes.
+- `init.lua` loads `config.lazy`; `lua/config/lazy.lua` imports LazyVim core
+  and `lua/plugins/`.
+- `lazyvim.json` declares the extras: language support, DAP, testing, editing,
+  UI and Sidekick. Do not rely on an old hard-coded extras list in documentation.
+- `lua/plugins/colorscheme.lua` selects Catppuccin.
+- `lua/plugins/mason.lua` extends the tool installation list.
+- `lua/plugins/sidekick.lua` disables NES, retaining the CLI integration.
+- `lua/config/options.lua` selects pyrefly for Python, scrolloff 8, a
+  120-column ruler, showmatch and `modeline=false`. Other options inherit upstream defaults.
+- `lua/config/keymaps.lua` adds one local mapping: Insert `jk` → Escape.
+- `lua/config/autocmds.lua` enables cursorline only in full Normal mode,
+  including correct recovery after Ctrl-C; its augroup is reload-idempotent.
+- `stylua.toml` configures two-space Lua formatting with width 120.
 
-## Features
+Detailed architecture and validation contracts are in
+[docs/neovim.md](../../docs/neovim.md). All effective local values are determined
+by the JSON/Lua source, not copied keymap or plugin tables.
 
-### Extras (lua/config/lazy.lua — 10)
+## Customization and updates
 
-```lua
-{ import = "lazyvim.plugins.extras.lang.typescript" },
-{ import = "lazyvim.plugins.extras.lang.json" },
-{ import = "lazyvim.plugins.extras.lang.python" },
-{ import = "lazyvim.plugins.extras.lang.rust" },
-{ import = "lazyvim.plugins.extras.lang.go" },
-{ import = "lazyvim.plugins.extras.lang.cmake" },
-{ import = "lazyvim.plugins.extras.lang.docker" },
-{ import = "lazyvim.plugins.extras.lang.yaml" },
-{ import = "lazyvim.plugins.extras.lang.markdown" },
-{ import = "lazyvim.plugins.extras.ui.mini-animate" },
-```
+Put plugin specs in `lua/plugins/`. Configure options and mappings in
+`lua/config/`; use `:LazyExtras` for extras and merge target-file changes back
+into the chezmoi source.
 
-9 language extras + `mini-animate`. LSP / formatting / lint are handled by mason + nvim-lspconfig + conform + nvim-lint; mason prompts to install the server on first open of the relevant filetype. `lazyvim.json` `extras: []` is expected — LazyVim writes that file at runtime; the source of truth is `lazy.lua`.
+- `:Lazy` and `:checkhealth`: runtime/plugin health.
+- `:Lazy update`, `:Lazy restore`, `:Lazy sync`: plugin management.
+- `lazy-lock.json` is local runtime state, not tracked by this repository;
+  installations are not pinned across machines.
+- Shell `update-all` does not update Neovim plugins.
 
-### Plugin Set (not pinned)
+## Offline verification
 
-`lazy-lock.json` is no longer tracked (3c3d65f): each machine installs the latest plugin versions on first launch and writes its own local lock; the repo does not pin versions, so cross-machine installs are **not** guaranteed identical. The list below is the historical lock snapshot (43 entries), kept for reference only:
+From the repository root:
 
-`LazyVim`, `SchemaStore.nvim`, `blink.cmp`, `bufferline.nvim`, `catppuccin`, `cmake-tools.nvim`,
-`conform.nvim`, `crates.nvim`, `flash.nvim`, `friendly-snippets`, `fzf-lua`, `gitsigns.nvim`,
-`grug-far.nvim`, `lazy.nvim`, `lazydev.nvim`, `lualine.nvim`, `markdown-preview.nvim`,
-`mason-lspconfig.nvim`, `mason.nvim`, `mini.ai`, `mini.animate`, `mini.icons`, `mini.pairs`,
-`neo-tree.nvim`, `noice.nvim`, `nui.nvim`, `nvim-lint`, `nvim-lspconfig`,
-`nvim-treesitter`, `nvim-treesitter-textobjects`, `nvim-ts-autotag`, `persistence.nvim`,
-`plenary.nvim`, `render-markdown.nvim`, `rustaceanvim`, `snacks.nvim`, `telescope.nvim`,
-`todo-comments.nvim`, `tokyonight.nvim`, `trouble.nvim`, `ts-comments.nvim`,
-`venv-selector.nvim`, `which-key.nvim`.
-
-> Update via `:Lazy update` (refreshes the local lock) / `:Lazy restore` (rollback). The shell `update-all` (brew/mise/sdk/…) does **not** touch Neovim plugins — the two channels are independent.
-
-### Custom Plugin Specs (`lua/plugins/`)
-
-`lua/plugins/` is currently **empty** — the former `example.lua` (catppuccin colorscheme override, telescope `<leader>fp`, pyright, treesitter `ensure_installed`, mason tool list, lualine `😄` component, commented nvim-cmp) was removed with the file, so **none of those overrides are active anymore**; colorscheme falls back to the LazyVim default (tokyonight). Add new spec files under `lua/plugins/` to customize — every spec there is auto-loaded by lazy.nvim.
-
-### Built-in Settings (lua/config/options.lua)
-
-- **Line numbers**: `number` + `relativenumber` (absolute current, relative others)
-- **Indent**: `tabstop=4` `shiftwidth=4` `expandtab` `smartindent` `autoindent` `wrap=false` (4-space)
-- **Scroll**: `scrolloff=8`
-- **Clipboard / completion**: NOT set here — LazyVim's defaults are inherited (clipboard is SSH-aware upstream: empty over `SSH_CONNECTION` so the OSC52 provider works remotely; `completeopt=menu,menuone,noselect` is already the upstream default. Former static overrides removed.)
-- **Search**: `ignorecase` + `smartcase` + `hlsearch` + `incsearch` + `inccommand=nosplit` + `showmatch` (smart case, incremental highlight)
-- **Colors**: `termguicolors` + `colorcolumn="100"` (true color, 100-column ruler)
-- **Cursorline**: highlighted only in Normal mode (toggled via `InsertEnter`/`InsertLeave` autocmd)
-
-### Key Mappings (lua/config/keymaps.lua)
-
-Leader is `<Space>` (LazyVim default). Custom mappings loaded after defaults (so you can override):
-
-| Keymap            | Mode | Action                      | Description                  |
-| ----------------- | ---- | --------------------------- | ---------------------------- |
-| `jk`              | i    | `<ESC>`                     | Exit insert mode             |
-| `<leader><space>` | n    | `<cmd>nohlsearch<CR>`       | Clear search highlights      |
-| `<leader>sv`      | n    | `<C-w>v`                    | Split window vertically      |
-| `<leader>sh`      | n    | `<C-w>s`                    | Split window horizontally    |
-| `<leader>rl`      | n    | `<cmd>set relativenumber!<CR>` | Toggle relative line numbers |
-
-> **Note**: a former `<leader>bd` → raw `<cmd>bdelete<CR>` map was removed — it silently overrode LazyVim's built-in `<leader>bd` (Snacks.bufdelete, keeps window layout) while claiming to complement it; LazyVim's `<leader>bD` remains the raw `:bd` variant.
-
-> **Note**: historical `<leader>u` (UndotreeToggle) and `<leader>f` (LSP format) maps were removed — the former errored `E492` because `mbbill/undotree` is neither in `lazy-lock.json` nor in `lua/plugins/`, and both clobbered LazyVim's `<leader>u` / `<leader>f` group prefixes. To restore undotree, first add a real spec (e.g. `return { "mbbill/undotree" }` + `:Lazy sync`), then map keys; formatting uses LazyVim's built-in `<leader>cf` / `<leader>uf`.
-
-All other keys are LazyVim defaults (flash, neo-tree, snacks, bufferline, which-key, etc.). Press `<leader>` and wait for which-key to see the full list; full reference at [lazyvim.org/keymaps](https://www.lazyvim.org/keymaps).
-
-### Autocmds (lua/config/autocmds.lua)
-
-| Event | Group | Pattern | Action |
-| ----- | ----- | ------- | ------ |
-| `InsertEnter`/`InsertLeave` | `user_cursorline_toggle` | `*` | Cursorline only in Normal mode |
-
-> yank 高亮与窗口均分已由 LazyVim v16 上游覆盖，不再重复定义。
-
-> No per-filetype autocmds: the former `FileType python` row was stale (removed from autocmds.lua as redundant) — indentation is set globally in `options.lua` (4-space) and per-filetype needs would go in `autocmds.lua`.
-
-> Format-on-save is now handled solely by LazyVim's built-in autoformat (on by default; toggle with `<leader>uf` / `<leader>uF`). The custom `FormatOnSave` `BufWritePre` autocmd was removed — it double-formatted every save and kept running even after autoformat was disabled.
-
-## Customization
-
-#### Adding Plugins
-
-Create new files in `lua/plugins/`. Every spec under `lua/plugins/` is auto-loaded by lazy.nvim:
-
-```lua
--- lua/plugins/my.lua
-return { "mbbill/undotree", cmd = "UndotreeToggle" }
+```sh
+python3 docs/validation/check.py --strict
 ```
 
-#### Modifying Options
-
-Edit `lua/config/options.lua` for globals, or override via the `opts` field in a plugin spec.
-
-#### Key Mappings
-
-Add custom maps in `lua/config/keymaps.lua` (loaded after LazyVim defaults, so you can override). Use `desc` for which-key hints:
-
-```lua
-vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })
-```
-
-## Updating & Health
-
-- **Check**: `:Lazy` — plugin status; `:checkhealth` — LSP / treesitter / providers.
-- **Update**: `:Lazy update` (updates `lazy-lock.json`) · **Restore**: `:Lazy restore` · **Sync**: `:Lazy sync`.
-- **Checker**: `lua/config/lazy.lua` sets `checker.enabled=true, notify=false` (silent background check).
-- **Shell**: `update-all` / `auto-update` in `private_dot_config/zsh/aliases.zsh` cover brew/mise/sdk/… **only** — run `:Lazy update` separately for Neovim.
-
-## Relationship to docs/neovim.md
-
-- This README = **repository view** (kept in the source tree; excluded by `.chezmoiignore` `**/README.md`, not deployed to `~/.config/nvim/README.md`) — installation, features, keymaps, settings.
-- [`docs/neovim.md`](../../docs/neovim.md) = **repository view (maintainer)** — source structure, file-by-file mapping, extras provenance, lock verification, autocmd groups, and the `update-all` boundary.
-- Both share the same numbers: **10 extras (9 lang + mini-animate)** and **5 custom keymaps**; conflicts — `lua/config/*.lua` wins (`lazy-lock.json` not tracked).
+The tests use disposable HOME/XDG paths and plugin-free Neovim instances. They
+check local Lua syntax, actual mode changes and local overrides—not external
+plugin installation, LSP connectivity or a complete LazyVim bootstrap.
+See [validation/README.md](../../docs/validation/README.md).
 
 ## License
 
-Apache-2.0 — the `LICENSE` file has been removed from this repo (former LazyVim starter copy); this statement is retained, full text at the [LazyVim starter](https://github.com/LazyVim/starter).
+Apache-2.0 declaration retained from the starter; the repository does not contain
+its full license text. See the [LazyVim starter](https://github.com/LazyVim/starter).
