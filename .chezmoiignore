@@ -33,7 +33,7 @@ docs/
 # fish 机器本地状态（Universal Variables，仅本机；仓库仅提交 fish_plugins 与手写配置）
 .config/fish/fish_variables
 
-# 敏感与凭据（防误入库；含 token/secret/credential 字样的文件一律排除）
+# 敏感与凭据（仅防部署；Git 提交排除由 .gitignore 负责，不能依赖此处防误入库）
 # 注：`*` 不跨 / ，必须用 `**/` 前缀才能覆盖嵌套目录（如 ~/.config/foo/secret.txt）
 **/*token*
 **/*secret*

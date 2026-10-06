@@ -20,10 +20,19 @@ nvim.payne
 
 # --- Coding agent 运行时（本地状态，不入库）---
 .pi/
-# 凭据纵深防御：防止未来 `chezmoi add` 把 ~/.pi 凭据以源文件形式带入公开仓库
-private_dot_pi/**/mcp*.json
-private_dot_pi/**/auth.json
-private_dot_pi/private_agent/sessions/
+# Pi 源文件默认不入库，仅允许与 .chezmoiignore 对应的三个配置（此处按源名匹配）。
+# Git ignore 不保护已跟踪文件，也不能阻止 git add -f；提交前仍需审查 diff。
+/dot_pi/**
+!/dot_pi/
+!/dot_pi/agent/
+!/dot_pi/workflows/
+!/dot_pi/agent/settings.json
+!/dot_pi/agent/pi-goal.json
+!/dot_pi/workflows/settings.json
+# 兼容旧源布局及 private_/encrypted_ 等文件属性前缀。
+private_dot_pi/**/*mcp*.json*
+private_dot_pi/**/*auth*.json*
+private_dot_pi/**/sessions/
 
 # --- 审计/测试残留（防复发，替代本地 .git/info/exclude）---
 .tmp-empty-config.toml
