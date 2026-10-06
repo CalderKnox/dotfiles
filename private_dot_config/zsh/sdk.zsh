@@ -7,7 +7,7 @@
 #               且为三模块最后加载（内含 compdef 注册，需 compinit 已完成；
 #               顺序即语义）
 # Guards      : 单项工具均 command -v / 目录存在 + 去重守卫；SDKMAN 惰性桩；
-#               补全缓存按二进制 mtime 失效并 zcompile
+#               补全缓存按可执行文件 stat 身份失效，锁内原子发布并 zcompile
 # Loading-order contract: aliases.zsh -> fzf.zsh -> sdk.zsh (sdk last)
 # Author      : Payne
 # =============================================================================
@@ -31,13 +31,19 @@ if command -v pnpm &>/dev/null && command -v compdef &>/dev/null; then
 fi
 
 ########## Java / SDKMAN ##########
-# SDKMAN 惰性加载（省约 45ms 启动耗时）：此处仅定义 sdk 占位函数，首次调用
+# SDKMAN 惰性加载：此处仅定义 sdk 占位函数，首次调用
 # 时才 source sdkman-init.sh——其内部重定义 sdk 为真实实现并注入
 # PATH/JAVA_HOME，后续调用即由真实实现接管。未安装 SDKMAN 时不定义任何内容。
 # 注意：JAVA_HOME 与各 candidate 的 PATH 注入也随之延迟到首次 sdk 调用。
-if [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]]; then
+if [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && (( ! $+functions[sdk] )); then
     sdk() {
-        source "$HOME/.sdkman/bin/sdkman-init.sh"
+        # 先移除占位桩：失败或初始化未定义 sdk 时不得递归调用自己。
+        unfunction sdk
+        source "$HOME/.sdkman/bin/sdkman-init.sh" || return $?
+        if (( ! $+functions[sdk] )); then
+            print -u2 -- "SDKMAN initialization did not define sdk."
+            return 1
+        fi
         sdk "$@"
     }
 fi
@@ -66,31 +72,50 @@ export GOBIN="${GOPATH}/bin"
 source "$HOME/.cargo/env" 2>/dev/null
 
 ########## Container ##########
-# 通用补全缓存加载器：kubectl/docker 的补全脚本需拉起子进程生成（各 ~10ms 级），
-# 首次生成后缓存到 ${ZDOTDIR:-~}/.cache/zsh/ 并 zcompile，之后启动直接 source 缓存
-# （zsh 自动优先加载不早于源文件的 .zwc 字节码）。
-# 失效策略：工具二进制比缓存新（升级）时自动重建；生成失败则回退为本次跳过。
+# 通用补全缓存加载器：首次调用真实二进制生成，之后启动复用源码/字节码。
+# 路径 + stat 身份等值比较，兼容同路径降级及未来 mtime；不以缓存创建时间判断升级。
+# 每工具的内建 flock 覆盖检查、生成、发布和 source，避免混用不同安装的源码/字节码。
+# 最多等锁 1 秒；生成/校验失败保留旧文件但本次跳过，不阻塞启动或使用错误版本补全。
 _ZSH_CACHE_DIR="${ZDOTDIR:-${HOME}}/.cache/zsh"
 _load_cached_completion() {
-    # $1: 工具名，补全生成命令固定为 "$1 completion zsh"
-    # 前置守卫：工具不存在，或 compdef 未定义（Zim 引导失败的弱网场景）时静默跳过
-    local tool="$1" bin_path cache_file
-    command -v "$tool" &>/dev/null && command -v compdef &>/dev/null || return 0
-    # 用 whence -p 只解析二进制路径（command -v 会命中同名函数/别名，如 kubectl 包装函数）
+    emulate -L zsh
+    local tool="$1" bin_path cache_file cached_header header tmp_file lock_fd
+    local -A executable_stat
+    command -v compdef &>/dev/null || return 0
+    # 解析真实二进制；不调用 kubecolor 包装函数或同名 alias。
     bin_path="$(whence -p "$tool" 2>/dev/null)"
+    [[ -n "$bin_path" && -x "$bin_path" ]] || return 0
+    bin_path="${bin_path:A}"
+    zmodload zsh/stat && zmodload zsh/system || return 0
     cache_file="${_ZSH_CACHE_DIR}/${tool}-completion.zsh"
-
-    if [[ ! -s "$cache_file" || ( -n "$bin_path" && "$bin_path" -nt "$cache_file" ) ]]; then
-        command mkdir -p "$_ZSH_CACHE_DIR"
-        if ! "$tool" completion zsh > "$cache_file" 2>/dev/null; then
-            command rm -f -- "$cache_file"
-            return 0
+    [[ -d "$_ZSH_CACHE_DIR" ]] || command mkdir -p "$_ZSH_CACHE_DIR" || return 0
+    # 稳定锁文件不能在解锁后删除：否则下一进程可能锁住不同 inode。
+    : >> "${cache_file}.lock" || return 0
+    zsystem flock -t 1 -i 0.02 -f lock_fd "${cache_file}.lock" 2>/dev/null || return 0
+    {
+        zstat -H executable_stat -- "$bin_path" 2>/dev/null || return 0
+        header="# completion executable: ${(q)bin_path} ${executable_stat[device]}:${executable_stat[inode]}:${executable_stat[size]}:${executable_stat[mtime]}:${executable_stat[ctime]}"
+        [[ -r "$cache_file" ]] && IFS= read -r cached_header < "$cache_file"
+        if [[ ! -s "$cache_file" || "$cached_header" != "$header" ]]; then
+            tmp_file="$(command mktemp "${cache_file}.XXXXXX")" || return 0
+            [[ -n "$tmp_file" ]] || return 0
+            if { print -r -- "$header"; "$bin_path" completion zsh; } >| "$tmp_file" 2>/dev/null &&
+                [[ "$(<"$tmp_file")" != "$header" ]] && command zsh -dfn "$tmp_file" 2>/dev/null; then
+                command rm -f -- "${cache_file}.zwc" && command mv -f -- "$tmp_file" "$cache_file" || return 0
+                # .zwc 必须嵌入最终源码名，否则 rename 后 Zsh 会静默忽略字节码。
+                # 锁覆盖发布；单独指定临时 output，仍以最终源码名编译。
+                if zcompile -U "${tmp_file}.zwc" "$cache_file" 2>/dev/null; then
+                    command mv -f -- "${tmp_file}.zwc" "${cache_file}.zwc"
+                fi
+            else
+                return 0
+            fi
         fi
-    fi
-    if [[ ! -s "${cache_file}.zwc" || "$cache_file" -nt "${cache_file}.zwc" ]]; then
-        zcompile "$cache_file" 2>/dev/null
-    fi
-    source "$cache_file"
+        source "$cache_file"
+    } always {
+        [[ -n "$tmp_file" ]] && command rm -f -- "$tmp_file" "${tmp_file}.zwc"
+        zsystem flock -u "$lock_fd"
+    }
 }
 
 # Docker 补全（未安装 docker CLI 时跳过；子进程生成结果走缓存）
