@@ -14,7 +14,6 @@
     "npm:@narumitw/pi-goal",
     "npm:@narumitw/pi-btw",
     "npm:@narumitw/pi-statusline",
-    "npm:@patimweb/pi-cron",
     "npm:@calesennett/pi-codex-fast"
   ],
   "defaultTools": [
@@ -28,7 +27,7 @@
   ],
   "defaultProvider": "openai",
   "defaultModel": "gpt-6.1-sol",
-  "defaultThinkingLevel": "medium",
+  "defaultThinkingLevel": "max",
   "steeringMode": "all",
   "hideThinkingBlock": true,
   "pi-codex-fast": {
