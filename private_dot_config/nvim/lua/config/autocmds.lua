@@ -8,15 +8,20 @@
   参考：https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/autocmds.lua
 ]]
 
--- 仅在 Normal 模式显示光标行高亮：进入插入模式时关闭，离开插入模式时开启。
--- 动机：插入编辑时 cursorline 容易干扰视线；Normal 模式下保留便于定位当前行。
--- 触发：任意缓冲区的 InsertEnter / InsertLeave（pattern = "*"）。
--- 实现：用 augroup 包住，clear = true 保证重复加载配置时不会重复注册同一组回调。
-vim.api.nvim_create_autocmd({ "InsertEnter", "InsertLeave" }, {
-  group = vim.api.nvim_create_augroup("HighlightCursorLine", { clear = true }),
-  pattern = "*",
-  callback = function(ev)
-    -- InsertLeave 时打开 cursorline；InsertEnter 时关闭
-    vim.wo.cursorline = (ev.event == "InsertLeave")
-  end,
+-- 仅在 Normal 模式高亮。ModeChanged 覆盖不触发 InsertLeave 的 Ctrl-C，
+-- 也覆盖 Replace、Visual 和 Ctrl-O 暂时离开/返回插入模式。
+-- 使用实际模式，初始化与窗口切换时同步 window-local 选项；重复加载不累积回调。
+local group = vim.api.nvim_create_augroup("HighlightCursorLine", { clear = true })
+local function update_cursorline()
+  vim.wo.cursorline = vim.fn.mode(1) == "n"
+end
+vim.api.nvim_create_autocmd("ModeChanged", {
+  group = group,
+  pattern = "*:*",
+  callback = update_cursorline,
 })
+vim.api.nvim_create_autocmd("WinEnter", {
+  group = group,
+  callback = update_cursorline,
+})
+update_cursorline()
