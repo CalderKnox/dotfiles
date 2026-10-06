@@ -31,6 +31,19 @@ if status is-interactive
     # Interactive-only prompt: initialize starship when installed.
     # `type -q` guard makes this a no-op on machines without starship,
     # keeping non-interactive / CI startup fast.
-    type -q starship; and starship init fish | source
-    type -q zoxide; and zoxide init fish | source
+    # 生成成功后才执行完整输出；失败的 producer 不得把部分代码送进 source。
+    if type -q starship
+        if set -l starship_init (starship init fish)
+            printf '%s\n' $starship_init | source
+        else
+            echo "starship initialization failed; output not sourced." >&2
+        end
+    end
+    if type -q zoxide
+        if set -l zoxide_init (zoxide init fish)
+            printf '%s\n' $zoxide_init | source
+        else
+            echo "zoxide initialization failed; output not sourced." >&2
+        end
+    end
 end

@@ -42,7 +42,8 @@ set -gx EDITOR nvim
 set -gx VISUAL nvim
 
 set -gx HOMEBREW_NO_AUTO_UPDATE 1      # 禁用自动更新提示（由 update-all 显式触发）
-set -gx HOMEBREW_NO_INSTALL_CLEANUP 0  # 0 = 保留清理（brew 默认）；1 = 禁用
+# HOMEBREW_NO_INSTALL_CLEANUP 是 presence-style 开关，连 0 也会禁用清理。
+# 不设置它：保持 brew 默认，同时尊重调用者显式继承的 opt-out。
 set -gx HOMEBREW_NO_ENV_HINTS 1         # 静默 hints
 
 # ---------------------------------------------------------------------------

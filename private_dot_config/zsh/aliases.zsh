@@ -166,8 +166,18 @@ ruff_auto() {
 
 # 使用清华镜像安装 pip 包
 alias pip_tsinghua_mirror='python3 -m pip install -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple'
-# ⚠️ 破坏性操作：删除 .venv 与 uv.lock 后重建并同步
-alias uv_resync='rm -rf ${HOME}/.venv ${HOME}/uv.lock && uv sync'
+# ⚠️ 破坏性操作：删除 HOME 下 .venv 与 uv.lock 后重建并同步
+# 先检查 uv，且每一步失败即停止，避免依赖缺失或删除失败造成额外破坏。
+# 兼容在旧 alias 仍存在的 shell 中 reload（alias 会参与函数定义的解析）。
+unalias uv_resync 2>/dev/null || true
+uv_resync() {
+    if ! command -v uv >/dev/null 2>&1; then
+        print -u2 -- "uv not found; ${HOME}/.venv and ${HOME}/uv.lock left unchanged."
+        return 127
+    fi
+    command rm -rf -- "$HOME/.venv" "$HOME/uv.lock" || return $?
+    uv sync
+}
 
 # =============================================================================
 # Android 逆向工程
@@ -182,19 +192,28 @@ scr() { nohup scrcpy "$@" > /dev/null 2>&1 & }   # 后台启动 scrcpy 投屏
 # =============================================================================
 
 # yazi 包装：退出时自动 cd 到最后浏览的目录
-# 健壮性：trap 保证信号/异常退出时清理 tmp；IFS= read -d '' 处理 yazi 的 NUL 分隔
+# always 清理临时文件而不覆盖调用者的 traps；保留 yazi/cd 的失败状态。
 y() {
-	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-	trap 'command rm -f -- "$tmp"' EXIT INT TERM HUP
-	command yazi "$@" --cwd-file="$tmp"
-	IFS= read -r -d '' cwd < "$tmp"
-	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd"
-	command rm -f -- "$tmp"
-	trap - EXIT INT TERM HUP
+    emulate -L zsh
+    local tmp cwd rc=0
+    tmp="$(command mktemp "${TMPDIR:-/tmp}/yazi-cwd.XXXXXX")" || return $?
+    [[ -n "$tmp" ]] || return 1
+    {
+        command yazi "$@" --cwd-file="$tmp" || rc=$?
+        if (( rc == 0 )); then
+            IFS= read -r -d '' cwd < "$tmp"
+            if [[ -n "$cwd" && "$cwd" != "$PWD" && -d "$cwd" ]]; then
+                builtin cd -- "$cwd" || rc=$?
+            fi
+        fi
+    } always {
+        command rm -f -- "$tmp"
+    }
+    return "$rc"
 }
 
 # ---------------------------------------------------------------------------
-# update-all —— 声明式批量更新（6 目标：brew/sdk/rustup/tldr/uv/mise）
+# update-all —— 声明式批量更新（7 目标：brew/sdk/rustup/tldr/uv/mise/pi）
 # 用法：update-all [targets...]  # 无参全量；有参按名过滤
 # 守卫与非直观逻辑：
 #   - tasks 为关联数组，声明式列出命令模板；targets 过滤时校验 Unknown target
@@ -221,24 +240,34 @@ update-all() {
         targets=(${(k)tasks})
     fi
 
+    # 全量预检：未知目标不得在前面的目标已更新后才被发现。
+    local name
+    for name in "${targets[@]}"; do
+        if [[ -z "${tasks[$name]}" ]]; then
+            print -u2 -- "Unknown target: $name"
+            print -u2 -- "Available: ${(kj:, :)tasks}"
+            return 1
+        fi
+    done
+
     local failed=0
     local attempted=0          # 实际执行的目标数（not found 跳过的不计）
     local skipped=0
     local -a failed_names skipped_names
     local start_time=$(date +%s)
 
-    for name in $targets; do
-        if [[ -z "${tasks[$name]}" ]]; then
-            print -P "%F{red}❌ Unknown target: $name%f"
-            print -P "Available: ${(kj:, :)tasks}"
-            return 1
-        fi
-
+    for name in "${targets[@]}"; do
         print -P "%F{blue}═══ Updating $name ═══%f"
 
         if command -v $name >/dev/null 2>&1; then
             (( attempted++ ))
-            local errfile="$(mktemp "${TMPDIR:-/tmp}/update-all.${name}.XXXXXX")"
+            local errfile
+            if ! errfile="$(command mktemp "${TMPDIR:-/tmp}/update-all.${name}.XXXXXX")" || [[ -z "$errfile" ]]; then
+                (( failed++ ))
+                failed_names+=("$name")
+                print -u2 -- "Cannot allocate stderr file for $name; update skipped."
+                continue
+            fi
             local rc=0
             eval "${tasks[$name]}" 2>! "$errfile" || rc=$?
             if (( rc == 0 )); then
@@ -293,10 +322,11 @@ bak() {
         ts=$(date +%Y%m%d_%H%M%S)
     fi
     (( $# )) || { print -u2 "Usage: bak <file1> <file2> ..."; return 1 }
-    local file base backup
+    local file base backup failed=0
     for file in "$@"; do
         if [[ ! -e $file ]]; then
             print -u2 -P "%F{red}Error: $file does not exist%f"
+            failed=1
             continue
         fi
         base=${file:t}
@@ -310,7 +340,11 @@ bak() {
             print -u2 -P "%F{yellow}Warning: $backup already exists, skipped%f"
             continue
         fi
-        cp -f -- "$file" "$backup" &&
-            print "Backed up: $file -> $backup"
+        if command cp -f -- "$file" "$backup"; then
+            print -r -- "Backed up: $file -> $backup"
+        else
+            failed=1
+        fi
     done
+    return "$failed"
 }

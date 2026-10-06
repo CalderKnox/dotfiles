@@ -140,9 +140,11 @@ done
 unset _p
 
 # init（逐项守卫：工具未安装时静默跳过，不再打印 command not found）
-command -v zoxide   >/dev/null 2>&1 && eval "$(zoxide init zsh)"
-command -v mise     >/dev/null 2>&1 && eval "$(mise activate zsh)"
-command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+# 仅执行成功生成的完整初始化代码，避免失败的 producer 输出被 eval。
+if command -v zoxide >/dev/null 2>&1 && _init="$(zoxide init zsh)"; then eval "$_init"; fi
+if command -v mise >/dev/null 2>&1 && _init="$(mise activate zsh)"; then eval "$_init"; fi
+if command -v starship >/dev/null 2>&1 && _init="$(starship init zsh)"; then eval "$_init"; fi
+unset _init
 # fzf 的键位绑定/补全不再在此 eval：统一由 fzf.zsh 内带守卫的
 # `command -v fzf && eval "$(fzf --zsh)"` 初始化（唯一初始化点，避免双重加载）
 # brew shellenv 也不再在此 eval：Zim 的 zimfw/homebrew 模块（见 dot_zimrc）

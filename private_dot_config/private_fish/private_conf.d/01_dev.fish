@@ -6,9 +6,9 @@
 #               仅包含 Fish 侧常用的 pnpm/cargo/go/mvn 封装；其余保留
 #               为注释模板，按需启用。
 # Usage       : 由 Fish 自动 source（conf.d 字典序，01_ 在 00_ 之后）；
-#               无需手动 source，alias 仅在交互 shell 生效。
-# Guards      : 无外部强依赖；uv_resync 直接 rm -rf .venv uv.lock 后重建并
-#               uv sync --upgrade，无目录守卫（在项目根目录使用）；
+#               无需手动 source；此处别名/函数在非交互 shell 中也会定义。
+# Guards      : uv_resync 先检查 uv，再删除 .venv/uv.lock，逐步成功后重建并
+#               uv sync --upgrade；仍需在项目根目录主动调用；
 #               AI 助手别名 (cla/clp 等) 为普通别名、未加 type -q 守卫，
 #               二进制缺失时错误在调用时暴露（属预期）。
 # Author      : Payne
@@ -75,9 +75,12 @@ alias pip_tsinghua_mirror='python3 -m pip install -i https://mirrors.tuna.tsingh
 # alias uvsync='rm -rf .venv uv.lock && bass uv pip sync --allow-empty-requirements /dev/null && uv sync --upgrade'
 
 function uv_resync
-    rm -rf .venv uv.lock
-    uv venv  # 显式创建虚拟环境
-#     uv pip sync --requirement /dev/null  # 清空依赖（可选）
+    if not type -q uv
+        echo "uv not found; .venv and uv.lock left unchanged." >&2
+        return 127
+    end
+    rm -rf -- .venv uv.lock; or return
+    uv venv; or return  # 显式创建虚拟环境；失败时不继续 sync
     uv sync --upgrade
 end
 

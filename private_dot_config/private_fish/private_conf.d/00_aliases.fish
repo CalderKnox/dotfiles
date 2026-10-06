@@ -60,7 +60,7 @@ alias cbpaste="pbpaste"
 # 智能 cd / mkdir (自动 ls / cd)
 # ---------------------------------------------------------------------------
 function cdd --wraps='builtin cd' --description 'cd with automatic listing'
-    builtin cd $argv
+    builtin cd $argv; or return
     ls -la --group-directories-first 2>/dev/null
 end
 
@@ -143,7 +143,12 @@ function netcheck --description 'Quick network diagnostics'
     echo
 
     echo (set_color cyan)"⚡ Speed Test (Download):"(set_color normal)
-    curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python3 - --simple 2>/dev/null | head -1
+    # 只运行本机已安装的 speedtest-cli，不下载并执行可变的远程 Python 源码。
+    if not type -q speedtest-cli
+        echo "speedtest-cli not found; install it before running the speed test." >&2
+        return 127
+    end
+    speedtest-cli --no-upload --simple
 end
 
 # ---------------------------------------------------------------------------
@@ -200,11 +205,10 @@ function ofproxy --description 关闭终端代理
 end
 
 # ---------------------------------------------------------------------------
-# update-all — 声明式批量更新 (fish 版; 默认清单与 zsh 有意不同, 非对齐关系)
+# update-all — 声明式批量更新 (fish 版; Rust 目标名为 rust，zsh 为 rustup)
 # 用法: update-all [targets...]  无参全量；有参按名过滤
 #       auto-update = onproxy + update-all（先开代理再全量更新）
-# 任务: brew / rust / tldr / uv / mise / pi (fish 侧含 pi 更新)
-#       fish 侧不支持 sdk 目标（sdkman 插件已移除，与 zsh 的能力差异属有意决定）
+# 任务: brew / rust / tldr / uv / mise / pi / sdk（sdk 未安装时跳过）
 # 守卫: type -q / command -q 逐项守卫，未装跳过；失败计数与耗时统计
 # ---------------------------------------------------------------------------
 function auto-update --description "一键更新所有开发环境 (fish 版)"
@@ -213,8 +217,7 @@ function auto-update --description "一键更新所有开发环境 (fish 版)"
 end
 
 function update-all --description "一键更新所有开发环境 (fish 版)"
-    # 默认清单与 zsh 有意不同：fish 含 pi 不含 sdk（sdkman 插件已移除，
-    # 与 zsh 的能力差异属有意决定）；目标名 rust 对应 zsh 侧的 rustup
+    # 保持本 shell 的目标名 rust；sdk 仍按 type -q 守卫，未安装时跳过。
     set -l tasks brew rust tldr uv mise pi sdk
 
     set -l targets
@@ -222,6 +225,16 @@ function update-all --description "一键更新所有开发环境 (fish 版)"
         set targets $tasks
     else
         set targets $argv
+    end
+
+    # 先验证全部目标，避免 update-all uv typo 先更新 uv 再报错。
+    set -l name
+    for name in $targets
+        if not contains -- $name $tasks
+            echo "Unknown target: $name" >&2
+            echo "Available: "(string join ", " $tasks) >&2
+            return 1
+        end
     end
 
     set -l failed 0
@@ -312,13 +325,28 @@ end
 # yazi 包装：退出时自动 cd 到最后浏览的目录
 # ---------------------------------------------------------------------------
 function y --description 'yazi wrapper: cd to last dir on exit'
-    set -l tmp (mktemp -t "yazi-cwd.XXXXXX")
+    set -l tmpdir /tmp
+    set -q TMPDIR; and test -n "$TMPDIR"; and set tmpdir "$TMPDIR"
+    set -l tmp (command mktemp "$tmpdir/yazi-cwd.XXXXXX")
+    or return $status
+    test -n "$tmp"; or return 1
+    set -l cwd
     command yazi $argv --cwd-file="$tmp"
-    # 读取 yazi 写入的 cwd（null 分隔或换行）；fish 的 read -z 读 NUL 分隔
-    if read -z cwd <"$tmp"; and test "$cwd" != "$PWD"; and test -d "$cwd"
-        builtin cd -- "$cwd"
+    set -l rc $status
+    if test $rc -eq 0
+        # read 在 EOF 仍赋值；兼容 yazi 无终止符路径和 NUL 终止格式。
+        read -z cwd <"$tmp"
+        # 旧封装宣称兼容换行终止；仅在原值不是有效目录时去掉尾部换行。
+        if not test -d "$cwd"
+            set cwd (string trim --right --chars \n -- "$cwd")
+        end
+        if test -n "$cwd"; and test "$cwd" != "$PWD"; and test -d "$cwd"
+            builtin cd -- "$cwd"
+            set rc $status
+        end
     end
-    rm -f -- "$tmp"
+    command rm -f -- "$tmp"
+    return $rc
 end
 
 # ---------------------------------------------------------------------------
@@ -384,14 +412,22 @@ function bak --description "备份文件，添加时间戳后缀"
         return 1
     end
     set -l date_stamp (date +%Y%m%d_%H%M%S)
+    set -l failed 0
     for file in $argv
-        if test -e $file
-            cp -f $file $file.$date_stamp.bak
-            echo "Backed up: $file -> $file.$date_stamp.bak"
+        if not test -e "$file"
+            echo (set_color red)"Error: $file does not exist"(set_color normal) >&2
+            set failed 1
+            continue
+        end
+        set -l backup "$file.$date_stamp.bak"
+        if command cp -f -- "$file" "$backup"
+            echo "Backed up: $file -> $backup"
         else
-            echo (set_color red)"Error: $file does not exist"(set_color normal)
+            echo (set_color red)"Error: failed to back up $file"(set_color normal) >&2
+            set failed 1
         end
     end
+    return $failed
 end
 
 function timer --description 简单倒计时
