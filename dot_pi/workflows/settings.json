@@ -6,7 +6,7 @@
   "defaultConcurrency": 6,
   "defaultAgentRetries": 3,
   "defaultAgentTimeoutMs": 900000,
-  "defaultTokenBudget": 1000000,
+  "defaultTokenBudget": 100000000,
 
   "progressPanelMode": "detailed",
   "persistAgentSessions": false,
