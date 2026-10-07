@@ -68,8 +68,9 @@ export GOBIN="${GOPATH}/bin"
 [[ -d "$GOBIN" && ":$PATH:" != *":$GOBIN:"* ]] && export PATH="$PATH:${GOBIN}"
 
 ########## Rust ##########
-# rustup 环境（brew 安装的 rustup 无此文件时静默跳过）
-source "$HOME/.cargo/env" 2>/dev/null
+# ~/.cargo/bin 的 PATH 注入已由 dot_zshrc 顶部守卫完成（目录存在 + 冒号定界去重）；
+# 此处不再 source ~/.cargo/env —— 它只重复同一 PATH 前置（且缺去重），
+# 与 fish 侧 00_env.fish 的 fish_add_path -g 守卫等价，单一注入点即可。
 
 ########## Container ##########
 # 通用补全缓存加载器：首次调用真实二进制生成，之后启动复用源码/字节码。
