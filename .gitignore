@@ -28,6 +28,8 @@ nvim.payne
 !/dot_pi/agent/settings.json
 !/dot_pi/agent/pi-goal.json
 !/dot_pi/workflows/settings.json
+!/dot_pi/agent/pi-goal.json
+!/dot_pi/workflows/settings.json
 # 兼容旧源布局及 /encrypted_ 等文件属性前缀。
 dot_pi/**/sessions/
 
