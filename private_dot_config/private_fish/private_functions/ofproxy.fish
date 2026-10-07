@@ -14,5 +14,7 @@ function ofproxy --description 关闭终端代理
     set -e ALL_PROXY
     set -e HTTP_PROXY
     set -e HTTPS_PROXY
+    set -e no_proxy
+    set -e NO_PROXY
     echo -e "⛵️ 终端代理已关闭。"
 end

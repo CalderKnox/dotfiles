@@ -20,6 +20,9 @@ function onproxy --description "启用终端代理 (127.0.0.1:5376, socks5/http)
     set -gx ALL_PROXY "$socks_url"
     set -gx HTTP_PROXY "$proxy_url"
     set -gx HTTPS_PROXY "$proxy_url"
+    # 回环豁免（与 zsh 侧一致）：本机/localhost 流量不走代理
+    set -gx no_proxy "localhost,127.0.0.1,::1"
+    set -gx NO_PROXY "localhost,127.0.0.1,::1"
 
     echo -e "🚀 终端代理已开启："
     echo -e "   HTTP/HTTPS: $proxy_url"

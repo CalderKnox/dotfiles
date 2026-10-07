@@ -35,10 +35,10 @@ end
 # ---------------------------------------------------------------------------
 # Locale / Editor / Homebrew
 # ---------------------------------------------------------------------------
-set -gx LANG zh_CN.UTF-8
+set -q LANG; or set -gx LANG zh_CN.UTF-8   # 仅当未继承时设置（SSH/远端 locale 不被覆盖，与 zsh dot_zshrc 一致）
 
-set -gx EDITOR nvim
-set -gx VISUAL nvim
+set -q EDITOR; or set -gx EDITOR nvim       # 已继承的 EDITOR 优先（同 zsh aliases.zsh 守卫）
+set -q VISUAL; or set -gx VISUAL nvim
 
 set -gx HOMEBREW_NO_AUTO_UPDATE 1      # 禁用自动更新提示（由 update-all 显式触发）
 # HOMEBREW_NO_INSTALL_CLEANUP 是 presence-style 开关，连 0 也会禁用清理。

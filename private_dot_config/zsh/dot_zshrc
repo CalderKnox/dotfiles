@@ -21,7 +21,12 @@
 #
 
 # export LANG=en_US.UTF-8          # 注释备用项（默认已切 zh_CN.UTF-8，见下）
-export LANG=zh_CN.UTF-8
+# 守卫：仅当未继承 LANG 时设置（SSH/远端会话已带的 locale 不被覆盖，与 fish 00_env.fish 一致）
+[[ -n "${LANG:-}" ]] || export LANG=zh_CN.UTF-8
+
+# Homebrew 静默标志（与 fish 00_env.fish 对齐；更新由 update-all 显式触发）
+export HOMEBREW_NO_AUTO_UPDATE=1
+export HOMEBREW_NO_ENV_HINTS=1
 
 
 # -----------------

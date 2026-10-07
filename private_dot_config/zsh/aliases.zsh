@@ -36,12 +36,16 @@ onproxy() {
     local http="http://$host:$port" socks="socks5h://$host:$port"
     export all_proxy="$socks" http_proxy="$http" https_proxy="$http" \
            ALL_PROXY="$socks" HTTP_PROXY="$http" HTTPS_PROXY="$http"
+    # 回环豁免（与 fish 侧一致）：本机/localhost 流量不走代理，brew 本地镜像、
+    # OrbStack docker、ssh ControlSocket 等本机服务不受代理干扰
+    export no_proxy="localhost,127.0.0.1,::1" NO_PROXY="localhost,127.0.0.1,::1"
     printf "🚀 终端代理已开启：\n   HTTP/HTTPS: $http\n   SOCKS5: $socks"
 }
 
 # 关闭终端代理
 ofproxy() {
     unset all_proxy http_proxy https_proxy ALL_PROXY HTTP_PROXY HTTPS_PROXY
+    unset no_proxy NO_PROXY
     printf "⛵️ 终端代理已关闭。"
 }
 
@@ -127,9 +131,10 @@ alias format='biome format --write --files-max-size=10485760'
 # 编辑器 (Neovim) —— EDITOR 契约
 # =============================================================================
 # 必须为环境变量（非 alias），供 git/crontab/fzf 的 Ctrl-G 绑定等子进程读取；
-# fzf.zsh 的 ctrl-g:execute($EDITOR ...) 在 source 时展开，故本文件必须先于 fzf.zsh 加载
-export EDITOR='nvim'
-export VISUAL='nvim'
+# fzf.zsh 的 ctrl-g:execute($EDITOR ...) 在 source 时展开，故本文件必须先于 fzf.zsh 加载。
+# 守卫：已继承的 EDITOR/VISUAL（远端/launchd 注入）优先，缺省回落 nvim（与 fish 00_env.fish 一致）
+[[ -n "${EDITOR:-}" ]] || export EDITOR='nvim'
+[[ -n "${VISUAL:-}" ]] || export VISUAL='nvim'
 
 alias v='nvim'
 alias vi='nvim'
