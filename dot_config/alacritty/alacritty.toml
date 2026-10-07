@@ -1,3 +1,8 @@
+# tombi / TOML-LSP schema association; alacritty itself ignores this key
+# (benign "Unused config key" warning).
+[[schemas]]
+path = "https://raw.githubusercontent.com/distinction-dev/alacritty-schema/main/alacritty/reference.json"
+strict = false
 
 [env]
 TERM = "xterm-256color"  # ensure 256-color + truecolor in tmux/ssh

@@ -27,6 +27,7 @@
 - **字体**为 JetBrainsMono Nerd Font Mono、`size = 16`；Ghostty 使用 NL 变体。
 - **配色**：活跃调色板为 Catppuccin Mocha（`colors.primary / normal / bright` 的 `#1e1e2e` / `#f38ba8` 系列）；Dracula 块整体注释保留，需要时取消注释切换。实际 hex 值以源文件 `alacritty.toml` 的 `[colors]` 为准。
 - **键位**：复用交给 tmux，故屏蔽 `Cmd+T` / `Cmd+N`、保留 `Cmd+Enter` 切换全屏；其余自定义绑定见源文件。
+- **编辑器 schema**：顶部 `[[schemas]]` 关联 distinction-dev 社区 JSON Schema（tombi/TOML LSP 补全与校验，`strict = false` 仅告警不阻断）；alacritty 自身忽略该键（仅记 "Unused config key" 告警）。
 
 ## kitty — `dot_config/kitty/kitty.local.conf`（仅仓库参考，不部署）
 
