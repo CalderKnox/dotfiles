@@ -31,7 +31,7 @@
 
 ### 前缀缓存
 
-fzf 安装前缀的探测顺序、缓存文件位置（`~/.fzf_prefix_cache`）及自愈逻辑（仅当 `$FZF_PREFIX/bin/fzf` 可执行时信任缓存）见 `fzf.zsh` 第 1 节注释与代码，不在此复述路径列表。
+fzf 安装前缀的探测顺序、缓存文件位置（`~/.cache/zsh/fzf_prefix`，XDG 风格）及自愈逻辑（仅当 `$FZF_PREFIX/bin/fzf` 可执行时信任缓存）见 `fzf.zsh` 第 1 节注释与代码，不在此复述路径列表。
 
 ### 内联注释的兼容性
 
