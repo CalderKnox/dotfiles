@@ -117,6 +117,7 @@ alias ls="l"
 alias lt="ls --tree"
 alias tree="ls --tree --depth 3"
 alias cat='bat --paging=never'
+alias rm='rm -i'   # 删除前逐个确认（与 zsh 侧 / cp/mv 护栏一致）
 alias cp='cp -ir'
 alias mv='mv -i'
 alias mkdir='mkdir -p -v'

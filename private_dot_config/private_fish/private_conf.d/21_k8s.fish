@@ -20,3 +20,15 @@ alias kk="k krew"
 alias kg="kubectl get"
 alias kl="kubectl logs"
 alias kd="kubectl describe"
+alias kdel="kubectl delete"
+alias ka="kubectl apply -f"
+
+alias kgp="kubectl get pods -o wide"
+alias kgn="kubectl get nodes -o wide"
+alias kgs="kubectl get svc -o wide"
+alias kgd="kubectl get deployment -o wide"
+
+alias ksys="kubectl -n kube-system"
+
+alias kctx="kubectl config current-context"
+alias kctxs="kubectl config get-contexts"
