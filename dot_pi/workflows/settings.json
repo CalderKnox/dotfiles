@@ -3,7 +3,7 @@
   "keywordTriggerWord": "ultracode",
 
   "defaultEffort": "off",
-  "defaultConcurrency": 6,
+  "defaultConcurrency": 8,
   "defaultAgentRetries": 3,
   "defaultAgentTimeoutMs": 900000,
   "defaultTokenBudget": 100000000,
