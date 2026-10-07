@@ -19,7 +19,6 @@ bootstrap。当前验证使用 Neovim 0.12.5；本机 LazyVim 16.0.1 要求 Neov
 | `lua/plugins/mason.lua` | Mason 工具列表，含 pyrefly、ruff、debugpy、Biome、Go/Rust 等工具 |
 | `lua/plugins/sidekick.lua` | CLI-only：`nes.enabled=false`，不启用 Copilot NES LSP |
 | `stylua.toml` | 2 空格，120 列 |
-| `dot_gitignore` | 部署为 `~/.config/nvim/.gitignore`；不是被排除的文档 |
 | `README.md` | 仓库内安装概览；不部署 |
 
 选项未在本地覆盖时由 LazyVim 或插件决定，不应将历史的 4 空格缩进、行号、剪贴板、

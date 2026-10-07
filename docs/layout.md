@@ -66,7 +66,6 @@
 | --- | --- | --- |
 | `dot_config/nvim/**` | `~/.config/nvim/**` | LazyVim 配置（`init.lua` + `lua/config/*` + `lua/plugins/*`、`lazyvim.json`（extras 声明的事实来源）、本地 colorscheme/Mason/Sidekick 插件 specs、`stylua.toml`；`lazy-lock.json` 已停止跟踪（3c3d65f），运行时生成不入库） |
 | `dot_config/nvim/README.md` | —（不部署） | LazyVim 上游模板自带；由 `**/*.md` 排除，仅仓库内查阅（历史排除模式误写为 `**/REAMDME.md` 未生效，已修复） |
-| `dot_config/nvim/dot_gitignore` | `~/.config/nvim/.gitignore` | 忽略插件数据等运行时目录 |
 | `dot_config/mise/config.toml` | `~/.config/mise/config.toml` | mise 工具链声明（工具与版本见 `dot_config/mise/config.toml`） |
 | （`private_dot_claude` 已移出仓库） | `~/.claude/settings.json`（各机本地维护） | Claude Code 设置已不入库（参照 .codex 模式：源已移出仓库，由各机本地维护；`.chezmoiignore` 的 `.claude/settings.json` 行为防御性保留） |
 | `dot_codex/config.toml` | —（不部署，被 `.chezmoiignore` 的 `.codex/config.toml` 排除） | cc-switch 机器本地配置的参考快照（provider、hooks/projects trust 由各机 cc-switch 注入维护；仓库版本仅参考，实际生效值以各机 `~/.codex/config.toml` 为准） |
@@ -111,8 +110,7 @@
 ## 仓库特性说明
 
 - **极简模板**：仅有的 `*.tmpl` 是 `symlink_dot_zshrc.tmpl` / `symlink_dot_zimrc.tmpl`（各一行 `{{ .chezmoi.homeDir }}/.config/zsh/...`，将 `~/.zshrc` 收敛至 XDG）—— 其余全部为静态文件，无 `.chezmoidata.*` 数据；无 `run_*` 脚本（历史 `run_once_create-ssh-sockets.sh` 已删除，`~/.ssh/sockets` 改由 `private_dot_ssh/private_sockets/.keep` 目录属性管理，每次 apply 校验）。所有机器 `chezmoi apply` 拿到同一套内容；如需进一步按机器差异化，可在现有模板基础上扩展。
-- **运行时产物不入库**：`~/.config/zsh/.gitignore` 和 `~/.config/nvim/.gitignore`
-  分别忽略 `.DS_Store`/`*.zwc` 及 Neovim 插件数据等运行时目录；fzf 前缀缓存位于 HOME/ZDOTDIR，不应假定该 `.gitignore` 覆盖它。
+- **运行时产物不入库**：`~/.config/zsh/.gitignore` 忽略 `.DS_Store`/`*.zwc` 等运行时产物（`~/.config/nvim/.gitignore` 已停止管理）；fzf 前缀缓存位于 HOME/ZDOTDIR，不应假定该 `.gitignore` 覆盖它。
 - **仅服务于仓库管理、不部署的文件**：根目录的 `.gitignore` 与 `.chezmoiignore` 被 chezmoi 默认忽略（源目录中点开头文件不参与 apply）；根级 `README.md`、`docs/`（本文档所在）以及全部嵌套 `README.md`（如 `zsh/README.md`、`nvim/README.md`）被 `.chezmoiignore` 排除；根级与 `nvim/LICENSE` 文件已删除，`**/LICENSE` 模式防御性保留。
 - **不在仓库内的重要文件**：
   - `~/.config/gh/hosts.yml` / `config.yml`——由 `gh auth login` 生成，含凭据，切勿加入仓库；
