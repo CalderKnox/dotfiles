@@ -85,7 +85,6 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │   │   ├── aliases.zsh                →  ~/.config/zsh/aliases.zsh
 │   │   ├── fzf.zsh                    →  ~/.config/zsh/fzf.zsh
 │   │   ├── sdk.zsh                    →  ~/.config/zsh/sdk.zsh
-│   │   ├── dot_gitignore              →  ~/.config/zsh/.gitignore
 │   │   └── README.md                  →  (不部署) 模块文档，由 **/README.md 排除
 │   ├── ghostty/config                 →  ~/.config/ghostty/config     Ghostty 终端（command = fish -l）
 │   ├── alacritty/alacritty.toml       →  ~/.config/alacritty/alacritty.toml Alacritty 备用

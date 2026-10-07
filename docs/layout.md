@@ -47,7 +47,6 @@
 | `dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`update-all`、`auto-update`、`y`、`ruff_auto` 等）；`update-all` 为关联数组 7 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`/`pi`，支持传参过滤、失败计数与耗时统计；`auto-update` 为兼容旧习惯的一键入口（可选 `onproxy` 切代理后直接委托 `update-all`，覆盖目标一致，均含 `mise`）；新增 `chezc/chezdf/chezap` 三别名 |
 | `dot_config/zsh/fzf.zsh` | `~/.config/zsh/fzf.zsh` | fzf 前缀探测/缓存、全局选项、Ctrl-R/T/Alt-C 及 `frg`/`fkill`/`ftm`/`fl*` 函数 |
 | `dot_config/zsh/sdk.zsh` | `~/.config/zsh/sdk.zsh` | SDK 环境与补全（pnpm/SDKMAN(可选)/Android NDK/Python(uv)/Go/Rust/Docker/kubectl+kubecolor） |
-| `dot_config/zsh/dot_gitignore` | `~/.config/zsh/.gitignore` | 忽略运行时产物（实际模式见文件，当前为 `.DS_Store` 与 `*.zwc`） |
 | `dot_config/zsh/README.md` | —（不部署） | 模块内部文档（加载顺序契约、函数速查）；由 `**/*.md` 排除，仅仓库内查阅 |
 
 ### 终端与提示符
@@ -110,7 +109,7 @@
 ## 仓库特性说明
 
 - **极简模板**：仅有的 `*.tmpl` 是 `symlink_dot_zshrc.tmpl` / `symlink_dot_zimrc.tmpl`（各一行 `{{ .chezmoi.homeDir }}/.config/zsh/...`，将 `~/.zshrc` 收敛至 XDG）—— 其余全部为静态文件，无 `.chezmoidata.*` 数据；无 `run_*` 脚本（历史 `run_once_create-ssh-sockets.sh` 已删除，`~/.ssh/sockets` 改由 `private_dot_ssh/private_sockets/.keep` 目录属性管理，每次 apply 校验）。所有机器 `chezmoi apply` 拿到同一套内容；如需进一步按机器差异化，可在现有模板基础上扩展。
-- **运行时产物不入库**：`~/.config/zsh/.gitignore` 忽略 `.DS_Store`/`*.zwc` 等运行时产物（`~/.config/nvim/.gitignore` 已停止管理）；fzf 前缀缓存位于 HOME/ZDOTDIR，不应假定该 `.gitignore` 覆盖它。
+- **运行时产物不入库**：`~/.config/zsh/.gitignore` 与 `~/.config/nvim/.gitignore` 已停止管理（源树 `dot_gitignore` 已删除），运行时产物由各机自行忽略；fzf 前缀缓存位于 HOME/ZDOTDIR，不依赖任何托管 `.gitignore`。
 - **仅服务于仓库管理、不部署的文件**：根目录的 `.gitignore` 与 `.chezmoiignore` 被 chezmoi 默认忽略（源目录中点开头文件不参与 apply）；根级 `README.md`、`docs/`（本文档所在）以及全部嵌套 `README.md`（如 `zsh/README.md`、`nvim/README.md`）被 `.chezmoiignore` 排除；根级与 `nvim/LICENSE` 文件已删除，`**/LICENSE` 模式防御性保留。
 - **不在仓库内的重要文件**：
   - `~/.config/gh/hosts.yml` / `config.yml`——由 `gh auth login` 生成，含凭据，切勿加入仓库；

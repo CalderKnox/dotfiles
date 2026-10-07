@@ -30,7 +30,7 @@ Starship 由 zsh（`eval "$(starship init zsh)"`）与 fish（`config.fish` 内 
 
 ### 前缀探测与缓存
 
-fzf 前缀按平台自适应探测（Apple Silicon `/opt/homebrew` → Intel `/usr/local` → `~/.fzf` → `/usr`），结果缓存至 `~/.cache/zsh/fzf_prefix` 并支持自愈重探；探测后按需追加至 `$PATH`，随后带守卫地 `eval "$(fzf --zsh)"` 初始化键位与补全。该 `eval` 是全链路中 fzf 键位的唯一初始化点。具体测试条件与缓存文件名以 `fzf.zsh` 与 `dot_config/zsh/dot_gitignore` 为准。
+fzf 前缀按平台自适应探测（Apple Silicon `/opt/homebrew` → Intel `/usr/local` → `~/.fzf` → `/usr`），结果缓存至 `~/.cache/zsh/fzf_prefix` 并支持自愈重探；探测后按需追加至 `$PATH`，随后带守卫地 `eval "$(fzf --zsh)"` 初始化键位与补全。该 `eval` 是全链路中 fzf 键位的唯一初始化点。具体测试条件与缓存文件名以 `fzf.zsh` 为准。
 
 ### 文件/目录列表命令
 
