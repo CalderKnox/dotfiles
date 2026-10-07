@@ -6,7 +6,6 @@
 # =============================================================================
 
 # --- OS / IDE / 日志 ---
-**/.vscode
 **/.git
 **/.idea
 **/node_modules
@@ -34,8 +33,16 @@ private_dot_pi/**/*mcp*.json*
 private_dot_pi/**/*auth*.json*
 private_dot_pi/**/sessions/
 
+# --- 敏感与凭据（镜像 .chezmoiignore 的部署侧守卫；Git 侧由本文件负责）---
+**/*token*
+**/*secret*
+**/*credential*
+**/auth.json*
+
 # --- 审计/测试残留（防复发，替代本地 .git/info/exclude）---
 .tmp-empty-config.toml
+__pycache__/
+*.pyc
 
 # --- Fish — Fisher 生成与机器本地状态 ---
 # Fisher 在目标机按 fish_plugins 清单生成函数/补全；仓库仅提交用户手写的

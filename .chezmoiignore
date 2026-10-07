@@ -49,3 +49,4 @@ node_modules/
 .claude/settings.json
 
 **/.orca
+**/.vscode
