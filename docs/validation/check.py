@@ -828,6 +828,14 @@ class FishHelpers(Fixture):
     self.assertEqual(self.ok(self.shell("", script, "fish")).strip(), "UNSET")
     self.assertEqual(self.ok(self.shell("", script, "fish", {"HOMEBREW_NO_INSTALL_CLEANUP": "1"})).strip(), "1")
 
+  def test_behavior_changing_aliases_are_interactive_only(self):
+    # 与 zsh .zshrc 只在交互 shell 加载对齐：非交互 source 后，遮蔽原生命令的
+    # 行为改变型别名（cp/cat/mkdir…）不得定义；显式函数（cdd/mkcd）仍可用。
+    script = f"source {shlex.quote(str(FISH / '10_sys.fish'))}\n"
+    script += "functions -q cp; and echo CP_DEFINED\nfunctions -q cat; and echo CAT_DEFINED\nfunctions -q cdd; and echo CDD_DEFINED\n"
+    out = self.ok(self.shell("", script, "fish"))
+    self.assertEqual(out.splitlines(), ["CDD_DEFINED"])
+
   def test_netcheck_uses_local_speedtest_without_remote_code_execution(self):
     self.stub("curl", "print('fixture IP')")
     self.stub("dig", "print('fixture DNS')")

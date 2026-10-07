@@ -7,7 +7,9 @@
 #               可调用大函数（update-all/代理切换/y/serve/备份计时/磁盘分析等）
 #               迁至 functions/ 惰性加载目录，首次调用时才 source。
 # Usage       : 由 Fish 自动 source（conf.d 字典序，1x 为系统基础层，
-#               顺序无关）；别名/函数在非交互 shell 中也会定义。
+#               顺序无关）；行为改变型别名（top/df/du/ping/tmux/wget/ls 系/
+#               cat/rm/cp/mv/mkdir）仅在交互 shell 定义——对齐 zsh 侧 .zshrc
+#               只在交互 shell 加载的语义，非交互 fish -c 脚本拿到原生命令。
 # Guards      : 本文件无外部强依赖；别名未加 type -q 守卫，依赖缺失时
 #               错误在调用时暴露（属预期）；与 zsh aliases.zsh 职责对齐。
 # Author      : Payne
@@ -31,7 +33,7 @@ alias dl="cd ~/Downloads"
 alias dt="cd ~/Desktop"
 alias doc="cd ~/Documents"
 alias wp="cd ~/WorkSpaces"
-alias wi="cd ~/WisdomSpaces"
+alias ws="cd ~/WisdomSpaces"   # 命名与 zsh 侧统一（原 wi，已废弃）
 alias finder="open ."
 
 # 终端：Ghostty / iTerm 快速打开当前目录（单引号保证运行时取 $PWD，与 zsh 侧一致）
@@ -104,23 +106,29 @@ alias timestamp_seconds='date +%s'
 alias timestamp_millisecond='python3 -c "import time; print(int(time.time()*1000))"'
 alias timestamp_microsecond='python3 -c "import time; print(int(time.time()*1000*1000))"'
 
-alias top='htop'
-alias df='df -h'
-alias du='du -kh'
-alias ping='ping -c 5'
-alias pws='ps -p $fish_pid'
+# 行为改变型别名仅交互 shell 定义（见文件头 Usage）：非交互脚本中 top/du/cat
+# /cp/mv/mkdir 等保持原生语义，不被 lsd/bat/-i 等包装劫持（等价 zsh 侧
+# .zshrc 只在交互 shell 加载的语义；cdd/mkcd 等显式函数调用不受影响）
+if status is-interactive
+    alias top='htop'
+    alias df='df -h'
+    alias du='du -h -d 2'   # 与 zsh 侧同 profile：人类可读 + 两层深度
+    alias ping='ping -c 5'
+    alias pws='ps -p $fish_pid'
 
-alias tmux="tmux -2"
+    alias tmux="tmux -2"
+    alias wget='wget -c'    # 断点续传（与 zsh 侧一致）
 
-alias l="lsd --group-directories-first"
-alias ls="l"
-alias lt="ls --tree"
-alias tree="ls --tree --depth 3"
-alias cat='bat --paging=never'
-alias rm='rm -i'   # 删除前逐个确认（与 zsh 侧 / cp/mv 护栏一致）
-alias cp='cp -ir'
-alias mv='mv -i'
-alias mkdir='mkdir -p -v'
+    alias l="lsd --group-directories-first"
+    alias ls="l"
+    alias lt="ls --tree"
+    alias tree="lsd --tree --depth 3"
+    alias cat='bat --paging=never'
+    alias rm='rm -i'   # 删除前逐个确认（与 zsh 侧 / cp/mv 护栏一致）
+    alias cp='cp -ir'
+    alias mv='mv -i'
+    alias mkdir='mkdir -p -v'
+end
 # --preserve-root 别名已移除：BSD 的 chmod/chown/chgrp 不支持该选项
 # （alias 展开为 command chmod --preserve-root 后每次调用都报 illegal option，
 # 与 zsh aliases.zsh 侧同因移除；macOS 根分区本身 SIP 只读，无需此护栏）
