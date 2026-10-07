@@ -70,7 +70,7 @@ alias pipr="pip uninstall"
 alias pipl="pip list"
 alias pipu="pip install --upgrade pip"
 alias ruff_auto='ruff check --fix --exit-zero . && ruff format .'
-alias pip_tsinghua_mirror='python3 -m pip install -i https://mirrors.tuna.tsinghua.edu.cn/pip/web/simple'
+alias pip_tsinghua_mirror='python3 -m pip install -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple'
 # alias uv_resync='rm -rf .venv uv.lock && bass uv pip sync --allow-empty-requirements <(cat /dev/null) && uv sync --upgrade'
 # alias uvsync='rm -rf .venv uv.lock && bass uv pip sync --allow-empty-requirements /dev/null && uv sync --upgrade'
 
