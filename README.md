@@ -88,7 +88,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │   │   ├── dot_gitignore              →  ~/.config/zsh/.gitignore
 │   │   └── README.md                  →  (不部署) 模块文档，由 **/README.md 排除
 │   ├── ghostty/config                 →  ~/.config/ghostty/config     Ghostty 终端（command = fish -l）
-│   ├── alacritty/private_alacritty.toml → ~/.config/alacritty/alacritty.toml Alacritty 备用（文件 0600）
+│   ├── alacritty/alacritty.toml       →  ~/.config/alacritty/alacritty.toml Alacritty 备用
 │   ├── kitty/kitty.local.conf         →  (不部署) 仅入库作参考（.chezmoiignore 的 **/*.local.* 排除）；目标机 ~/.config/kitty/kitty.local.conf 机器本地维护，由本机 kitty.conf 末尾 include 引入（仓库不含 kitty.conf）
 │   ├── mise/config.toml               →  ~/.config/mise/config.toml   mise 工具链
 │   ├── nvim/                          →  ~/.config/nvim/              LazyVim 配置（含 stylua.toml；lazy-lock.json 已停止跟踪、不入库）

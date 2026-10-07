@@ -199,7 +199,7 @@ class SourceChecks(Fixture):
         json.loads(path.read_text())
     for path in (
       ROOT / "dot_config/mise/config.toml",
-      ROOT / "dot_config/alacritty/private_alacritty.toml",
+      ROOT / "dot_config/alacritty/alacritty.toml",
       ROOT / "dot_config/nvim/stylua.toml",
     ):
       with path.open("rb") as stream:

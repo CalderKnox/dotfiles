@@ -68,9 +68,9 @@ bindings = [
 ]
 
 [terminal]
-# Alacritty Configuration File (chezmoi: private_dot_config/alacritty/alacritty.toml -> ~/.config/alacritty/alacritty.toml)
+# Alacritty Configuration File (chezmoi: dot_config/alacritty/alacritty.toml -> ~/.config/alacritty/alacritty.toml)
 # GPU-accelerated terminal. Theme: Catppuccin Mocha (active [colors] below, same Catppuccin Mocha theme family as ghostty & local starship, though ANSI bright variants differ from ghostty's bundled theme; the original Dracula block is kept fully commented as an alternative template).
-# `private_dot_config` ensures parent dir 0700 on deploy.
+# No private_ prefix: file deploys 0644, parent dirs 0755.
 # Docs: https://alacritty.org/config-alacritty.html | bindings: .../config-alacritty-bindings.html
 # Reference: https://www.kevnu.com/zh/posts/18
 

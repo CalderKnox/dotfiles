@@ -2,7 +2,7 @@
 
 三套配置可独立安装、互不依赖；Ghostty 使用 `JetBrainsMonoNL Nerd Font Mono`，Alacritty/kitty 使用 `JetBrainsMono Nerd Font Mono`。Ghostty 为日常主力（支持热重载、Quick Terminal），Alacritty 为轻量备用，kitty 仅以增量个人配置 `kitty.local.conf` 入库作参考、不部署（目标机文件机器本地维护，在新机生成的默认 `kitty.conf` 末尾 `include` 引入即可，见下文）。四者的 shell 均已统一为 fish：Ghostty `command = fish -l`、Alacritty `shell = fish + tmux`、kitty `shell = fish`、tmux `default-shell = fish`（无 fish 环境时 tmux 侧经 if-shell 自动回退 `/bin/bash`，见 `dot_tmux.conf`；其余三者为硬编码路径）。
 
-> **分工**：本文件只解释终端模拟器自身的配置思路与日常使用，不重复具体数值。提示符与配色方案的完整定义（Starship `catppuccin_mocha`、powerline 格式与各段样式）见 [shell.md — Starship 提示符](shell.md#starship-提示符机器本地-starshiptoml)。所有实际配置值（字体、透明度、键位、配色等）一律以源文件为唯一权威：Ghostty 见 `dot_config/ghostty/config`，Alacritty 见 `dot_config/alacritty/private_alacritty.toml`，kitty 见 `dot_config/kitty/kitty.local.conf`。
+> **分工**：本文件只解释终端模拟器自身的配置思路与日常使用，不重复具体数值。提示符与配色方案的完整定义（Starship `catppuccin_mocha`、powerline 格式与各段样式）见 [shell.md — Starship 提示符](shell.md#starship-提示符机器本地-starshiptoml)。所有实际配置值（字体、透明度、键位、配色等）一律以源文件为唯一权威：Ghostty 见 `dot_config/ghostty/config`，Alacritty 见 `dot_config/alacritty/alacritty.toml`，kitty 见 `dot_config/kitty/kitty.local.conf`。
 
 ---
 
@@ -19,11 +19,11 @@
 
 > 历史上曾存在重复赋值的键，已按 Ghostty「末次赋值生效」语义去重为单次赋值，实际行为不变。
 
-## Alacritty — `dot_config/alacritty/private_alacritty.toml`
+## Alacritty — `dot_config/alacritty/alacritty.toml`
 
-轻量备用，Catppuccin Mocha 配色（与 Ghostty 同主题；Dracula 调色板整块注释保留为模板），与 Ghostty 互为独立配置，切换无需改另一文件。源文件的 `private_` 前缀使部署目标文件为 0600。
+轻量备用，Catppuccin Mocha 配色（与 Ghostty 同主题；Dracula 调色板整块注释保留为模板），与 Ghostty 互为独立配置，切换无需改另一文件。
 
-- **启动即 Fish + tmux**：`private_alacritty.toml` 的 `shell = { program = "/opt/homebrew/bin/fish", args = ["-c", "tmux new -A -s main"] }`（共享 tmux 会话，Ghostty 已直接使用 Fish，此处通过 tmux 复用）；毛玻璃、仅右 Option 作 Alt 等与 Ghostty 策略一致。
+- **启动即 Fish + tmux**：`alacritty.toml` 的 `shell = { program = "/opt/homebrew/bin/fish", args = ["-c", "tmux new -A -s main"] }`（共享 tmux 会话，Ghostty 已直接使用 Fish，此处通过 tmux 复用）；毛玻璃、仅右 Option 作 Alt 等与 Ghostty 策略一致。
 - **字体**为 JetBrainsMono Nerd Font Mono、`size = 16`；Ghostty 使用 NL 变体。
 - **配色**：活跃调色板为 Catppuccin Mocha（`colors.primary / normal / bright` 的 `#1e1e2e` / `#f38ba8` 系列）；Dracula 块整体注释保留，需要时取消注释切换。实际 hex 值以源文件 `alacritty.toml` 的 `[colors]` 为准。
 - **键位**：复用交给 tmux，故屏蔽 `Cmd+T` / `Cmd+N`、保留 `Cmd+Enter` 切换全屏；其余自定义绑定见源文件。

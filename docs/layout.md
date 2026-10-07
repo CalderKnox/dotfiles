@@ -55,7 +55,7 @@
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
 | `dot_config/ghostty/config` | `~/.config/ghostty/config` | Ghostty 主终端配置（JetBrainsMonoNL Nerd Font Mono，`command = /opt/homebrew/bin/fish -l` 启动登录 Fish，Catppuccin Mocha 主题；`zsh -l` / `tmux` 方案注释保留） |
-| `dot_config/alacritty/private_alacritty.toml` | `~/.config/alacritty/alacritty.toml` | Alacritty 备用配置（活跃配色为 Catppuccin Mocha，Dracula 调色板整块注释保留为模板；`shell = fish -c "tmux new -A -s main"` 经 Fish 进 tmux） |
+| `dot_config/alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` | Alacritty 备用配置（活跃配色为 Catppuccin Mocha，Dracula 调色板整块注释保留为模板；`shell = fish -c "tmux new -A -s main"` 经 Fish 进 tmux） |
 | `dot_config/kitty/kitty.local.conf` | —（不部署，机器本地维护） | kitty 增量个人配置（字体/光标/Catppuccin Mocha/快捷键，`shell = fish`）仅入库作参考，不随 apply 部署（被 `.chezmoiignore` 的 `**/*.local.*` 排除，`chezmoi ignored` 含 `.config/kitty/kitty.local.conf`）；目标机 `~/.config/kitty/kitty.local.conf` 各机本地维护，在 kitty 首次生成的 `~/.config/kitty/kitty.conf` 末尾手工添加 `include kitty.local.conf` 引入（仓库有意不含 kitty.conf） |
 | `dot_tmux.conf` | `~/.tmux.conf` | tmux 配置：`default-shell` 经 if-shell 回退链设定（Homebrew fish → `/usr/bin/fish` → `/bin/bash`，无 fish 环境自动回退；不设 default-command，保持登录语义）、tpm 插件（yank/sensible/open/cpu/battery）、Catppuccin Mocha 状态栏、鼠标与 100k 历史 |
 | （starship.toml 不在仓库） | `~/.config/starship.toml`（机器本地） | Starship 提示符配置未入库（已于 0ad1efc 移除）；zsh/fish 两侧仅负责 `starship init`，跨机迁移需自行拷贝该文件 |
