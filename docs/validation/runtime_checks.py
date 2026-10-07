@@ -168,7 +168,7 @@ class FishRuntime(Fixture):
     )
     out = self.ok(self.shell("", script, "fish")).strip()
     init = Path(self.env["HOME"]) / ".sdkman/bin/sdkman-init.sh"
-    self.assertEqual(out, f"BASS source {init} ;and sdk current java")
+    self.assertEqual(out, f"BASS source {init} && sdk current java")
 
 
 class ZshRuntime(Fixture):
