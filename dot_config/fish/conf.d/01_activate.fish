@@ -28,7 +28,10 @@ end
 # --- SDKMAN 惰性桩（与 zsh 侧 sdk.zsh 同契约；差异：init 为 bash 脚本）---
 # sdkman-init.sh 是 bash 脚本，函数体无法回传 fish，故与 zsh 的“接管式”惰性
 # 加载不同：桩在首次及后续每次调用时，经 fisher 插件 edc/bass 在子 bash 中
-# source init 并转发命令；PATH/JAVA_HOME 等导出变量由 bass 差量回传本会话
+# source init 并转发命令。注意 bass v2（__bass.py）把各参数空格拼接后直接交
+# bash -c 执行，不识别旧版 ';and'/';or' 约定，故此处传 bash 原生 '&&' 字面参数
+# （source 失败则不执行 sdk，且失败状态码经 bass 回传）；PATH/JAVA_HOME 等
+# 导出变量由 bass 差量回传本会话
 # （多次调用 PATH 可能累积重复项，可接受）。JAVA_HOME 与 candidate PATH 注入
 # 因此延迟到首次 sdk 调用；未安装 SDKMAN（init 文件缺失）时不定义任何内容，
 # update-all 的 sdk 目标随之跳过；已存在同名 sdk 函数时不覆盖。
@@ -38,7 +41,7 @@ if test -s "$HOME/.sdkman/bin/sdkman-init.sh"; and not functions -q sdk
             echo "sdk: fisher plugin edc/bass is required to run SDKMAN's bash init." >&2
             return 127
         end
-        bass source "$HOME/.sdkman/bin/sdkman-init.sh" ';and' sdk $argv
+        bass source "$HOME/.sdkman/bin/sdkman-init.sh" '&&' sdk $argv
     end
 end
 # --- end SDKMAN ---
