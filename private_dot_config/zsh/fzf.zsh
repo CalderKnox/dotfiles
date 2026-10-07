@@ -12,12 +12,15 @@
 
 # -----------------------------------------------------------------------------
 # 1. fzf 可执行文件前缀探测（带磁盘缓存，避免每次启动重复探测）
-# 逻辑：优先读 ~/.fzf_prefix_cache；仅当缓存指向的 $prefix/bin/fzf 仍可执行时
-#       才信任，否则删缓存重新探测（自愈，换机/重装无需手工清理）。探测顺序
-#       固定为 Homebrew ARM → Intel → ~/.fzf → /usr，命中后写缓存供下次复用。
-#       PATH 插入同样带去重守卫，重复 source 幂等。
+# 逻辑：优先读 ~/.cache/zsh/fzf_prefix（XDG 风格，与 _ZSH_CACHE_DIR 同目录；
+#       旧版位于 ~/.fzf_prefix_cache，首次加载时一次性清理）；仅当缓存指向的
+#       $prefix/bin/fzf 仍可执行时才信任，否则删缓存重新探测（自愈，换机/
+#       重装无需手工清理）。探测顺序固定为 Homebrew ARM → Intel → ~/.fzf →
+#       /usr，命中后写缓存供下次复用。PATH 插入同样带去重守卫，重复 source 幂等。
 # -----------------------------------------------------------------------------
-FZF_PREFIX_CACHE="${ZDOTDIR:-${HOME}}/.fzf_prefix_cache"
+# 一次性迁移：删除旧版 $HOME 根下的缓存文件（已由 XDG 路径取代）
+[[ -f "${ZDOTDIR:-${HOME}}/.fzf_prefix_cache" ]] && command rm -f -- "${ZDOTDIR:-${HOME}}/.fzf_prefix_cache"
+FZF_PREFIX_CACHE="${ZDOTDIR:-${HOME}}/.cache/zsh/fzf_prefix"
 
 if [[ -f "$FZF_PREFIX_CACHE" ]]; then
     FZF_PREFIX=$(<"$FZF_PREFIX_CACHE")    # $(<file) 纯内建读取：$(cat) 会被 cat=bat 别名展开，多一次子进程
@@ -38,7 +41,10 @@ if [[ -z "${FZF_PREFIX:-}" ]]; then
     elif [[ -x "/usr/bin/fzf" ]]; then
         FZF_PREFIX="/usr"                       # Linux 发行版仓库安装（可执行文件，用 -x 测试）
     fi
-    [[ -n "${FZF_PREFIX:-}" && -x "$FZF_PREFIX/bin/fzf" ]] && print -r -- "$FZF_PREFIX" >! "$FZF_PREFIX_CACHE"
+    [[ -n "${FZF_PREFIX:-}" && -x "$FZF_PREFIX/bin/fzf" ]] && {
+        [[ -d "${FZF_PREFIX_CACHE:h}" ]] || command mkdir -p -- "${FZF_PREFIX_CACHE:h}"
+        print -r -- "$FZF_PREFIX" >! "$FZF_PREFIX_CACHE"
+    }
 fi
 
 # 仅当探测成功且 PATH 尚未包含时追加，避免死路径与重复累积（冒号定界去重）

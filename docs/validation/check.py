@@ -532,7 +532,8 @@ class FzfPrefix(Fixture):
     ):
       self.probe = self.probe.replace(original, str(replacement))
     self.probe = self.probe.replace('FZF_PREFIX="/usr"', f'FZF_PREFIX="{self.linux}"')
-    self.prefix_cache = Path(self.env["HOME"]) / ".fzf_prefix_cache"
+    self.prefix_cache = Path(self.env["HOME"]) / ".cache/zsh/fzf_prefix"
+    self.prefix_cache.parent.mkdir(parents=True, exist_ok=True)
 
   def test_incomplete_preferred_installation_is_skipped_and_path_is_unique(self):
     (self.arm / "bin").mkdir(parents=True)

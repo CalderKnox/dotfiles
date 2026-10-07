@@ -132,11 +132,11 @@ chezmoi doctor && chezmoi diff
 
 ### fzf 找不到 / 快捷键失效
 
-`fzf` 安装前缀缓存放在 `$ZDOTDIR/.fzf_prefix_cache`（未设置 `ZDOTDIR` 时即 `~/.fzf_prefix_cache`）。升级/卸载/换机器后若失效，模块会自愈删除并重新探测；
+`fzf` 安装前缀缓存放在 `$ZDOTDIR/.cache/zsh/fzf_prefix`（未设置 `ZDOTDIR` 时即 `~/.cache/zsh/fzf_prefix`；旧版 `~/.fzf_prefix_cache` 首次加载时自动清理）。升级/卸载/换机器后若失效，模块会自愈删除并重新探测；
 也可手动删除该缓存文件强制重建：
 
 ```bash
-rm -f ~/.fzf_prefix_cache && exec zsh
+rm -f ~/.cache/zsh/fzf_prefix && exec zsh
 ```
 
 详见 `private_dot_config/zsh/fzf.zsh` 的探测逻辑与 [shell.md](shell.md)。

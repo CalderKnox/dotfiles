@@ -100,7 +100,7 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 | Zim 框架 | `~/.config/zsh/.zshrc` 检测 `~/.zim/zimfw.zsh` 缺失时自动下载并 `zimfw init` 安装 `dot_zimrc` 中声明的全部模块（详见 `private_dot_config/zsh/dot_zimrc`） | 首次启动 `zsh` |
 | `PATH` / `brew` | 按 `dot_zshrc` 中守卫逻辑注入 Homebrew 与本地路径（前置 `~/bin` 等，cargo/rustup 按目录存在性守卫，详见 `private_dot_config/zsh/dot_zshrc`） | 每次启动 `zsh` |
 | `zoxide` / `mise` / `starship` / `fzf` | 按 `command -v` 守卫 `eval` 初始化，未安装静默跳过；`fzf` 键位绑定唯一收敛于 `fzf.zsh`（详见 `dot_zshrc` 与 `fzf.zsh`） | 每次启动 `zsh` |
-| `zsh` 三模块 | 按序 `source ~/.config/zsh/aliases.zsh` → `fzf.zsh`（含 `fzf` 前缀探测与 `~/.fzf_prefix_cache` 缓存）→ `sdk.zsh`（`pnpm` / `SDKMAN` **惰性加载** / `Go` / `Rust` / `Docker` / `kubectl`，补全走 `~/.cache/zsh/` 缓存 + `zcompile`，均有守卫） | 每次启动 `zsh` |
+| `zsh` 三模块 | 按序 `source ~/.config/zsh/aliases.zsh` → `fzf.zsh`（含 `fzf` 前缀探测与 `~/.cache/zsh/fzf_prefix` 缓存）→ `sdk.zsh`（`pnpm` / `SDKMAN` **惰性加载** / `Go` / `Rust` / `Docker` / `kubectl`，补全走 `~/.cache/zsh/` 缓存 + `zcompile`，均有守卫） | 每次启动 `zsh` |
 | Neovim | 首次运行 `nvim` 时 `lazy.nvim` 自动 `bootstrap` 并安装全部插件最新版（`lazy-lock.json` 已停止跟踪，需网络） | 首次运行 `nvim` |
 | `mise` 工具链 | `mise activate` 已挂接；按需执行 `mise install` 安装 `private_dot_config/mise/config.toml` 声明的工具（详见该文件） | 手动执行 |
 
@@ -182,7 +182,7 @@ starship prompt                      # 渲染 powerline 提示符无报错〔未
 
 # fzf（含前缀缓存）〔未装 fzf 则本组全部跳过〕
 zsh -ic 'echo $FZF_DEFAULT_COMMAND'  # 以 fd 开头〔装了 fzf 但未装 fd 则以 rg 开头〕
-cat ~/.fzf_prefix_cache              # 应为 /opt/homebrew/opt/fzf（Apple Silicon）〔未装 fzf 时无此文件，跳过〕
+cat ~/.cache/zsh/fzf_prefix           # 应为 /opt/homebrew/opt/fzf（Apple Silicon）〔未装 fzf 时无此文件，跳过〕
 zsh -ic 'type frg fkill ftm'         # fzf 交互函数已加载
 
 # mise〔未装 mise 则跳过本组〕
