@@ -41,9 +41,9 @@ mise 工具链由 `dot_config/mise/config.toml` 声明（当前各工具使用 `
 
 > 验证：`zsh -n ~/.config/zsh/aliases.zsh` 可覆盖两函数语法；`zsh -ic 'type update-all auto-update'` 确认已加载。
 
-## Codex — `dot_codex/private_config.toml`
+## Codex — `dot_codex/config.toml`
 
-`config.toml` **不随 `chezmoi apply` 部署**：已被 `.chezmoiignore` 的排除行 `.codex/config.toml` 排除（该配置含 provider、hooks/projects trust 等机器本地状态，由各机 cc-switch 注入维护，不入部署）。仓库内的 `dot_codex/private_config.toml` 仅作参考快照（`private_` 前缀对应 `0600` 权限语义），实际生效值以各机 `~/.codex/config.toml` 为准。
+`config.toml` **不随 `chezmoi apply` 部署**：已被 `.chezmoiignore` 的排除行 `.codex/config.toml` 排除（该配置含 provider、hooks/projects trust 等机器本地状态，由各机 cc-switch 注入维护，不入部署）。仓库内的 `dot_codex/config.toml` 仅作参考快照，实际生效值以各机 `~/.codex/config.toml` 为准。
 
 ## pi coding agent — `dot_pi/`
 

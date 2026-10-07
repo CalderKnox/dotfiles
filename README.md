@@ -77,7 +77,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 ├── dot_gitignore_global               →  ~/.gitignore_global          全局忽略规则（构建产物根锚定，无 bin/）
 ├── dot_tmux.conf                      →  ~/.tmux.conf                  tmux 配置（Fish 登录 shell、tpm 插件、Catppuccin Mocha 状态栏）
 ├── dot_codex/
-│   └── private_config.toml            →  (不部署) ~/.codex/config.toml   cc-switch 机器本地配置参考快照（被 .chezmoiignore 的 .codex/config.toml 排除；~/.claude/settings.json 同此模式：源已移出仓库，各机本地维护）
+│   └── config.toml                    →  (不部署) ~/.codex/config.toml   cc-switch 机器本地配置参考快照（被 .chezmoiignore 的 .codex/config.toml 排除；~/.claude/settings.json 同此模式：源已移出仓库，各机本地维护）
 ├── dot_config/
 │   ├── zsh/                           →  ~/.config/zsh/               ★ 三模块 zsh 配置 + 入口文件（含独立 README，不部署）
 │   │   ├── dot_zshrc                  →  ~/.config/zsh/.zshrc         Zsh 入口：Zim 引导 + 工具 eval + 模块加载（symlink 目标，真实文件）

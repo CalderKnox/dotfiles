@@ -15,7 +15,7 @@
 前缀可叠加，如 `private_dot_ssh` = 隐藏目录 + 该目录本身权限 0700。
 
 > 注：`private_` 前缀只作用于它直接修饰的那一级——目录得 0700、文件得 0600，目录内未再带前缀的子项保持默认 0644。
-> `dot_config`、`fish` 无 `private_` 前缀，目标为默认权限 0755；`private_dot_ssh` 声明对应目标目录为 0700；未加 `private_` 的子文件默认 0644。`dot_pi/agent` 没有私有前缀，默认目录属性为 0755、文件为 0644，不能据历史 `stat` 推断当前部署权限。`~/.ssh/config` 的源文件本身带前缀，目标为 0600；Codex 参考文件虽带前缀，但不部署。
+> `dot_config`、`fish` 无 `private_` 前缀，目标为默认权限 0755；`private_dot_ssh` 声明对应目标目录为 0700；未加 `private_` 的子文件默认 0644。`dot_pi/agent` 没有私有前缀，默认目录属性为 0755、文件为 0644，不能据历史 `stat` 推断当前部署权限。`~/.ssh/config` 的源文件本身带前缀，目标为 0600；Codex 参考文件不部署（由 `.chezmoiignore` 的 `.codex/config.toml` 按目标名排除）。
 
 ## 完整映射表
 
@@ -69,7 +69,7 @@
 | `dot_config/nvim/dot_gitignore` | `~/.config/nvim/.gitignore` | 忽略插件数据等运行时目录 |
 | `dot_config/mise/config.toml` | `~/.config/mise/config.toml` | mise 工具链声明（工具与版本见 `dot_config/mise/config.toml`） |
 | （`private_dot_claude` 已移出仓库） | `~/.claude/settings.json`（各机本地维护） | Claude Code 设置已不入库（参照 .codex 模式：源已移出仓库，由各机本地维护；`.chezmoiignore` 的 `.claude/settings.json` 行为防御性保留） |
-| `dot_codex/private_config.toml` | —（不部署，被 `.chezmoiignore` 的 `.codex/config.toml` 排除） | cc-switch 机器本地配置的参考快照（provider、hooks/projects trust 由各机 cc-switch 注入维护；仓库版本仅参考，实际生效值以各机 `~/.codex/config.toml` 为准） |
+| `dot_codex/config.toml` | —（不部署，被 `.chezmoiignore` 的 `.codex/config.toml` 排除） | cc-switch 机器本地配置的参考快照（provider、hooks/projects trust 由各机 cc-switch 注入维护；仓库版本仅参考，实际生效值以各机 `~/.codex/config.toml` 为准） |
 
 > `~/.config/gh/config.yml` 与 `hosts.yml` 由 `gh auth login` 在目标机生成，含凭据，**不入库**（见下文“不在仓库内的重要文件”）。
 

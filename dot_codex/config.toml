@@ -1,5 +1,5 @@
-# Codex config reference snapshot (source: dot_codex/private_config.toml; deploy is
-# excluded via .chezmoiignore — .codex/config.toml is machine-maintained by cc-switch).
+# Codex config reference snapshot (deploy is excluded via .chezmoiignore —
+# .codex/config.toml is machine-maintained by cc-switch).
 # Provider 段（model_provider / [model_providers.*]，含 base_url、requires_openai_auth、wire_api）
 # 由 cc-switch 在各机器注入/改写，不入仓库；实际生效值以 ~/.codex/config.toml 为准，本文件仅作参考快照。
 # See: https://github.com/openai/codex — config reference.
