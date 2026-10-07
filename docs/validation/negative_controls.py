@@ -36,14 +36,18 @@ CONTROLS = (
   (runtime_checks.NeovimRuntime, "test_cursorline_real_mode_transitions"),
 )
 FILES = (
-  ".gitignore",
-  "dot_tmux.conf",
-  "private_dot_config/nvim/lua/config/autocmds.lua",
-  "private_dot_config/zsh/aliases.zsh",
-  "private_dot_config/zsh/fzf.zsh",
-  "private_dot_config/zsh/sdk.zsh",
-  "private_dot_config/private_fish/private_conf.d/00_aliases.fish",
-  "private_dot_config/private_fish/private_conf.d/01_dev.fish",
+  (".gitignore", ".gitignore"),
+  ("dot_tmux.conf", "dot_tmux.conf"),
+  ("private_dot_config/nvim/lua/config/autocmds.lua", "private_dot_config/nvim/lua/config/autocmds.lua"),
+  ("private_dot_config/zsh/aliases.zsh", "private_dot_config/zsh/aliases.zsh"),
+  ("private_dot_config/zsh/fzf.zsh", "private_dot_config/zsh/fzf.zsh"),
+  ("private_dot_config/zsh/sdk.zsh", "private_dot_config/zsh/sdk.zsh"),
+  # HEAD 仍是旧 conf.d 五文件布局；当前测试引用新路径（10_sys/20_dev/functions/y.fish）。
+  # 按函数所在旧文件映射到新布局路径，供 function_source 提取；uv_resync 测试为
+  # 条件化定义（注释态验证模板、启用态验证行为），HEAD 基线含活跃函数时控制项可复现。
+  ("private_dot_config/private_fish/private_conf.d/00_aliases.fish", "private_dot_config/private_fish/private_conf.d/10_sys.fish"),
+  ("private_dot_config/private_fish/private_conf.d/00_aliases.fish", "private_dot_config/private_fish/private_functions/y.fish"),
+  ("private_dot_config/private_fish/private_conf.d/01_dev.fish", "private_dot_config/private_fish/private_conf.d/20_dev.fish"),
 )
 
 
@@ -61,9 +65,9 @@ def main():
   print(f"Negative-control revision: {revision}")
   with tempfile.TemporaryDirectory(prefix="dotfiles-negative-controls-") as tmp:
     baseline = Path(tmp)
-    for name in FILES:
+    for name, destination in FILES:
       data = subprocess.check_output([git, "show", f"{revision}:{name}"], cwd=repository)
-      path = baseline / name
+      path = baseline / destination
       path.parent.mkdir(parents=True, exist_ok=True)
       path.write_bytes(data)
     # Reuse current test definitions with historical configuration files.
@@ -71,6 +75,7 @@ def main():
       module.ROOT = baseline
       module.ZSH = baseline / "private_dot_config/zsh"
       module.FISH = baseline / "private_dot_config/private_fish/private_conf.d"
+      module.FUNCS = baseline / "private_dot_config/private_fish/private_functions"
     reproduced = 0
     invalid = 0
     for cls, name in CONTROLS:

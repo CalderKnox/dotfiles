@@ -15,7 +15,10 @@ python3 docs/validation/check.py --strict
 
 覆盖：
 
-- 每个 Zsh/Fish/Lua 文件逐个语法检查；JSON、TOML、Git 与初始化脚本解析；
+- 每个 Zsh/Fish/Lua 文件逐个语法检查（含 conf.d 六文件、functions/ 惰性函数与
+  completions/ 自有补全）；Fish autoload/补全情性加载的文件名契约
+  （functions/<name>.fish 必须定义同名函数、completions/<cmd>.fish 必须
+  complete --command <cmd>）；JSON、TOML、Git 与初始化脚本解析；
 - Git 的 Pi 源名 allowlist；含非 JSON、加密/属性前缀与扩展脚本的合成 chezmoi
   部署 fixture，并验证删除 deny 规则确实使测试失效；
 - 实际渲染的 Zsh/Zim symlink 目标与 private/default 权限契约（不 apply）；
