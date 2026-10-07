@@ -38,6 +38,8 @@ docs/
 **/*token*
 **/*secret*
 **/*credential*
+**/auth.json*
+**/hosts.yml
 
 # 构建产物与依赖（体积大 / 可重建）
 node_modules/

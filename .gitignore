@@ -63,3 +63,13 @@ private_dot_config/private_fish/private_conf.d/*
 # --- chezmoi 本地状态 ---
 chezmoistate.boltdb
 *.boltdb
+
+# --- 本地覆盖 / 备份 / 凭据镜像（镜像 .chezmoiignore 的本地覆盖与敏感块；Git 侧守卫）---
+# kitty.local.conf 等已被跟踪（ignore 规则不影响已跟踪文件），此块拦截新增的机器本地覆盖。
+# 置于文件末尾：last-match-wins，优先级高于上方各白名单反选。
+**/*.local
+**/*.local.*
+**/*.bak
+**/hosts.yml
+.pnpm-store/
+!.vscode/
