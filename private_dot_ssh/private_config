@@ -113,7 +113,7 @@ Host *
   ServerAliveCountMax 3
   StrictHostKeyChecking accept-new
   ControlMaster auto
-  # 目录由 chezmoi run_once 脚本创建（.chezmoiscripts/run_once_create-ssh-sockets.sh）
+  # 目录由 chezmoi 管理（源 private_dot_ssh/private_sockets/.keep，每次 apply 确保 0700）
   ControlPath ~/.ssh/sockets/%r@%h-%p
   ControlPersist 600
 
