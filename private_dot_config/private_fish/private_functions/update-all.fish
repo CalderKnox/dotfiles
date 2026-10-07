@@ -81,7 +81,7 @@ function update-all --description "一键更新所有开发环境 (fish 版)"
 
             case pi
                 if type -q pi
-                    pi update --all 2>/dev/null
+                    pi update --all
                     or set failed (math $failed + 1)
                 else
                     echo (set_color yellow)"⚠️  pi not found, skipped"(set_color normal)
@@ -93,13 +93,7 @@ function update-all --description "一键更新所有开发环境 (fish 版)"
                     or set failed (math $failed + 1)
                 else
                     echo (set_color yellow)"⚠️  sdk not found, skipped"(set_color normal)
-
                 end
-
-            case '*'
-                echo (set_color red)"❌ Unknown target: $name"(set_color normal)
-                echo "Available: "(string join ", " $tasks)
-                return 1
         end
         echo ""
     end

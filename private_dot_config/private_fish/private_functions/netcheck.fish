@@ -10,11 +10,11 @@
 # =============================================================================
 function netcheck --description 'Quick network diagnostics'
     echo (set_color cyan)"🌐 External IP:"(set_color normal)
-    curl -s icanhazip.com
+    curl -s --max-time 5 https://icanhazip.com
     echo
 
     echo (set_color cyan)"📡 DNS Test:"(set_color normal)
-    dig google.com +short 2>/dev/null | head -1
+    dig google.com +short +time=2 +tries=1 2>/dev/null | head -1
     echo
 
     echo (set_color cyan)"⚡ Speed Test (Download):"(set_color normal)
