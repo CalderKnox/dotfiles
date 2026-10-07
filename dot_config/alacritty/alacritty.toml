@@ -1,5 +1,12 @@
 # tombi / TOML-LSP schema association; alacritty itself ignores this key
 # (benign "Unused config key" warning).
+
+# Alacritty Configuration File (chezmoi: dot_config/alacritty/alacritty.toml -> ~/.config/alacritty/alacritty.toml)
+# GPU-accelerated terminal. Theme: Catppuccin Mocha (active [colors] below, same Catppuccin Mocha theme family as ghostty & local starship, though ANSI bright variants differ from ghostty's bundled theme; the original Dracula block is kept fully commented as an alternative template).
+# No private_ prefix: file deploys 0644, parent dirs 0755.
+# Docs: https://alacritty.org/config-alacritty.html | bindings: .../config-alacritty-bindings.html
+# Reference: https://www.kevnu.com/zh/posts/18
+
 [[schemas]]
 path = "https://raw.githubusercontent.com/distinction-dev/alacritty-schema/main/alacritty/reference.json"
 strict = false
@@ -7,12 +14,6 @@ strict = false
 [terminal.shell]
 program = "/opt/homebrew/bin/fish"
 args = ["-c", "tmux new -A -s main"]
-
-# Alacritty Configuration File (chezmoi: dot_config/alacritty/alacritty.toml -> ~/.config/alacritty/alacritty.toml)
-# GPU-accelerated terminal. Theme: Catppuccin Mocha (active [colors] below, same Catppuccin Mocha theme family as ghostty & local starship, though ANSI bright variants differ from ghostty's bundled theme; the original Dracula block is kept fully commented as an alternative template).
-# No private_ prefix: file deploys 0644, parent dirs 0755.
-# Docs: https://alacritty.org/config-alacritty.html | bindings: .../config-alacritty-bindings.html
-# Reference: https://www.kevnu.com/zh/posts/18
 
 [env]
 TERM = "xterm-256color"  # ensure 256-color + truecolor in tmux/ssh
@@ -32,10 +33,10 @@ LANG = "zh_CN.UTF-8"
 size = 16
 
 # Requires JetBrainsMono Nerd Font Mono installed (via Homebrew `font-jetbrains-mono-nerd-font`).
-normal = { family = "JetBrainsMono Nerd Font Mono", style = "Regular" }
-bold = { family = "JetBrainsMono Nerd Font Mono", style = "Bold" }
-italic = { family = "JetBrainsMono Nerd Font Mono", style = "Italic" }
-bold_italic = { family = "JetBrainsMono Nerd Font Mono", style = "Bold Italic" }
+normal = { family = "JetBrainsMonoNL Nerd Font Mono", style = "Regular" }
+bold = { family = "JetBrainsMonoNL Nerd Font Mono", style = "Bold" }
+italic = { family = "JetBrainsMonoNL Nerd Font Mono", style = "Italic" }
+bold_italic = { family = "JetBrainsMonoNL Nerd Font Mono", style = "Bold Italic" }
 builtin_box_drawing = true
 
 # Palette: Catppuccin Mocha (active) — same Catppuccin Mocha theme family as ghostty & local starship (ANSI bright variants differ from ghostty's bundled theme); the Dracula block below is kept fully commented as an alternative template.
