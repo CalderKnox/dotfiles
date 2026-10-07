@@ -115,8 +115,31 @@ class FishRuntime(Fixture):
     result = self.shell(definition, "update-all uv mise pi\n", "fish", {"TERM": "xterm-256color"})
     self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
     self.assertEqual(self.calls(), [["uv", "tool", "upgrade", "--all"], ["mise", "upgrade"]])
+    self.assertIn("✓ mise done", result.stdout)
+    self.assertIn("✗ uv failed", result.stdout)
+    self.assertIn("attempted: 2 · skipped: 1 · failed: 1", result.stdout)
+    self.assertIn("skipped: pi", result.stdout)
+    self.assertIn("failed: uv", result.stdout)
     self.assertIn("1 update(s) failed", result.stdout)
     self.assertIn("pi not found", result.stdout)
+
+  def test_update_all_accepts_rustup_alias_for_rust(self):
+    self.stub("rustup")
+    definition = function_source(FUNCS / "update-all.fish", "update-all", "fish")
+    result = self.shell(definition, "update-all rustup\n", "fish", {"TERM": "xterm-256color"})
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+    self.assertEqual(self.calls("rustup"), [["rustup", "update"]])
+    self.assertIn("✓ rust done", result.stdout)
+
+  def test_update_all_sdk_target_flushes_like_zsh(self):
+    self.stub("sdk")
+    definition = function_source(FUNCS / "update-all.fish", "update-all", "fish")
+    result = self.shell(definition, "update-all sdk\n", "fish", {"TERM": "xterm-256color"})
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+    self.assertEqual(
+      self.calls("sdk"),
+      [["sdk", "update"], ["sdk", "upgrade"], ["sdk", "selfupdate"], ["sdk", "flush"]],
+    )
 
   def fish_sdk_block(self):
     source = (FISH / "01_activate.fish").read_text()
