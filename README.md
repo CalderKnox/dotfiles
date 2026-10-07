@@ -95,7 +95,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │   └── private_fish/                  →  ~/.config/fish/              Fish 辅助配置（Starship + Fisher 13 插件清单）
 │       ├── config.fish                →  ~/.config/fish/config.fish
 │       ├── fish_plugins                →  ~/.config/fish/fish_plugins     Fisher 13 插件清单
-│       ├── private_completions/       →  ~/.config/fish/completions/  symlink_docker/kubectl/orbctl.fish → OrbStack
+│       ├── private_completions/       →  ~/.config/fish/completions/  kubecolor.fish + symlink_docker/kubectl/orbctl.fish → OrbStack
 │       ├── private_conf.d/            →  conf.d/ 六文件分层（00_env / 01_activate / 10_sys / 20_dev / 21_k8s / 22_rev；编号=加载阶段，01_activate 守卫激活 mise）
 │       ├── private_functions/         →  functions/ 18 个惰性加载函数（update-all/onproxy/y/serve/makes/bak 等，首次调用才 source；fisher 插件安装于 ~/.config/fish/fisher = fisher_path，退出 chezmoi 管理域）
 │       └── themes/                    →  ~/.config/fish/themes/       空占位目录（仅 .keep）

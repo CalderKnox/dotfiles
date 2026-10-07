@@ -80,7 +80,7 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 ### .chezmoiignore 的影响
 新机器执行 `chezmoi apply` 时，根目录的 `.chezmoiignore` 会自动**跳过**以下内容不渲染到 `$HOME`（见 [layout.md](layout.md)）：
 
-- 根级与全部嵌套的 `README.md`（模式 `**/README.md`，含 `zsh/README.md`、`nvim/README.md`）—— 仓库文档仅留在源目录，不污染目标机；`LICENSE` 文件（根级与 `nvim/LICENSE`）已删除，`**/LICENSE` 模式防御性保留
+- 根级与全部嵌套的 `README.md`（实际模式为 `**/*.md`（含 `zsh/README.md`、`nvim/README.md`）—— 仓库文档仅留在源目录，不污染目标机；`LICENSE` 文件（根级与 `nvim/LICENSE`）已删除，`**/LICENSE` 模式防御性保留
 - `docs/` —— 本文档所在目录整体不部署
 - `*.local` / `*.local.*` / `*.bak` / `**/.DS_Store` / `node_modules/` / `.pnpm-store/` 等本地覆盖与构建产物
 - `*token*` / `*secret*` / `*credential*` 等敏感文件名匹配

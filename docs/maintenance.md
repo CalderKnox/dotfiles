@@ -109,7 +109,7 @@ for f in ~/.config/fish/config.fish ~/.config/fish/conf.d/*.fish; do fish --no-c
 # ⚠️ conf.d 分层重排的迁移清理：chezmoi 不删除源里移除的条目，旧四文件在其他机器
 # git pull && chezmoi apply 后仍会残留并被继续 source（与新文件双份定义、旧 k8s 别名复活），
 # 必须逐机手动清理：
-#   rm -f ~/.config/fish/conf.d/{00_aliases,01_dev,01_rev,02_mise}.fish
+rm -f ~/.config/fish/conf.d/{00_aliases,01_dev,01_rev,02_mise}.fish
 # （新机器全新 apply 无此问题；全部存量机器清理完后可删除本段提示）
 
 # mise 环境体检

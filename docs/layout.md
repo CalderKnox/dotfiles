@@ -48,7 +48,7 @@
 | `private_dot_config/zsh/fzf.zsh` | `~/.config/zsh/fzf.zsh` | fzf 前缀探测/缓存、全局选项、Ctrl-R/T/Alt-C 及 `frg`/`fkill`/`ftm`/`fl*` 函数 |
 | `private_dot_config/zsh/sdk.zsh` | `~/.config/zsh/sdk.zsh` | SDK 环境与补全（pnpm/SDKMAN(可选)/Android NDK/Python(uv)/Go/Rust/Docker/kubectl+kubecolor） |
 | `private_dot_config/zsh/dot_gitignore` | `~/.config/zsh/.gitignore` | 忽略运行时产物（实际模式见文件，当前为 `.DS_Store` 与 `*.zwc`） |
-| `private_dot_config/zsh/README.md` | —（不部署） | 模块内部文档（加载顺序契约、函数速查）；由 `**/README.md` 排除，仅仓库内查阅 |
+| `private_dot_config/zsh/README.md` | —（不部署） | 模块内部文档（加载顺序契约、函数速查）；由 `**/*.md` 排除，仅仓库内查阅 |
 
 ### 终端与提示符
 
@@ -65,7 +65,7 @@
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
 | `private_dot_config/nvim/**` | `~/.config/nvim/**` | LazyVim 配置（`init.lua` + `lua/config/*` + `lua/plugins/*`、`lazyvim.json`（extras 声明的事实来源）、本地 colorscheme/Mason/Sidekick 插件 specs、`stylua.toml`；`lazy-lock.json` 已停止跟踪（3c3d65f），运行时生成不入库） |
-| `private_dot_config/nvim/README.md` | —（不部署） | LazyVim 上游模板自带；由 `**/README.md` 排除，仅仓库内查阅（历史排除模式误写为 `**/REAMDME.md` 未生效，已修复） |
+| `private_dot_config/nvim/README.md` | —（不部署） | LazyVim 上游模板自带；由 `**/*.md` 排除，仅仓库内查阅（历史排除模式误写为 `**/REAMDME.md` 未生效，已修复） |
 | `private_dot_config/nvim/dot_gitignore` | `~/.config/nvim/.gitignore` | 忽略插件数据等运行时目录 |
 | `private_dot_config/mise/config.toml` | `~/.config/mise/config.toml` | mise 工具链声明（工具与版本见 `private_dot_config/mise/config.toml`） |
 | （`private_dot_claude` 已移出仓库） | `~/.claude/settings.json`（各机本地维护） | Claude Code 设置已不入库（参照 .codex 模式：源已移出仓库，由各机本地维护；`.chezmoiignore` 的 `.claude/settings.json` 行为防御性保留） |
@@ -102,7 +102,7 @@
 ## .chezmoiignore —— 排除部分源文件不参与部署
 
 根目录的 `.chezmoiignore` 本身**不会**被 `chezmoi apply` 到 `$HOME`
-（chezmoi 对该文件名特殊处理），作用是在源目录中**排除**部分文件不参与渲染（按目标名匹配）。完整排除列表以 `.chezmoiignore` 源文件为唯一权威，涵盖本地覆盖与备份（`*.local`/`*.bak`）、仓库文档（`README.md`/`LICENSE`/`docs/`）、敏感词（`**/*token*`/`**/*secret*`/`**/*credential*`，`**/` 前缀使其覆盖嵌套目录）、构建产物（`node_modules/` 等）与 fish 机器本地状态等。
+（chezmoi 对该文件名特殊处理），作用是在源目录中**排除**部分文件不参与渲染（按目标名匹配）。完整排除列表以 `.chezmoiignore` 源文件为唯一权威，涵盖本地覆盖与备份（`*.local`/`*.bak`）、仓库文档（`README.md`/`LICENSE`/`docs/`）、敏感词（`**/*token*`/`**/*secret*`/`**/*credential*`/`**/auth.json*`/`**/hosts.yml`，`**/` 前缀使其覆盖嵌套目录）、构建产物（`node_modules/` 等）与 fish 机器本地状态等。
 
 效果：`chezmoi diff` / `chezmoi apply` 自动跳过上述模式匹配的目标，避免污染家目录。
 

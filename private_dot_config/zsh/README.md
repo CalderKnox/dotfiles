@@ -87,6 +87,6 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.fzf_prefix_cache`）�
 ## 修改与验收流程
 
 1. 改完后逐文件跑语法检查（实测 `zsh -n` 多文件传参时只解析首个）：`for f in aliases.zsh fzf.zsh sdk.zsh dot_zshrc dot_zimrc; do zsh -n "$f" || exit 1; done`（或 `zsh -n ~/.config/zsh/.zshrc`）
-2. 提交前离线检查：从仓库根执行 `python3 docs/validation/check.py`（隔离 HOME + stub；不执行更新器）。
+2. 提交前离线检查：从仓库根执行 `python3 docs/validation/check.py --strict`（隔离 HOME + stub；不执行更新器；strict 下任何 skip 即失败）。
 3. 仅在主动验证已部署配置时执行 `zsh -ic 'exit'` / `zsh -ic 'type k df du; echo $EDITOR; echo $LANG'`；这些命令使用真实 HOME，首次启动可能下载插件。
 4. 提交：小步提交，说明动机；重大重构前先打 tag 以便回退（本仓库历史上并无 `baseline` 标签，不要创建同名标签造成混淆）。
