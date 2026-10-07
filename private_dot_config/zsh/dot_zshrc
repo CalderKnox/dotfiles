@@ -157,8 +157,10 @@ unset _init
 
 # ---------------------------------------------------------------------------
 # 外部配置加载（Loading-order contract：aliases → fzf → sdk，顺序即语义）
+# - 显式逐个 source（不用 glob）：新掉 .zsh 文件不会静默改变加载集，
+#   模块顺序是文档化契约，必须在这里看得见
 # - 守卫：PATH 插入均目录存在+去重；工具 init 均 command -v 守卫
-# - (N) 使无匹配时不产生字面量，避免 source 报错；每个文件存在才 source
 # ---------------------------------------------------------------------------
-for file in ~/.config/zsh/*.zsh(N); do [[ -f "$file" ]] && source "$file"; done
-unset file
+[[ -f "$HOME/.config/zsh/aliases.zsh" ]] && source "$HOME/.config/zsh/aliases.zsh"
+[[ -f "$HOME/.config/zsh/fzf.zsh" ]] && source "$HOME/.config/zsh/fzf.zsh"
+[[ -f "$HOME/.config/zsh/sdk.zsh" ]] && source "$HOME/.config/zsh/sdk.zsh"
