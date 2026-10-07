@@ -42,9 +42,9 @@ FILES = (
   ("private_dot_config/zsh/aliases.zsh", "private_dot_config/zsh/aliases.zsh"),
   ("private_dot_config/zsh/fzf.zsh", "private_dot_config/zsh/fzf.zsh"),
   ("private_dot_config/zsh/sdk.zsh", "private_dot_config/zsh/sdk.zsh"),
-  # HEAD 仍是旧 conf.d 五文件布局；当前测试引用新路径（10_sys/20_dev/functions/y.fish）。
-  # 按函数所在旧文件映射到新布局路径，供 function_source 提取；uv_resync 测试为
-  # 条件化定义（注释态验证模板、启用态验证行为），HEAD 基线含活跃函数时控制项可复现。
+  # 负对照基线读取重构前的旧 conf.d 源名（控制在旧代码上复现失败才有意义）；
+  # HEAD 已是新布局，默认运行会触发下方 cat-file 预检的明确报错——请用
+  # --revision 指向重构前的提交（如 9483af3）再运行。
   ("private_dot_config/private_fish/private_conf.d/00_aliases.fish", "private_dot_config/private_fish/private_conf.d/10_sys.fish"),
   ("private_dot_config/private_fish/private_conf.d/00_aliases.fish", "private_dot_config/private_fish/private_functions/y.fish"),
   ("private_dot_config/private_fish/private_conf.d/01_dev.fish", "private_dot_config/private_fish/private_conf.d/20_dev.fish"),
@@ -63,6 +63,16 @@ def main():
     [git, "rev-parse", "--verify", args.revision + "^{commit}"], cwd=repository, text=True
   ).strip()
   print(f"Negative-control revision: {revision}")
+  missing = [
+    name
+    for name, _ in FILES
+    if subprocess.run([git, "cat-file", "-e", f"{revision}:{name}"], cwd=repository).returncode != 0
+  ]
+  if missing:
+    parser.error(
+      f"baseline paths absent in {args.revision}: {', '.join(missing)}; "
+      "pass the pre-refactor revision via --revision or update the FILES mapping"
+    )
   with tempfile.TemporaryDirectory(prefix="dotfiles-negative-controls-") as tmp:
     baseline = Path(tmp)
     for name, destination in FILES:

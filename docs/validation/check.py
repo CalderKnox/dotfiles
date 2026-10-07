@@ -203,6 +203,22 @@ class SourceChecks(Fixture):
       self.run_command([self.require("git"), "config", "--no-includes", "--file", ROOT / "dot_gitconfig", "--list"])
     )
 
+  def test_ssh_config_parses(self):
+    # `ssh -G` resolves and prints the effective configuration without connecting
+    # and without executing ProxyCommand. Token expansion must key ControlPath on
+    # %n so aliases sharing user@host:port (tst/ops/sec, the github pair) each own
+    # a distinct socket and their IdentityFiles actually engage.
+    ssh = self.require("ssh")
+    config = ROOT / "private_dot_ssh/private_config"
+    result = None
+    for host in ("tst", "ops", "sec", "github.com"):
+      result = self.run_command([ssh, "-G", "-F", config, host])
+      self.ok(result)
+      options = {line.split(" ", 1)[0]: line.split(" ", 1)[1] for line in result.stdout.splitlines() if " " in line}
+      self.assertIn("controlpath", options)
+      self.assertIn(host, options["controlpath"], host)
+    self.assertIn("proxycommand", {line.split(" ", 1)[0] for line in result.stdout.splitlines()})
+
   def test_pi_source_allowlist(self):
     git = self.require("git")
     (self.cwd / ".gitignore").write_text((ROOT / ".gitignore").read_text())
