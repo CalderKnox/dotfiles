@@ -35,6 +35,8 @@
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
 | `private_dot_ssh/private_config` | `~/.ssh/config` (0600) | OrbStack `Include ~/.orbstack/ssh/config` 置顶 + `Host github.com` 走 `ssh.github.com:443` + SOCKS5 自适应（`nc -z 127.0.0.1:5376` 探测，有则 `-X 5 -x 127.0.0.1:5376` 否则直连） |
+| `private_dot_ssh/private_sockets/.keep` | `~/.ssh/sockets/` (0700) | ControlPath socket 目录占位（.keep 本身不部署，仅目录属性生效） |
+| `private_dot_ssh/private_agent/.keep` | `~/.ssh/agent/` (0700) | 预留占位目录 |
 
 ### ~/.config/zsh/（XDG 收敛：入口 + 三模块）
 
@@ -45,7 +47,7 @@
 | `private_dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`update-all`、`auto-update`、`y`、`ruff_auto` 等）；`update-all` 为关联数组 7 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`/`pi`，支持传参过滤、失败计数与耗时统计；`auto-update` 为兼容旧习惯的一键入口（可选 `onproxy` 切代理后直接委托 `update-all`，覆盖目标一致，均含 `mise`）；新增 `chezc/chezdf/chezap` 三别名 |
 | `private_dot_config/zsh/fzf.zsh` | `~/.config/zsh/fzf.zsh` | fzf 前缀探测/缓存、全局选项、Ctrl-R/T/Alt-C 及 `frg`/`fkill`/`ftm`/`fl*` 函数 |
 | `private_dot_config/zsh/sdk.zsh` | `~/.config/zsh/sdk.zsh` | SDK 环境与补全（pnpm/SDKMAN(可选)/Android NDK/Python(uv)/Go/Rust/Docker/kubectl+kubecolor） |
-| `private_dot_config/zsh/dot_gitignore` | `~/.config/zsh/.gitignore` | 忽略运行时产物（实际模式见文件，当前仅 `*.zwc`） |
+| `private_dot_config/zsh/dot_gitignore` | `~/.config/zsh/.gitignore` | 忽略运行时产物（实际模式见文件，当前为 `.DS_Store` 与 `*.zwc`） |
 | `private_dot_config/zsh/README.md` | —（不部署） | 模块内部文档（加载顺序契约、函数速查）；由 `**/README.md` 排除，仅仓库内查阅 |
 
 ### 终端与提示符
@@ -80,8 +82,8 @@
 | `.../private_completions/symlink_kubectl.fish` | `~/.config/fish/completions/kubectl.fish` | 同上 |
 | `.../private_completions/symlink_orbctl.fish` | `~/.config/fish/completions/orbctl.fish` | 同上 |
 | `.../fish_plugins` | `~/.config/fish/fish_plugins` | Fisher 插件清单（13 个：fzf.fish、forgit、bass、done、autopair、sponge、puffer-fish 等） |
-| `.../private_conf.d/00_env.fish`、`00_aliases.fish`、`01_dev.fish`、`01_rev.fish`、`02_mise.fish` | `~/.config/fish/conf.d/` | 五件套：`00_env.fish`（PATH 收敛/LANG/EDITOR/HOMEBREW_*/kubecolor 补全/GOPATH）+ `00_aliases.fish`（别名与函数、update-all）+ `01_dev.fish`（开发工具）+ `01_rev.fish`（逆向/杂项）+ `02_mise.fish`（`type -q mise` 守卫激活，与 zsh 侧 `dot_zshrc` 的 activate 对应）；fish 侧 fzf 键位由 fisher 插件 patrickf1/fzf.fish 提供（安装于 `~/.config/fish/fisher` = fisher_path，退出 chezmoi 管理域，config.fish 注入其 functions/completions/conf.d，不入库） |
-| `.../private_functions/*`、`.../private_completions/*` | `~/.config/fish/functions/`、`~/.config/fish/completions/` | fisher 插件函数/补全不再随源部署（插件安装于 `~/.config/fish/fisher` = fisher_path，退出 chezmoi 管理域）；仓库 `private_functions/` 仅余 `.keep` 占位，`private_completions/` 仅保留三条 OrbStack 符号链接（`symlink_docker/kubectl/orbctl.fish` 随源部署） |
+| `.../private_conf.d/`（`00_env` / `01_activate` / `10_sys` / `20_dev` / `21_k8s` / `22_rev`） | `~/.config/fish/conf.d/` | 六文件分层：编号表达加载阶段（0x 环境/激活 → 1x 系统基础 → 2x 领域）。`00_env.fish`（PATH 收敛/LANG/EDITOR/HOMEBREW_*/GOPATH）+ `01_activate.fish`（`type -q mise` 守卫激活，与 zsh 侧 `dot_zshrc` 的 activate 对应）+ `10_sys.fish`（系统增强别名/导航/时间戳）+ `20_dev.fish`（开发工具）+ `21_k8s.fish`（k8s 别名）+ `22_rev.fish`（逆向）；fish 侧 fzf 键位由 fisher 插件 patrickf1/fzf.fish 提供（安装于 `~/.config/fish/fisher` = fisher_path，退出 chezmoi 管理域，config.fish 注入其 functions/completions/conf.d，不入库） |
+| `.../private_functions/*`、`.../private_completions/*` | `~/.config/fish/functions/`、`~/.config/fish/completions/` | `private_functions/` 18 个惰性加载函数（update-all/auto-update、onproxy/ofproxy、y、serve、netcheck、makes/xargsp/__half_cpu_count、bak/timer/decide、find-large/dus/filestats/recent/tree-size；首次调用才 source，`__` 前缀 helper 被补全隐藏）；`private_completions/` 含 `kubecolor.fish`（complete --wraps kubectl）与三条 OrbStack 符号链接；fisher 插件仍安装于 `~/.config/fish/fisher` = fisher_path，退出 chezmoi 管理域，不写入仓库 |
 | `.../themes/.keep` | —（`.keep` 仅保留空目录，不部署） | 主题目录占位 |
 | `.../private_fish_variables` | —（已加入 `.chezmoiignore`，不部署） | fish Universal Variables 机器本地状态 |
 
@@ -108,9 +110,9 @@
 
 ## 仓库特性说明
 
-- **极简模板**：仅有的 `*.tmpl` 是 `symlink_dot_zshrc.tmpl` / `symlink_dot_zimrc.tmpl`（各一行 `{{ .chezmoi.homeDir }}/.config/zsh/...`，将 `~/.zshrc` 收敛至 XDG）—— 其余全部为静态文件，无 `.chezmoidata.*` 数据；仅有一个 `run_*` 脚本 `.chezmoiscripts/run_once_create-ssh-sockets.sh`（每机仅执行一次的 ssh socket 目录初始化）。所有机器 `chezmoi apply` 拿到同一套内容；如需进一步按机器差异化，可在现有模板基础上扩展。
+- **极简模板**：仅有的 `*.tmpl` 是 `symlink_dot_zshrc.tmpl` / `symlink_dot_zimrc.tmpl`（各一行 `{{ .chezmoi.homeDir }}/.config/zsh/...`，将 `~/.zshrc` 收敛至 XDG）—— 其余全部为静态文件，无 `.chezmoidata.*` 数据；无 `run_*` 脚本（历史 `run_once_create-ssh-sockets.sh` 已删除，`~/.ssh/sockets` 改由 `private_dot_ssh/private_sockets/.keep` 目录属性管理，每次 apply 校验）。所有机器 `chezmoi apply` 拿到同一套内容；如需进一步按机器差异化，可在现有模板基础上扩展。
 - **运行时产物不入库**：`~/.config/zsh/.gitignore` 和 `~/.config/nvim/.gitignore`
-  分别忽略 `*.zwc` 及 Neovim 插件数据等运行时目录；fzf 前缀缓存位于 HOME/ZDOTDIR，不应假定该 `.gitignore` 覆盖它。
+  分别忽略 `.DS_Store`/`*.zwc` 及 Neovim 插件数据等运行时目录；fzf 前缀缓存位于 HOME/ZDOTDIR，不应假定该 `.gitignore` 覆盖它。
 - **仅服务于仓库管理、不部署的文件**：根目录的 `.gitignore` 与 `.chezmoiignore` 被 chezmoi 默认忽略（源目录中点开头文件不参与 apply）；根级 `README.md`、`docs/`（本文档所在）以及全部嵌套 `README.md`（如 `zsh/README.md`、`nvim/README.md`）被 `.chezmoiignore` 排除；根级与 `nvim/LICENSE` 文件已删除，`**/LICENSE` 模式防御性保留。
 - **不在仓库内的重要文件**：
   - `~/.config/gh/hosts.yml` / `config.yml`——由 `gh auth login` 生成，含凭据，切勿加入仓库；

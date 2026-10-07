@@ -104,7 +104,13 @@ git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy
 
 # fish 配置语法检查（fish -n 只校验首个文件，必须逐个检查；实测多文件传参时后续文件被静默跳过）
 for f in ~/.config/fish/config.fish ~/.config/fish/conf.d/*.fish; do fish --no-config -n "$f" || exit 1; done
-# conf.d 现含五文件：00_env / 00_aliases / 01_dev / 01_rev / 02_mise（02_mise 以 type -q mise 守卫激活，与 zsh 侧 dot_zshrc 的 activate 对应；fisher 插件安装于 ~/.config/fish/fisher = fisher_path，退出 chezmoi 管理域，config.fish 注入其 functions/completions/conf.d，不写入仓库 private_functions/）
+# conf.d 现为六文件分层：00_env / 01_activate / 10_sys / 20_dev / 21_k8s / 22_rev（01_activate 以 type -q mise 守卫激活，与 zsh 侧 dot_zshrc 的 activate 对应；编号=加载阶段，文件名=领域）。可调用大函数（update-all/auto-update、onproxy/ofproxy、y、serve、netcheck、makes/xargsp、bak/timer/decide、磁盘分析四件套共 18 个）在 private_functions/ 惰性加载（首次调用才 source）；kubecolor 补全在 private_completions/kubecolor.fish；fisher 插件安装于 ~/.config/fish/fisher = fisher_path，退出 chezmoi 管理域，config.fish 注入其 functions/completions/conf.d，不写入仓库 private_functions/
+
+# ⚠️ conf.d 分层重排的迁移清理：chezmoi 不删除源里移除的条目，旧四文件在其他机器
+# git pull && chezmoi apply 后仍会残留并被继续 source（与新文件双份定义、旧 k8s 别名复活），
+# 必须逐机手动清理：
+#   rm -f ~/.config/fish/conf.d/{00_aliases,01_dev,01_rev,02_mise}.fish
+# （新机器全新 apply 无此问题；全部存量机器清理完后可删除本段提示）
 
 # mise 环境体检
 mise doctor

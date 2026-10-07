@@ -117,7 +117,7 @@ Ghostty/kitty native parser 2/2 通过；实际 tmux plugin 初始化/重载测�
 - Zsh uv reset 仍作用于 HOME，Fish reset 仍作用于项目目录；两者都是主动调用的
   破坏性操作，不是无损同步。
 - `bak` 保留 shell 原有命名与覆盖策略，不保证并发同一时间戳备份的事务性。
-- SSH run_once 脚本和 symlink 模板使用 HOME；指定另一个 destination 而不隔离 HOME
+- symlink 模板使用 HOME；指定另一个 destination 而不隔离 HOME
   不构成安全 apply 沙箱。常规 HOME 部署契约没有改变。
 - 浮动 mise/plugin 选择保留；本次验证覆盖所列本机版本，不保证所有历史或未来版本。
 - **没有测量真实 shell 全链路启动时间，不声明整体提速百分比。** 可证明的性能收益是
