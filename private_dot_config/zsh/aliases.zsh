@@ -151,8 +151,21 @@ alias cla_cfg='code ${HOME}/.claude'
 # =============================================================================
 
 # ~~~ 编译构建 ~~~
-alias makes='make -j $(( $(nproc) / 2 ))'        # 用一半核数并行编译（nproc 来自 coreutils）
-alias xargsp='xargs -P $(( $(nproc) / 2 ))'      # xargs 半核并行执行
+# 半核并行（与 fish 侧 functions/__half_cpu_count.fish 同语义）：nproc（coreutils）
+# 缺失时回退 sysctl（macOS 原生）；探测失败/非数字时回退 1；下限 1。
+__half_cpu_count() {
+    local n
+    if command -v nproc >/dev/null 2>&1; then
+        n=$(nproc 2>/dev/null)
+    else
+        n=$(sysctl -n hw.ncpu 2>/dev/null)
+    fi
+    [[ "$n" == <-> ]] || n=2
+    (( n < 2 )) && n=2
+    print -- $(( n / 2 ))
+}
+makes() { make -j "$(__half_cpu_count)" "$@"; }
+xargsp() { xargs -P "$(__half_cpu_count)" "$@"; }
 
 # ~~~ Git 相关 ~~~
 alias gopen='gh browse'                          # 浏览器打开当前仓库
