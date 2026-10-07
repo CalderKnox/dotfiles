@@ -28,10 +28,8 @@ nvim.payne
 !/dot_pi/agent/settings.json
 !/dot_pi/agent/pi-goal.json
 !/dot_pi/workflows/settings.json
-# 兼容旧源布局及 private_/encrypted_ 等文件属性前缀。
-private_dot_pi/**/*mcp*.json*
-private_dot_pi/**/*auth*.json*
-private_dot_pi/**/sessions/
+# 兼容旧源布局及 /encrypted_ 等文件属性前缀。
+dot_pi/**/sessions/
 
 # --- 敏感与凭据（镜像 .chezmoiignore 的部署侧守卫；Git 侧由本文件负责）---
 **/*token*
@@ -49,16 +47,16 @@ __pycache__/
 # config.fish、编号前缀的 conf.d/[0-9]*.fish（分层六文件）、fish_plugins、
 # functions/*.fish（惰性加载函数）与 completions/symlink_* + kubecolor.fish，
 # 其余 fisher 生成物不入库、由 .keep 占位。
-private_dot_config/private_fish/private_fish_variables
-private_dot_config/private_fish/private_functions/*
-!private_dot_config/private_fish/private_functions/.keep
-!private_dot_config/private_fish/private_functions/*.fish
-private_dot_config/private_fish/private_completions/*
-!private_dot_config/private_fish/private_completions/symlink_*.fish
-!private_dot_config/private_fish/private_completions/kubecolor.fish
-private_dot_config/private_fish/private_conf.d/*
-!private_dot_config/private_fish/private_conf.d/.keep
-!private_dot_config/private_fish/private_conf.d/[0-9]*\.fish
+dot_config/fish/fish_variables
+dot_config/fish/functions/*
+!dot_config/fish/functions/.keep
+!dot_config/fish/functions/*.fish
+dot_config/fish/completions/*
+!dot_config/fish/completions/symlink_*.fish
+!dot_config/fish/completions/kubecolor.fish
+dot_config/fish/conf.d/*
+!dot_config/fish/conf.d/.keep
+!dot_config/fish/conf.d/[0-9]*\.fish
 
 # --- chezmoi 本地状态 ---
 chezmoistate.boltdb
