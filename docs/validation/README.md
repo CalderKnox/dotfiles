@@ -25,7 +25,7 @@ python3 docs/validation/check.py --strict
 - updater 全参数预检、混合失败、缺失依赖、临时文件失败与 stderr；
 - Zsh/Fish yazi 成功/失败/清理/caller 变量；uv destructive reset 依赖与短路；
 - fzf 正整数 PID、去重、多选、危险 Ex 行字段、路径选项终止与 ftm 状态；
-- SDKMAN 惰性加载、失败不递归、reload 不重复初始化；
+- SDKMAN 惰性加载、失败不递归、reload 不重复初始化（zsh）；fish 侧 SDKMAN 桩未安装不定义、惰性、经 bass 转发参数；
 - completion 冷/热缓存、未来 mtime、同路径降级、NO_CLOBBER、无效生成、编译失败、
   真实 bytecode 消费，以及同/不同二进制的并发加载（不同安装的 stress fixture
   仅把等锁上限延长到 10 秒；另一个检查验证 production 1 秒超时安全跳过）；

@@ -50,6 +50,11 @@ def function_source_optional(path, name, shell="zsh"):
 
 
 class Fixture(unittest.TestCase):
+  def sdk_init(self, content):
+    """Install a fixture SDKMAN bash init script under the isolated HOME."""
+    path = Path(self.env["HOME"]) / ".sdkman/bin/sdkman-init.sh"
+    path.parent.mkdir(parents=True)
+    path.write_text(content)
   def setUp(self):
     self.temp = tempfile.TemporaryDirectory(prefix="dotfiles-validation-")
     self.addCleanup(self.temp.cleanup)

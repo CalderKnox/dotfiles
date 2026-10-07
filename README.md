@@ -15,7 +15,7 @@
 | 领域 | 方案 | 说明 |
 | --- | --- | --- |
 | Shell | Zsh + [Zim](https://zimfw.sh/) + 自有模块 | `aliases.zsh` / `fzf.zsh` / `sdk.zsh` 三模块化加载；`update-all` 批量更新（`brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`/`pi`，支持参数过滤与失败计数） |
-| Fish | Fish + [Fisher](https://github.com/jorgebucaran/fisher) + Starship | Ghostty 登录 shell（`fish -l`，tmux `default-shell` 同步）；`fish_plugins` 锁定 13 个插件（fzf.fish / forgit / autopair / done 等），`conf.d` 分层六文件（含 `01_activate.fish` 守卫激活 mise）设定 PATH/LANG/EDITOR 等环境，可调用大函数在 `private_functions/` 惰性加载，补全含 kubecolor 与 OrbStack docker/kubectl/orbctl 符号链接 |
+| Fish | Fish + [Fisher](https://github.com/jorgebucaran/fisher) + Starship | Ghostty 登录 shell（`fish -l`，tmux `default-shell` 同步）；`fish_plugins` 锁定 13 个插件（fzf.fish / forgit / autopair / done 等），`conf.d` 分层六文件（含 `01_activate.fish` 守卫激活 mise 与 SDKMAN 惰性桩）设定 PATH/LANG/EDITOR 等环境，可调用大函数在 `private_functions/` 惰性加载，补全含 kubecolor 与 OrbStack docker/kubectl/orbctl 符号链接 |
 | 提示符 | [Starship](https://starship.rs/) | Catppuccin Mocha powerline 风格（`starship.toml` 为机器本地文件，未入库） |
 | 模糊搜索 | fzf + fzf-tab + fd | Ctrl-R 历史、Ctrl-T 文件、Alt-C 目录、`frg`/`fkill`/`ftm`/`fl*` 交互函数 |
 | 终端 | Ghostty（主力）/ Alacritty（备用） | Ghostty 使用 JetBrainsMonoNL，Alacritty 使用 JetBrainsMono Nerd Font Mono；Catppuccin Mocha 配色（Dracula 以注释模板保留于 alacritty） |
@@ -96,7 +96,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │       ├── config.fish                →  ~/.config/fish/config.fish
 │       ├── fish_plugins                →  ~/.config/fish/fish_plugins     Fisher 13 插件清单
 │       ├── private_completions/       →  ~/.config/fish/completions/  kubecolor.fish + symlink_docker/kubectl/orbctl.fish → OrbStack
-│       ├── private_conf.d/            →  conf.d/ 六文件分层（00_env / 01_activate / 10_sys / 20_dev / 21_k8s / 22_rev；编号=加载阶段，01_activate 守卫激活 mise）
+│       ├── private_conf.d/            →  conf.d/ 六文件分层（00_env / 01_activate / 10_sys / 20_dev / 21_k8s / 22_rev；编号=加载阶段，01_activate 守卫激活 mise + SDKMAN 惰性桩）
 │       ├── private_functions/         →  functions/ 18 个惰性加载函数（update-all/onproxy/y/serve/makes/bak 等，首次调用才 source；fisher 插件安装于 ~/.config/fish/fisher = fisher_path，退出 chezmoi 管理域）
 │       └── themes/                    →  ~/.config/fish/themes/       空占位目录（仅 .keep）
 ├── private_dot_ssh/

@@ -106,7 +106,7 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 
 > `~/.config/zsh/.zshrc` 以 glob（`for file in ~/.config/zsh/*.zsh(N)`）加载三模块，没有逐文件 source 行；
 > 如需禁用 `sdk.zsh`，重命名/移除已部署文件（如 `mv ~/.config/zsh/sdk.zsh ~/.config/zsh/sdk.zsh.disabled`）
-> 或改 `dot_zshrc` 中的 glob 行。`SDKMAN` 为惰性加载——首次调用 `sdk` 时才真正 source init 并注入 PATH（Java 等
+> 或改 `dot_zshrc` 中的显式 source 行。`SDKMAN` 为惰性加载——首次调用 `sdk` 时才真正 source init 并注入 PATH（Java 等
 > candidate 的可用性随之延迟到首次 `sdk` 调用）；`fzf` 键位绑定只在 `fzf.zsh` 内
 > `eval "$(fzf --zsh)"` 一次，`~/.zshrc` 不再重复。详见 [shell.md](shell.md)。
 

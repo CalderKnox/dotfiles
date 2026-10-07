@@ -3,7 +3,8 @@
 # Sync: `fisher install` / `fisher update` / `fisher list` reads this file.
 # Each line is a GitHub repo (or local path); fisher ignores blank lines
 # and comment lines that contain spaces. Keep 13 plugins.
-# Note: edc/bass 仅被 20_dev.fish 中注释掉的 uv 模板引用，保留为模板依赖；
+# Note: edc/bass 为 conf.d/01_activate.fish 的 SDKMAN 惰性桩转发 bash init
+#       （另被 20_dev.fish 中注释掉的 uv 模板引用）；
 #       oh-my-fish/plugin-foreign-env (fenv) 当前未被任何配置使用（预留）。
 #       移除任一项均为需显式确认的决定。
 # See also: config.fish (shell entry), conf.d/00_env.fish (PATH).

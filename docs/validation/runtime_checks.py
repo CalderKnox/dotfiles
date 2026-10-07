@@ -118,17 +118,41 @@ class FishRuntime(Fixture):
     self.assertIn("1 update(s) failed", result.stdout)
     self.assertIn("pi not found", result.stdout)
 
+  def fish_sdk_block(self):
+    source = (FISH / "01_activate.fish").read_text()
+    start = source.index("# --- SDKMAN")
+    return source[start : source.index("# --- end SDKMAN", start)]
+
+  def test_fish_sdk_stub_absent_without_sdkman_and_lazy_with_it(self):
+    block = self.fish_sdk_block()
+    # 未安装 SDKMAN：不定义任何函数（update-all 的 sdk 目标随之跳过）
+    result = self.shell("", block + "\nfunctions -q sdk; or echo NO_STUB\n", "fish")
+    self.assertEqual(self.ok(result).strip(), "NO_STUB")
+    # 已安装：桩已定义且惰性——定义本身不 source init；bass 缺失时受控失败
+    # 127（不扏 bash 报错、不递归）
+    self.sdk_init("export INIT=1\n")
+    script = block + "\nfunctions -q sdk; and echo STUB\n"
+    self.assertIn("STUB", self.ok(self.shell("", script, "fish")))
+    result = self.shell("", block + "\nsdk current\n", "fish")
+    self.assertEqual(result.returncode, 127, result.stderr)
+    self.assertIn("bass", result.stderr)
+
+  def test_fish_sdk_stub_forwards_args_to_bass_without_eager_init(self):
+    self.sdk_init("export INIT=1\n")
+    script = (
+      self.fish_sdk_block()
+      + "\nfunction bass; echo BASS (string join ' ' $argv); end\nsdk current java\n"
+    )
+    out = self.ok(self.shell("", script, "fish")).strip()
+    init = Path(self.env["HOME"]) / ".sdkman/bin/sdkman-init.sh"
+    self.assertEqual(out, f"BASS source {init} ;and sdk current java")
+
 
 class ZshRuntime(Fixture):
   def sdk_block(self):
     source = (ZSH / "sdk.zsh").read_text()
     start = source.index('if [[ -s "$HOME/.sdkman/bin/sdkman-init.sh"')
     return source[start : source.index("########## Android", start)]
-
-  def sdk_init(self, content):
-    path = Path(self.env["HOME"]) / ".sdkman/bin/sdkman-init.sh"
-    path.parent.mkdir(parents=True)
-    path.write_text(content)
 
   def test_sdk_is_lazy_and_not_reset_by_repeated_source(self):
     self.sdk_init('typeset -g INIT_CALLS=$(( ${INIT_CALLS:-0} + 1 ))\nsdk() { print -r -- "sdk:$*:$INIT_CALLS"; }\n')
