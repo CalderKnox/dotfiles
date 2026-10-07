@@ -2,7 +2,7 @@
 
 个人 zsh 配置模块集合。目标环境：**macOS (Apple Silicon) + Homebrew (`/opt/homebrew`) + zsh 5.9**。
 
-本仓库包含按模块拆分的配置文件；入口文件为 `private_dot_config/zsh/dot_zshrc`（部署为 `~/.config/zsh/.zshrc`，经 `symlink_dot_zshrc.tmpl` 在 `~/.zshrc` 建立符号链接兼容）。**各源码文件头部与内联注释为单一事实来源（SSOT）**，本文仅作高层索引与契约说明，不复述字段值与代码清单。
+本仓库包含按模块拆分的配置文件；入口文件为 `dot_config/zsh/dot_zshrc`（部署为 `~/.config/zsh/.zshrc`，经 `symlink_dot_zshrc.tmpl` 在 `~/.zshrc` 建立符号链接兼容）。**各源码文件头部与内联注释为单一事实来源（SSOT）**，本文仅作高层索引与契约说明，不复述字段值与代码清单。
 
 ## 模块总览
 
@@ -21,7 +21,7 @@
 - `aliases.zsh` 必须先于 `fzf.zsh`（后者 Ctrl-G 绑定在 source 时展开 `$EDITOR`）；
 - `sdk.zsh` 必须在 compinit 之后且最后加载（内含 `compdef` 注册，需 compinit 已完成；`k` 别名仅在此定义，`aliases.zsh` 有意不重复）。
 
-精确的 `source` 语句与守卫说明见 `private_dot_config/zsh/dot_zshrc` 底部加载块与各文件头部的 `Usage` 注释，本文不复述代码清单。
+精确的 `source` 语句与守卫说明见 `dot_config/zsh/dot_zshrc` 底部加载块与各文件头部的 `Usage` 注释，本文不复述代码清单。
 
 ## 关键设计约定
 
@@ -66,7 +66,7 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.cache/zsh/fzf_prefix`
 ### 启动必需（缺失会导致功能缺失）
 
 - `fzf`（有 `command -v` 守卫；缺失则失去 Ctrl-R/Ctrl-T/Alt-C 等绑定及 `frg`/`fkill`/`ftm`/`fl*`）
-- `fzf-tab` 插件（由 `private_dot_config/zsh/dot_zimrc` 的 `zmodule Aloxaf/fzf-tab` 经 zimfw 加载；缺失则补全菜单失去 fzf 化）
+- `fzf-tab` 插件（由 `dot_config/zsh/dot_zimrc` 的 `zmodule Aloxaf/fzf-tab` 经 zimfw 加载；缺失则补全菜单失去 fzf 化）
 - zsh 补全系统 `compinit`（由 `dot_zshrc` 的 Zim 框架最先完成；`sdk.zsh` 的 `compdef` 依赖它）
 
 ### 有守卫的可选组件（未安装时静默跳过）
@@ -80,7 +80,7 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.cache/zsh/fzf_prefix`
 ## 注意事项
 
 1. **破坏性命令**：`uv_resync` 先检查 uv 可用，随后删除 `~/.venv` 与 `~/uv.lock` 再执行 `uv sync`（目标为家目录路径而非当前项目），使用前请确认。定义见 `aliases.zsh`。
-2. **`~/.config/zsh/.zshrc`（即仓库内 `private_dot_config/zsh/dot_zshrc`，兼容 `~/.zshrc` 符号链接）已收敛单一初始化点**：fzf 键位/补全仅在 `fzf.zsh` 内成功生成后 eval `fzf --zsh` 的完整输出一次，`dot_zshrc` 不再重复 eval；`sdk.zsh` 为无条件 `source` 但内部逐项守卫。详见 `dot_zshrc` 注释。
+2. **`~/.config/zsh/.zshrc`（即仓库内 `dot_config/zsh/dot_zshrc`，兼容 `~/.zshrc` 符号链接）已收敛单一初始化点**：fzf 键位/补全仅在 `fzf.zsh` 内成功生成后 eval `fzf --zsh` 的完整输出一次，`dot_zshrc` 不再重复 eval；`sdk.zsh` 为无条件 `source` 但内部逐项守卫。详见 `dot_zshrc` 注释。
 3. **强绑定的个人路径与镜像**：`GOPATH`、`GOPROXY`、清华 pip 镜像别名、`ANDROID_NDK_HOME` 等以 `sdk.zsh`/`aliases.zsh` 源码为准。
 4. **被别名替换的原生命令**：`cat→bat`、`ls→lsd`、`top→htop`、`rm/cp/mv→-i` 等见 `aliases.zsh`；脚本中需原生行为时用 `command cat` 等形式。
 

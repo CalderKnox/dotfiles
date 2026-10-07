@@ -1,5 +1,5 @@
 # ============================================
-# Ghostty Terminal - Complete Configuration (chezmoi: private_dot_config/ghostty/config -> ~/.config/ghostty/config, dir 0700)
+# Ghostty Terminal - Complete Configuration (chezmoi: dot_config/ghostty/config -> ~/.config/ghostty/config, dir default perms)
 # Theme/palette: Catppuccin Mocha (dark) — see "Theme and Colors" section.
 # ============================================
 # File: ~/.config/ghostty/config

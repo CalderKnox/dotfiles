@@ -1,7 +1,7 @@
 # 💤 LazyVim
 
 This static Neovim configuration is deployed by chezmoi from
-`private_dot_config/nvim/` to `~/.config/nvim/`. This README stays in the repository;
+`dot_config/nvim/` to `~/.config/nvim/`. This README stays in the repository;
 `.chezmoiignore` excludes documentation from deployment.
 
 ## Installation

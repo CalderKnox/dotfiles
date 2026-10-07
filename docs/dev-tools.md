@@ -13,21 +13,21 @@
 
 ## GitHub CLI — `gh`
 
-当前仓库未直接托管 `private_dot_config/gh/private_config.yml`（该目录不存在），`gh` 配置由目标机执行 `gh auth login` 后生成（`~/.config/gh/hosts.yml` / `config.yml`）：
+当前仓库未直接托管 `dot_config/gh/private_config.yml`（该目录不存在），`gh` 配置由目标机执行 `gh auth login` 后生成（`~/.config/gh/hosts.yml` / `config.yml`）：
 
 - 协议 `git_protocol: https` 为默认值；`hosts.yml` 中通常按主机覆盖为 `ssh`。
 - 常用别名：`gh co` = `pr checkout`（若在本地配置）。
 - `pager` / `browser` 留空，跟随环境变量；`spinner` 动画开启。
-- 配合 `private_dot_config/zsh/aliases.zsh` 中的 `gopen`（`gh browse`）在浏览器打开当前仓库。
+- 配合 `dot_config/zsh/aliases.zsh` 中的 `gopen`（`gh browse`）在浏览器打开当前仓库。
 - 网络可达性与 `dot_gitconfig` / `private_dot_ssh/private_config` 共用本机 `127.0.0.1:5376` SOCKS5 代理（见 [getting-started.md](getting-started.md)「弱网环境：bootstrap 前先设代理」），已统一为 `5376`，不再区分 `7890`。
 
-## mise — `private_dot_config/mise/config.toml`
+## mise — `dot_config/mise/config.toml`
 
-mise 工具链由 `private_dot_config/mise/config.toml` 声明（当前各工具使用 `latest` 浮动选择器，非钉版；以源文件为准），由 `private_dot_config/zsh/dot_zshrc` 中的 `eval "$(mise activate zsh)"` 接管 zsh 环境（fish 侧由 `conf.d/01_activate.fish` 守卫激活）；实际声明以源文件为准。常用操作见 `mise` 文档与 `aliases.zsh` 的 `update-all` 复用。
+mise 工具链由 `dot_config/mise/config.toml` 声明（当前各工具使用 `latest` 浮动选择器，非钉版；以源文件为准），由 `dot_config/zsh/dot_zshrc` 中的 `eval "$(mise activate zsh)"` 接管 zsh 环境（fish 侧由 `conf.d/01_activate.fish` 守卫激活）；实际声明以源文件为准。常用操作见 `mise` 文档与 `aliases.zsh` 的 `update-all` 复用。
 
 ### 包管理器更新：`aliases.zsh` 的 `auto-update` 与 `update-all`
 
-`private_dot_config/zsh/aliases.zsh` 提供两个更新入口，实际更新逻辑已收敛为一处：
+`dot_config/zsh/aliases.zsh` 提供两个更新入口，实际更新逻辑已收敛为一处：
 
 | 函数 | 位置 | 覆盖目标 | 核心机制 | 适用场景 |
 | --- | --- | --- | --- | --- |

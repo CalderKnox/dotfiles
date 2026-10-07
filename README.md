@@ -15,12 +15,12 @@
 | 领域 | 方案 | 说明 |
 | --- | --- | --- |
 | Shell | Zsh + [Zim](https://zimfw.sh/) + 自有模块 | `aliases.zsh` / `fzf.zsh` / `sdk.zsh` 三模块化加载；`update-all` 批量更新（`brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`/`pi`，支持参数过滤与失败计数） |
-| Fish | Fish + [Fisher](https://github.com/jorgebucaran/fisher) + Starship | Ghostty 登录 shell（`fish -l`，tmux `default-shell` 同步）；`fish_plugins` 锁定 13 个插件（fzf.fish / forgit / autopair / done 等），`conf.d` 分层六文件（含 `01_activate.fish` 守卫激活 mise 与 SDKMAN 惰性桩）设定 PATH/LANG/EDITOR 等环境，可调用大函数在 `private_functions/` 惰性加载，补全含 kubecolor 与 OrbStack docker/kubectl/orbctl 符号链接 |
+| Fish | Fish + [Fisher](https://github.com/jorgebucaran/fisher) + Starship | Ghostty 登录 shell（`fish -l`，tmux `default-shell` 同步）；`fish_plugins` 锁定 13 个插件（fzf.fish / forgit / autopair / done 等），`conf.d` 分层六文件（含 `01_activate.fish` 守卫激活 mise 与 SDKMAN 惰性桩）设定 PATH/LANG/EDITOR 等环境，可调用大函数在 `functions/` 惰性加载，补全含 kubecolor 与 OrbStack docker/kubectl/orbctl 符号链接 |
 | 提示符 | [Starship](https://starship.rs/) | Catppuccin Mocha powerline 风格（`starship.toml` 为机器本地文件，未入库） |
 | 模糊搜索 | fzf + fzf-tab + fd | Ctrl-R 历史、Ctrl-T 文件、Alt-C 目录、`frg`/`fkill`/`ftm`/`fl*` 交互函数 |
 | 终端 | Ghostty（主力）/ Alacritty（备用） | Ghostty 使用 JetBrainsMonoNL，Alacritty 使用 JetBrainsMono Nerd Font Mono；Catppuccin Mocha 配色（Dracula 以注释模板保留于 alacritty） |
-| 编辑器 | Neovim + [LazyVim](https://www.lazyvim.org/) | extras 由 `private_dot_config/nvim/lazyvim.json` 声明，本地插件见 `lua/plugins/`；插件由 lazy.nvim 自动安装（`lazy-lock.json` 未入库） |
-| 运行时管理 | mise | 多运行时一键切换（工具清单见 `private_dot_config/mise/config.toml`） |
+| 编辑器 | Neovim + [LazyVim](https://www.lazyvim.org/) | extras 由 `dot_config/nvim/lazyvim.json` 声明，本地插件见 `lua/plugins/`；插件由 lazy.nvim 自动安装（`lazy-lock.json` 未入库） |
+| 运行时管理 | mise | 多运行时一键切换（工具清单见 `dot_config/mise/config.toml`） |
 | Git 工作流 | git + gh (CLI) | LFS、GitHub 走本地 SOCKS5 代理、`push.default=current` + `autoSetupRemote` |
 | SSH | OpenSSH `~/.ssh/config` | `ssh.github.com:443` + 自适应 `ProxyCommand`（探活 `127.0.0.1:5376` SOCKS5，失败直连）+ OrbStack `Include` |
 | AI Agent | pi coding agent | `dot_pi/` 管理 agent、Goal 与工作流三个配置；本仓库不提供操作系统级沙箱，详见 [dev-tools.md](docs/dev-tools.md) |
@@ -78,7 +78,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 ├── dot_tmux.conf                      →  ~/.tmux.conf                  tmux 配置（Fish 登录 shell、tpm 插件、Catppuccin Mocha 状态栏）
 ├── dot_codex/
 │   └── private_config.toml            →  (不部署) ~/.codex/config.toml   cc-switch 机器本地配置参考快照（被 .chezmoiignore 的 .codex/config.toml 排除；~/.claude/settings.json 同此模式：源已移出仓库，各机本地维护）
-├── private_dot_config/
+├── dot_config/
 │   ├── zsh/                           →  ~/.config/zsh/               ★ 三模块 zsh 配置 + 入口文件（含独立 README，不部署）
 │   │   ├── dot_zshrc                  →  ~/.config/zsh/.zshrc         Zsh 入口：Zim 引导 + 工具 eval + 模块加载（symlink 目标，真实文件）
 │   │   ├── dot_zimrc                  →  ~/.config/zsh/.zimrc         Zim 模块清单（仅供 zimfw 读取，symlink 目标）
@@ -92,12 +92,12 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │   ├── kitty/kitty.local.conf         →  (不部署) 仅入库作参考（.chezmoiignore 的 **/*.local.* 排除）；目标机 ~/.config/kitty/kitty.local.conf 机器本地维护，由本机 kitty.conf 末尾 include 引入（仓库不含 kitty.conf）
 │   ├── mise/config.toml               →  ~/.config/mise/config.toml   mise 工具链
 │   ├── nvim/                          →  ~/.config/nvim/              LazyVim 配置（含 stylua.toml；lazy-lock.json 已停止跟踪、不入库）
-│   └── private_fish/                  →  ~/.config/fish/              Fish 辅助配置（Starship + Fisher 13 插件清单）
+│   └── fish/                  →  ~/.config/fish/              Fish 辅助配置（Starship + Fisher 13 插件清单）
 │       ├── config.fish                →  ~/.config/fish/config.fish
 │       ├── fish_plugins                →  ~/.config/fish/fish_plugins     Fisher 13 插件清单
-│       ├── private_completions/       →  ~/.config/fish/completions/  kubecolor.fish + symlink_docker/kubectl/orbctl.fish → OrbStack
-│       ├── private_conf.d/            →  conf.d/ 六文件分层（00_env / 01_activate / 10_sys / 20_dev / 21_k8s / 22_rev；编号=加载阶段，01_activate 守卫激活 mise + SDKMAN 惰性桩）
-│       ├── private_functions/         →  functions/ 18 个惰性加载函数（update-all/onproxy/y/serve/makes/bak 等，首次调用才 source；fisher 插件安装于 ~/.config/fish/fisher = fisher_path，退出 chezmoi 管理域）
+│       ├── completions/       →  ~/.config/fish/completions/  kubecolor.fish + symlink_docker/kubectl/orbctl.fish → OrbStack
+│       ├── conf.d/            →  conf.d/ 六文件分层（00_env / 01_activate / 10_sys / 20_dev / 21_k8s / 22_rev；编号=加载阶段，01_activate 守卫激活 mise + SDKMAN 惰性桩）
+│       ├── functions/         →  functions/ 18 个惰性加载函数（update-all/onproxy/y/serve/makes/bak 等，首次调用才 source；fisher 插件安装于 ~/.config/fish/fisher = fisher_path，退出 chezmoi 管理域）
 │       └── themes/                    →  ~/.config/fish/themes/       空占位目录（仅 .keep）
 ├── private_dot_ssh/
 │   ├── private_config                 →  ~/.ssh/config                ★ GitHub 走 ssh.github.com:443 + 自适应 SOCKS5 ProxyCommand（含 OrbStack Include；~/.ssh 目录 0700）
@@ -126,14 +126,14 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 | [docs/maintenance.md](docs/maintenance.md) | 日常维护流程、常用命令、验收清单、常见问题 |
 | [docs/validation/README.md](docs/validation/README.md) | 离线语法/部署边界/隔离回归检查 |
 | [docs/optimization.md](docs/optimization.md) | UltraCode 审查结论、优化证据与保留事项 |
-| [private_dot_config/zsh/README.md](private_dot_config/zsh/README.md) | zsh 三模块内部契约（加载顺序、依赖、函数速查） |
-| [private_dot_config/nvim/README.md](private_dot_config/nvim/README.md) | Neovim/LazyVim 使用说明 |
+| [dot_config/zsh/README.md](dot_config/zsh/README.md) | zsh 三模块内部契约（加载顺序、依赖、函数速查） |
+| [dot_config/nvim/README.md](dot_config/nvim/README.md) | Neovim/LazyVim 使用说明 |
 
 > 新增配置请同步更新 [docs/layout.md](docs/layout.md)；新文档请更新此索引。
 
 ## 🔒 安全与隐私
 
-- `private_` 前缀收紧对应一级权限：目录 `0700`（如 `~/.ssh/`、`~/.config/fish/`），文件 `0600`（如 `~/.ssh/config`）。`dot_pi/` 无此前缀，不应假定部署后的 `.pi` 目录为 `0700`。
+- `private_` 前缀收紧对应一级权限：目录 `0700`（如 `~/.ssh/`），文件 `0600`（如 `~/.ssh/config`）。`dot_pi/` 无此前缀，不应假定部署后的 `.pi` 目录为 `0700`。
 - `~/.config/gh/` 下的 `config.yml` 与 `hosts.yml` 均由 `gh auth login`
   在目标机器上生成，含凭据，不入仓库。
 - Pi 通常以启动账户的权限运行；本仓库不含 `sandbox.json`、`landstrip.json` 或工具权限矩阵，不能保证拒绝敏感路径或高危命令。需要隔离时请单独配置容器/VM/OS 沙箱，见 [docs/dev-tools.md](docs/dev-tools.md)。

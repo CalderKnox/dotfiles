@@ -6,11 +6,11 @@
 
 ```bash
 # 1. 编辑源文件（chezmoi edit 会直接打开源目录中的对应文件）
-chezmoi edit ~/.config/zsh/.zshrc  # XDG 真实入口（源 private_dot_config/zsh/dot_zshrc）
+chezmoi edit ~/.config/zsh/.zshrc  # XDG 真实入口（源 dot_config/zsh/dot_zshrc）
 chezmoi edit ~/.zshrc          # 注意：~/.zshrc 解析到的是一行符号链接模板 symlink_dot_zshrc.tmpl
                                 # （改 zshrc 内容请用上面一行，chezmoi source-path 实测）
 # 或直接：
-$EDITOR ~/.local/share/chezmoi/private_dot_config/zsh/dot_zshrc
+$EDITOR ~/.local/share/chezmoi/dot_config/zsh/dot_zshrc
 # 其他示例：
 chezmoi edit ~/.config/nvim/lua/config/options.lua
 
@@ -40,14 +40,14 @@ git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi commit -m 
 | `chezmoi doctor` | 环境体检 |
 | `chezmoi status` | 简要漂移概览（等价 `git status` 视角） |
 | `chezmoi ignored` | 查看被 `.chezmoiignore` 排除的文件 |
-| `zimfw update` | 更新 Zim 插件（`zsh`，改动 `private_dot_config/zsh/dot_zimrc` 后按需执行） |
+| `zimfw update` | 更新 Zim 插件（`zsh`，改动 `dot_config/zsh/dot_zimrc` 后按需执行） |
 | `zimfw upgrade` | 升级 `zimfw` 自身（`zsh`） |
 | `zimfw init` | 重建 `${ZIM_HOME}/init.zsh`（改动 `~/.config/zsh/.zimrc` 后需要，`dot_zshrc` 会按 `-nt` 时间戳自动重建） |
 | `zimfw info` | 查看 `zimfw` 版本与模块信息 |
-| `auto-update` | 一键全量更新入口：若定义了 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行（覆盖目标一致）；定义于 `private_dot_config/zsh/aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
+| `auto-update` | 一键全量更新入口：若定义了 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行（覆盖目标一致）；定义于 `dot_config/zsh/aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
 | `update-all [targets...]` | 关联数组驱动的批量更新，支持参数选择目标（如 `update-all brew mise`）、带失败计数与耗时统计；覆盖 `brew` / `sdk` / `rustup` / `tldr` / `uv` / `mise` / `pi` 共 7 项（**已覆盖 `mise`**，与 `auto-update` 的核心差异）；定义于 `aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
 
-> `auto-update` 与 `update-all` 均定义于 `private_dot_config/zsh/aliases.zsh`；`auto-update` 为兼容旧习惯的一键入口（内部委托 `update-all`），`update-all` 为支持参数过滤、失败计数与耗时统计的实际实现，二者覆盖目标一致（均含 `mise`）；详见 [dev-tools.md](dev-tools.md) 对比表。
+> `auto-update` 与 `update-all` 均定义于 `dot_config/zsh/aliases.zsh`；`auto-update` 为兼容旧习惯的一键入口（内部委托 `update-all`），`update-all` 为支持参数过滤、失败计数与耗时统计的实际实现，二者覆盖目标一致（均含 `mise`）；详见 [dev-tools.md](dev-tools.md) 对比表。
 
 ## 验收清单
 
@@ -104,7 +104,7 @@ git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy
 
 # fish 配置语法检查（fish -n 只校验首个文件，必须逐个检查；实测多文件传参时后续文件被静默跳过）
 for f in ~/.config/fish/config.fish ~/.config/fish/conf.d/*.fish; do fish --no-config -n "$f" || exit 1; done
-# conf.d 现为六文件分层：00_env / 01_activate / 10_sys / 20_dev / 21_k8s / 22_rev（01_activate 以 type -q mise 守卫激活，与 zsh 侧 dot_zshrc 的 activate 对应；编号=加载阶段，文件名=领域）。可调用大函数（update-all/auto-update、onproxy/ofproxy、y、serve、netcheck、makes/xargsp、bak/timer/decide、磁盘分析四件套共 18 个）在 private_functions/ 惰性加载（首次调用才 source）；kubecolor 补全在 private_completions/kubecolor.fish；fisher 插件安装于 ~/.config/fish/fisher = fisher_path，退出 chezmoi 管理域，config.fish 注入其 functions/completions/conf.d，不写入仓库 private_functions/
+# conf.d 现为六文件分层：00_env / 01_activate / 10_sys / 20_dev / 21_k8s / 22_rev（01_activate 以 type -q mise 守卫激活，与 zsh 侧 dot_zshrc 的 activate 对应；编号=加载阶段，文件名=领域）。可调用大函数（update-all/auto-update、onproxy/ofproxy、y、serve、netcheck、makes/xargsp、bak/timer/decide、磁盘分析四件套共 18 个）在 dot_config/fish/functions/ 惰性加载（首次调用才 source）；kubecolor 补全在 dot_config/fish/completions/kubecolor.fish；fisher 插件安装于 ~/.config/fish/fisher = fisher_path，退出 chezmoi 管理域，config.fish 注入其 functions/completions/conf.d，不写入仓库 dot_config/fish/functions/
 
 # ⚠️ conf.d 分层重排的迁移清理：chezmoi 不删除源里移除的条目，旧四文件在其他机器
 # git pull && chezmoi apply 后仍会残留并被继续 source（与新文件双份定义、旧 k8s 别名复活），
@@ -114,7 +114,7 @@ rm -f ~/.config/fish/conf.d/{00_aliases,01_dev,01_rev,02_mise}.fish
 
 # mise 环境体检
 mise doctor
-mise ls                                     # 工具声明见 private_dot_config/mise/config.toml，当前使用 latest 浮动选择器
+mise ls                                     # 工具声明见 dot_config/mise/config.toml，当前使用 latest 浮动选择器
 
 # alacritty：CLI 无 --print-config 子命令（0.17 实测报错），配置解析在启动时进行，
 # 冒烟启动（瞬间退出）即可验证配置可解析
@@ -139,7 +139,7 @@ chezmoi doctor && chezmoi diff
 rm -f ~/.cache/zsh/fzf_prefix && exec zsh
 ```
 
-详见 `private_dot_config/zsh/fzf.zsh` 的探测逻辑与 [shell.md](shell.md)。
+详见 `dot_config/zsh/fzf.zsh` 的探测逻辑与 [shell.md](shell.md)。
 
 ### 换了代理端口 / 地址
 
@@ -165,13 +165,13 @@ HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/private_config` 的 `Pro
 > 历史：旧版 `auto_update` 曾顺序守卫调用五个 `*_update` 辅助函数（不含 `mise`），
 > 这些函数已在提交 `0af1f61` 中删除，`auto_update` 随之改为委托 `update-all`。
 
-两者均定义于 `private_dot_config/zsh/aliases.zsh`，`zsh -n` 已覆盖其语法校验。
+两者均定义于 `dot_config/zsh/aliases.zsh`，`zsh -n` 已覆盖其语法校验。
 详见 [dev-tools.md](dev-tools.md) 与 `aliases.zsh` 源码。
 
 ### Go / Python 路径强绑定个人环境
 
-- `GOPATH=~/.local/share/go`、`GOPROXY=https://goproxy.cn,direct`（`private_dot_config/zsh/sdk.zsh`，与 fish `00_env.fish` 统一）
-- `pip` 清华镜像别名（`private_dot_config/zsh/aliases.zsh` 的 `pip_tsinghua_mirror`）、`uv` 镜像开关注释（`sdk.zsh`）
+- `GOPATH=~/.local/share/go`、`GOPROXY=https://goproxy.cn,direct`（`dot_config/zsh/sdk.zsh`，与 fish `00_env.fish` 统一）
+- `pip` 清华镜像别名（`dot_config/zsh/aliases.zsh` 的 `pip_tsinghua_mirror`）、`uv` 镜像开关注释（`sdk.zsh`）
 
 新机器路径不一致时按需调整源文件后 `chezmoi diff` → `apply`。详见 [shell.md](shell.md) 与 `sdk.zsh` 注释。
 
