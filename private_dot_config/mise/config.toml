@@ -6,8 +6,8 @@
 # Author: Payne
 
 [tools]
-bun = "latest"   # JS 运行时与包管理 (Bun)
+bun = "latest"  # JS 运行时与包管理 (Bun)
 deno = "latest"  # JS/TS 运行时 (Deno)
-go = "latest"    # Go 工具链 (GOPATH 统一为 ~/.local/share/go，见 zsh/sdk.zsh 与 fish/00_env.fish)
+go = "latest"  # Go 工具链 (GOPATH 统一为 ~/.local/share/go，见 zsh/sdk.zsh 与 fish/00_env.fish)
 node = "latest"  # Node.js 最新稳定版 (pnpm 依赖其；如需 LTS 可改锁主版本号如 "22")
 pnpm = "latest"  # JS 包管理器 (高效磁盘利用)
