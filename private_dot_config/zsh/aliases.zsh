@@ -71,9 +71,10 @@ alias ws='cd ${HOME}/WisdomSpaces'
 # ~~~ 系统信息 ~~~
 alias ff='fastfetch'
 alias nowdatetime='date "+%Y%m%d_%H%M%S"'
-alias timestamp_seconds='date +%s%N | cut -c 1-10'
-alias timestamp_millisecond='date +%s%N | cut -c 1-13'
-alias timestamp_microsecond='date +%s%N | cut -c 1-16'
+# macOS 各版本 date 对 %N 支持不一（旧版会输出字面 N），毫秒/微秒统一用 python3 保证可移植（与 zsh/fish 两侧保持一致）
+alias timestamp_seconds='date +%s'
+alias timestamp_millisecond='python3 -c "import time; print(int(time.time()*1000))"'
+alias timestamp_microsecond='python3 -c "import time; print(int(time.time()*1000*1000))"'
 
 # ~~~ 进程与资源 ~~~
 alias top='htop'                                 # htop 替代 top
@@ -168,16 +169,17 @@ ruff_auto() {
 alias pip_tsinghua_mirror='python3 -m pip install -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple'
 # ⚠️ 破坏性操作：删除 HOME 下 .venv 与 uv.lock 后重建并同步
 # 先检查 uv，且每一步失败即停止，避免依赖缺失或删除失败造成额外破坏。
+# 注意：fish 侧同名函数目标为当前目录（conf.d/20_dev.fish），两侧行为不同，勿混用。
 # 兼容在旧 alias 仍存在的 shell 中 reload（alias 会参与函数定义的解析）。
-unalias uv_resync 2>/dev/null || true
-uv_resync() {
-    if ! command -v uv >/dev/null 2>&1; then
-        print -u2 -- "uv not found; ${HOME}/.venv and ${HOME}/uv.lock left unchanged."
-        return 127
-    fi
-    command rm -rf -- "$HOME/.venv" "$HOME/uv.lock" || return $?
-    uv sync
-}
+# unalias uv_resync 2>/dev/null || true
+# uv_resync() {
+#     if ! command -v uv >/dev/null 2>&1; then
+#         print -u2 -- "uv not found; ${HOME}/.venv and ${HOME}/uv.lock left unchanged."
+#         return 127
+#     fi
+#     command rm -rf -- "$HOME/.venv" "$HOME/uv.lock" || return $?
+#     uv sync
+# }
 
 # =============================================================================
 # Android 逆向工程
