@@ -33,10 +33,8 @@ Host dev
   IdentitiesOnly yes
 
 # 注意：tst/ops/sec 的 user@host:port 完全相同（ubuntu@192.168.1.101:2222），
-# 在 Host * ControlMaster auto + ControlPersist 600 下共享同一个复用 socket
-# （ubuntu@192.168.1.101-2222，`ssh -O check` 可见）——首个连接的认证胜出，
-# ops/sec 会静默复用该 master，各自的 IdentityFile 并不会生效。
-# 切换身份：`ssh -O exit tst` 关闭复用连接，或 `ssh -o ControlPath=none ops` 直连。
+# 但 ControlPath 含 %n（命令行别名），三别名各持独立 socket/master，
+# 各自的 IdentityFile 正常生效，不会互相串扰认证。
 Host tst
   HostName 192.168.1.101
   User ubuntu
@@ -94,10 +92,8 @@ Host github.com ssh.github.com
 ## github.com:22 绕过了上面 github.com 块的 ssh.github.com:443 + SOCKS5 路由。
 ## 启用步骤：生成独立工作密钥（ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_work）、
 ## 加入 ssh-agent 并上传公钥后，取消下列整块注释：
-## 注意：启用后 github-work.com 与 github.com 解析出相同的 ControlPath
-## （git@ssh.github.com-443）——ControlPersist 600 窗口内会复用已有 master，
-## 工作密钥永远不会被真正使用。连接前先 `ssh -O exit github.com` 关闭复用，
-## 或用 `ssh -o ControlPath=none github-work.com` 直连，才能实际走工作身份。
+## 注意：ControlPath 含 %n（命令行别名），github-work.com 与 github.com 使用
+## 不同 socket，启用后无需先关闭复用连接即可走工作身份。
 # Host github-work.com ssh.github.com
 #     HostName ssh.github.com
 #     User git
@@ -114,6 +110,9 @@ Host *
   StrictHostKeyChecking accept-new
   ControlMaster auto
   # 目录由 chezmoi 管理（源 private_dot_ssh/private_sockets/.keep，每次 apply 确保 0700）
-  ControlPath ~/.ssh/sockets/%r@%h-%p
+  # %n（命令行别名）入键：同 user@host:port 的不同别名（tst/ops/sec、双 github）
+  # 各持独立 socket，身份互不串扰；代价是交替使用 github.com/ssh.github.com 时
+  # 会建立两条 master（同一终点），可接受。
+  ControlPath ~/.ssh/sockets/%n-%r@%h-%p
   ControlPersist 600
 
