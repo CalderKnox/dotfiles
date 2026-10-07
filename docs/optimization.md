@@ -91,14 +91,14 @@ stub 二进制，3 个 samples。原始 HEAD 每次生成（12/12/12 次），�
 （1/1/1 次）；本机 median 为 0.7803s → 0.5232s。该差值受进程启动/系统负载影响，
 不是整体 shell 启动提速；调用次数才是稳定验收条件。
 
-已获得当前源的 **74 tests 全部通过，0 skipped**（strict 模式；最近完整核心运行
+已获得当前源的 **77 tests 全部通过，0 skipped**（strict 模式；最近完整核心运行
 34.152s），历史 commit `b4e8bac8513ef949d1c3af6c7d99b633b986898d` 的
 **17/17 negative controls** 均复现断言失败、0 invalid controls。
 Ghostty/kitty native parser 2/2 通过；实际 tmux plugin 初始化/重载测试通过。
 原生 fzf 的 PTY 检查也已 2/2 通过：实际 fzf 对空格/引号/leading-dash/分号路径
 传参正确，拒绝 filename-controlled `+Ex` 字段，并选择 fzf-tab 的 Zsh shell。
-所有入口串成的最终 aggregate run `b774d2979` **exit=0**：74 个 strict 回归 +
-2 个 native fzf + 2 个 terminal parser + 1 个实际 tmux plugin 集成，共 **79 个正向测试
+所有入口串成的最终 aggregate run `b774d2979` **exit=0**：77 个 strict 回归 +
+2 个 native fzf + 2 个 terminal parser + 1 个实际 tmux plugin 集成，共 **82 个正向测试
 全部通过**；17 个历史控制均复现原缺陷；最后 `git diff --check` 通过。
 完整本机日志在 `.pi/tasks/01a1112b-2930-75bf-a65a-b264b9d7c248-56835/b774d2979.output`
 （Git/chezmoi 均排除；上方命令可重新生成证据）。最后文档链接检查为 63 个相对链接

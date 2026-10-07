@@ -44,6 +44,13 @@ alias iterm='open -a iTerm $PWD'
 alias fishconfig="code ~/.config/fish"
 alias fishsource="exec fish"
 alias zshconfig="code ~/.zshrc"
+
+# 编辑器快捷入口（与 zsh 侧 aliases.zsh 对齐）
+alias v="nvim"
+alias vi="nvim"
+alias vim="nvim"
+alias nv="nvim"
+alias nvi="nvim"
 alias zshsource="source ~/.zshrc"
 
 # ---------------------------------------------------------------------------

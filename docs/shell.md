@@ -61,3 +61,19 @@ fzf 前缀按平台自适应探测（Apple Silicon `/opt/homebrew` → Intel `/u
 ## Fish 的角色
 
 Fish 是 Ghostty 的登录 shell：Ghostty 以 `command = /opt/homebrew/bin/fish -l` 启动（`zsh -l` / `tmux` 方案注释保留）；Alacritty 经 `shell = { program = "/opt/homebrew/bin/fish", args = ["-c", "tmux new -A -s main"] }` 进入 tmux；kitty 以 `shell = /opt/homebrew/bin/fish --login --interactive` 固定（kitty 主配置为机器本地维护，仓库仅保留 kitty.local.conf 作参考、不参与部署）；tmux `default-shell` 亦为 Fish——四终端（Ghostty/Alacritty/kitty/tmux）均为 Fish。Zsh 栈（XDG 收敛 + Zim 三模块）完整保留为次选入口（`~/.zshrc` 经 symlink 指向 `~/.config/zsh/.zshrc`）。仓库中 `private_dot_config/private_fish/`（chezmoi `private_` 前缀，部署后为 `~/.config/fish/`）提供：`config.fish` 在 interactive 时初始化 Starship 与 zoxide，`fish_plugins`（13 插件）声明插件清单，fisher 将插件安装于 `~/.config/fish/fisher`（`fisher_path`，退出 chezmoi 管理域），`config.fish` 把其 functions/completions/conf.d 注入搜索路径；`conf.d` 六文件分层（00_env/01_activate/10_sys/20_dev/21_k8s/22_rev）承载环境与别名，可调用大函数（update-all、onproxy、y、serve 等 18 个）在仓库 `private_functions/` 惰性加载（首次调用才 source），`private_completions/` 含 kubecolor 补全与 OrbStack docker/kubectl/orbctl symlink 补全。Fish 侧已初始化 Starship、zoxide（`config.fish` 的 `zoxide init fish` 与 fzf_zoxide 插件）与 fzf 键位（fzf.fish 插件经 fisher_path 生效，不写入仓库 functions/）；mise 已双侧接入（zsh 侧 `dot_zshrc` 的 `eval "$(mise activate zsh)"` + fish 侧 `conf.d/01_activate.fish` 守卫激活）；SDKMAN 惰性桩两侧对齐（zsh 原生接管式；fish 经 edc/bass 转发 bash init，导出变量差量回传），详见 `private_dot_config/private_fish/` 源目录与 [layout.md](layout.md)。
+
+## 双侧对齐契约与已知不对称（有意保留）
+
+安全与环境契约已双侧对齐：`rm/cp/mv -i` 护栏、可移植时间戳别名、`LANG`/`EDITOR`/`VISUAL` 继承守卫、`HOMEBREW_NO_*` 静默标志、代理回环豁免（`no_proxy`/`NO_PROXY`）、k8s 快捷别名集、`ws`/`wp` 目录跳转、`du -h -d 2` profile、`wget -c`、编辑器别名（`v/vi/vim/nv/nvi`）、`format`（biome）、update-all 记账（attempted/skipped/failed）与 `rustup` 目标名互认（fish 侧接受 `rustup`≈`rust`）。行为改变型别名两侧同为交互 shell 专属（zsh 经 `.zshrc` 交互加载语义，fish 经 `status is-interactive` 门控）。
+
+以下不对称为有意保留（port 与否以使用场景为准，勿机械同步）：
+
+| 不对称项 | zsh 侧 | fish 侧 | 说明 |
+| --- | --- | --- | --- |
+| 工具快捷别名 | 无 | `go*`（gob/goi/gom/gomt/gor/got）、`mvn*`、`pip*`、`pnp*`、`cb/cc/ccl/cr/ct/cu`、`redis-cli`、`mongo-local` 等 22 个 | fish 是四终端主力交互 shell，日常快捷别名集中在此；zsh 为维护中的次选入口 |
+| AI 入口命名 | `cla_cfg` / `clp_cfg` | `claconfig` / `clpconfig` | 同义不同名，各自历史习惯 |
+| `lt` / `finder` / `iterm*` / `fishsource` / 剪贴板 `cb*` | 无 | 有 | fish 侧专属 |
+| `k` 定义点 | `sdk.zsh` 函数包装（kubecolor→kubectl + compdef） | `21_k8s.fish` 别名直指 kubecolor | 两侧等价，机制随 shell 惯例 |
+| update-all stderr | 捕获 + 失败末 5 行摘要（`2>!` mktemp） | 实时透传 | fish 无 NO_CLOBBER/mktemp 模板约束 |
+| Rust 目标名 | 仅 `rustup` | `rust`（另接受 `rustup`） | fish 保持短名，兼容 zsh 肌肉记忆 |
+| fzf 环境/键位 | `fzf.zsh` 前缀探测 + `fzf --zsh` | fisher 插件 `patrickf1/fzf.fish` | 各随生态惯例，`FZF_DEFAULT_*` 子集 fish 侧不设 |
