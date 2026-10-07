@@ -2,7 +2,7 @@
 # Main Fish shell configuration — sourced for each new shell instance.
 # Guarded by __fish_config_loaded so re-sourcing is a no-op (idempotent startup).
 # Related: PATH/env lives in conf.d/00_env.fish (fish_add_path, idempotent),
-# mise activation in conf.d/02_mise.fish, and plugin declarations in
+# mise activation in conf.d/01_activate.fish, and plugin declarations in
 # fish_plugins (managed by fisher, installed under $fisher_path).
 
 if set -q __fish_config_loaded

@@ -1,13 +1,14 @@
 # =============================================================================
 # 00_env.fish — Fish 环境变量与 PATH 收敛
 # =============================================================================
-# Description : Fish 启动时最早加载的 conf.d 配置（00_ 前缀保证顺序）。
-#               职责：PATH 收敛、locale/editor/homebrew 标志、kubecolor 包装、
+# Description : Fish 启动时最早加载的 conf.d 配置（00_ 环境层）。
+#               职责：PATH 收敛、locale/editor/homebrew 标志、
 #               以及 Go 代理等语言工具环境。`__fish_env_loaded` 守卫避免重复
-#               source 时重复注入 PATH 或重复注册补全。
+#               source 时重复注入 PATH。
+#               （kubecolor 补全已迁至 completions/kubecolor.fish 按需加载）
 # Usage       : 由 Fish 自动 source（conf.d 目录按字典序加载）；无需手动 source
 # Guards      : fish_add_path 本身幂等（去重）；rustup/go 等路径均带目录存在性
-#               + contains 守卫；kubecolor 补全仅在 binary 存在时注册
+#               + contains 守卫
 # Author      : Payne
 # =============================================================================
 
@@ -30,9 +31,6 @@ if test -d "$rustup_bin"; and not contains "$rustup_bin" $PATH
     set -x PATH "$rustup_bin" $PATH
 end
 
-# kubecolor → kubectl 彩色包装：仅在二进制存在时注册补全，避免无 kubectl 机器报错。
-type -q kubecolor; and complete --command kubecolor --wraps kubectl
-
 # ---------------------------------------------------------------------------
 # Locale / Editor / Homebrew
 # ---------------------------------------------------------------------------
@@ -53,7 +51,7 @@ set -gx HOMEBREW_NO_ENV_HINTS 1         # 静默 hints
 # 新机器 — 已清理原 15 行空 clang/cpp/rust/zig/jvm/node/bun/deno/python 占位。
 # 如需新增，按下方模板追加并带目录/命令存在性守卫：
 #   type -q go; and set -gx GOPATH $HOME/go; and fish_add_path $GOPATH/bin
-#   test -d ~/.cargo/bin; and fish_add_path ~/.cargo/bin   # rust (cargo)
+test -d ~/.cargo/bin; and fish_add_path ~/.cargo/bin   # rust (cargo)
 #   test -d /opt/homebrew/share/android-ndk; and set -gx ANDROID_NDK_HOME ...
 
 # Go — 仅当 GOPATH 存在或需默认时注入；GOPROXY 走国内镜像，GOPATH 统一为 ~/.local/share/go

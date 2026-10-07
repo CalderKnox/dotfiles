@@ -39,16 +39,19 @@ private_dot_pi/**/sessions/
 
 # --- Fish — Fisher 生成与机器本地状态 ---
 # Fisher 在目标机按 fish_plugins 清单生成函数/补全；仓库仅提交用户手写的
-# config.fish、0*.fish（00_*/01_*）、fish_plugins 与 completions/symlink_*，
+# config.fish、编号前缀的 conf.d/[0-9]*.fish（分层六文件）、fish_plugins、
+# functions/*.fish（惰性加载函数）与 completions/symlink_* + kubecolor.fish，
 # 其余 fisher 生成物不入库、由 .keep 占位。
 private_dot_config/private_fish/private_fish_variables
 private_dot_config/private_fish/private_functions/*
 !private_dot_config/private_fish/private_functions/.keep
+!private_dot_config/private_fish/private_functions/*.fish
 private_dot_config/private_fish/private_completions/*
 !private_dot_config/private_fish/private_completions/symlink_*.fish
+!private_dot_config/private_fish/private_completions/kubecolor.fish
 private_dot_config/private_fish/private_conf.d/*
 !private_dot_config/private_fish/private_conf.d/.keep
-!private_dot_config/private_fish/private_conf.d/0*\.fish
+!private_dot_config/private_fish/private_conf.d/[0-9]*\.fish
 
 # --- chezmoi 本地状态 ---
 chezmoistate.boltdb

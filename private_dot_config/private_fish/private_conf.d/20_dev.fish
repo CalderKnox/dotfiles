@@ -1,11 +1,11 @@
 # =============================================================================
-# 01_dev.fish — 开发与构建别名 (Fish)
+# 20_dev.fish — 开发与构建别名 (Fish)
 # =============================================================================
 # Description : 开发工具链快捷别名（gh/lazygit、pnpm、Go/Rust、Maven、
 #               Python/uv、数据库、AI 助手）。与 zsh 的 dev 段对齐，
 #               仅包含 Fish 侧常用的 pnpm/cargo/go/mvn 封装；其余保留
 #               为注释模板，按需启用。
-# Usage       : 由 Fish 自动 source（conf.d 字典序，01_ 在 00_ 之后）；
+# Usage       : 由 Fish 自动 source（conf.d 字典序，2x 为领域层，顺序无关）；
 #               无需手动 source；此处别名/函数在非交互 shell 中也会定义。
 # Guards      : uv_resync 先检查 uv，再删除 .venv/uv.lock，逐步成功后重建并
 #               uv sync --upgrade；仍需在项目根目录主动调用；
@@ -70,19 +70,20 @@ alias pipr="pip uninstall"
 alias pipl="pip list"
 alias pipu="pip install --upgrade pip"
 alias ruff_auto='ruff check --fix --exit-zero . && ruff format .'
-alias pip_tsinghua_mirror='python3 -m pip install -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple'
+alias pip_tsinghua_mirror='python3 -m pip install -i https://mirrors.tuna.tsinghua.edu.cn/pip/web/simple'
 # alias uv_resync='rm -rf .venv uv.lock && bass uv pip sync --allow-empty-requirements <(cat /dev/null) && uv sync --upgrade'
 # alias uvsync='rm -rf .venv uv.lock && bass uv pip sync --allow-empty-requirements /dev/null && uv sync --upgrade'
 
-function uv_resync
-    if not type -q uv
-        echo "uv not found; .venv and uv.lock left unchanged." >&2
-        return 127
-    end
-    rm -rf -- .venv uv.lock; or return
-    uv venv; or return  # 显式创建虚拟环境；失败时不继续 sync
-    uv sync --upgrade
-end
+# # ⚠️ 破坏性操作：删除当前目录 .venv 与 uv.lock。注意 zsh 同名函数目标是 $HOME/.venv 与 ~/uv.lock（zsh/aliases.zsh、zsh/README.md 注意事项 1），两侧行为不同，勿混用。
+# function uv_resync
+#     if not type -q uv
+#         echo "uv not found; .venv and uv.lock left unchanged." >&2
+#         return 127
+#     end
+#     rm -rf -- .venv uv.lock; or return
+#     uv venv; or return  # 显式创建虚拟环境；失败时不继续 sync
+#     uv sync --upgrade
+# end
 
 
 # alias pyserver="python -m http.server 8000"
@@ -108,5 +109,3 @@ alias cla-unsafe="claude --dangerously-skip-permissions"
 alias clp="opencode"
 alias clpconfig="code ~/.config/opencode"
 alias claconfig="code ~/.claude"
-
-
