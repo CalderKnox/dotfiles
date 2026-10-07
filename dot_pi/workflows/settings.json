@@ -1,7 +1,4 @@
 {
-  "keywordTriggerEnabled": true,
-  "keywordTriggerWord": "ultracode",
-
   "defaultEffort": "off",
   "defaultConcurrency": 9,
   "defaultAgentRetries": 3,
@@ -12,6 +9,8 @@
   "persistAgentSessions": false,
 
   "providerMiddlewareExtensions": [ ],
-  "inheritMainModel": false
+  "inheritMainModel": false,
 
+  "keywordTriggerEnabled": true,
+  "keywordTriggerWord": "ultracode"
 }
