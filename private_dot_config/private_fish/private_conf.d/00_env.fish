@@ -7,8 +7,9 @@
 #               source 时重复注入 PATH。
 #               （kubecolor 补全已迁至 completions/kubecolor.fish 按需加载）
 # Usage       : 由 Fish 自动 source（conf.d 目录按字典序加载）；无需手动 source
-# Guards      : fish_add_path 本身幂等（去重）；rustup/go 等路径均带目录存在性
-#               + contains 守卫
+# Guards      : fish_add_path 均带 -g（仅当前会话全局，不落 Universal Variables，
+#               PATH 完全由仓库收敛，不污染 fish_variables）；本身幂等（去重）；
+#               rustup 等路径带目录存在性 + contains 守卫
 # Author      : Payne
 # =============================================================================
 
@@ -20,8 +21,8 @@ set -g __fish_env_loaded
 # ---------------------------------------------------------------------------
 # PATH 基础收敛（幂等，去重）
 # ---------------------------------------------------------------------------
-# fish_add_path 已去重；按优先级前置，首项优先命中同名二进制。
-fish_add_path /opt/homebrew/bin /opt/homebrew/sbin /usr/local/bin $HOME/.local/bin
+# fish_add_path 已去重（-g 不落 universal）；按优先级前置，首项优先命中同名二进制。
+fish_add_path -g /opt/homebrew/bin /opt/homebrew/sbin /usr/local/bin $HOME/.local/bin
 
 # Homebrew 前缀兼容（Apple Silicon / Intel / Linux）：优先取已设 HOMEBREW_PREFIX，
 # 否则回退 /opt/homebrew，保证后续 rustup 等路径推导不硬编码。
@@ -50,14 +51,14 @@ set -gx HOMEBREW_NO_ENV_HINTS 1         # 静默 hints
 # 原则：仅对当前实际使用的 toolchain 暴露环境变量；空占位会污染文件且误导
 # 新机器 — 已清理原 15 行空 clang/cpp/rust/zig/jvm/node/bun/deno/python 占位。
 # 如需新增，按下方模板追加并带目录/命令存在性守卫：
-#   type -q go; and set -gx GOPATH $HOME/go; and fish_add_path $GOPATH/bin
-test -d ~/.cargo/bin; and fish_add_path ~/.cargo/bin   # rust (cargo)
+#   type -q go; and set -gx GOPATH $HOME/.local/share/go; and fish_add_path -g $GOPATH/bin
+test -d ~/.cargo/bin; and fish_add_path -g ~/.cargo/bin   # rust (cargo)
 #   test -d /opt/homebrew/share/android-ndk; and set -gx ANDROID_NDK_HOME ...
 
-# Go — 仅当 GOPATH 存在或需默认时注入；GOPROXY 走国内镜像，GOPATH 统一为 ~/.local/share/go
+# Go — GOPROXY 走国内镜像，GOPATH 统一为 ~/.local/share/go；bin 目录追加到 PATH
+# 末尾（-a，与 zsh 侧 sdk.zsh 一致：go install 的二进制不应覆盖 Homebrew 同名工具；
+# 目录不存在时 fish_add_path 自动跳过，去重免守卫）。
 # 注意：GOROOT 由 mise 管理，此处不硬编码（历史的 mise GOROOT 行已移除，避免版本漂移）。
 set -gx GOPROXY https://goproxy.cn,direct
 set -gx GOPATH $HOME/.local/share/go
-if test -d "$GOPATH"; and not contains "$GOPATH/bin" $PATH
-    fish_add_path $GOPATH/bin
-end
+fish_add_path -ga $GOPATH/bin
