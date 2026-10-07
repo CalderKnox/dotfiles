@@ -23,10 +23,10 @@ import tomllib
 sys.dont_write_bytecode = True
 
 ROOT = Path(__file__).resolve().parents[2]
-ZSH = ROOT / "private_dot_config/zsh"
-FISH = ROOT / "private_dot_config/private_fish/private_conf.d"
-FUNCS = ROOT / "private_dot_config/private_fish/private_functions"
-FISH_COMPLETIONS = ROOT / "private_dot_config/private_fish/private_completions"
+ZSH = ROOT / "dot_config/zsh"
+FISH = ROOT / "dot_config/fish/conf.d"
+FUNCS = ROOT / "dot_config/fish/functions"
+FISH_COMPLETIONS = ROOT / "dot_config/fish/completions"
 
 
 def function_source(path, name, shell="zsh"):
@@ -166,12 +166,12 @@ class SourceChecks(Fixture):
 
   def test_lua_syntax_per_file(self):
     tool = self.require("luac")
-    for path in sorted((ROOT / "private_dot_config/nvim").rglob("*.lua")):
+    for path in sorted((ROOT / "dot_config/nvim").rglob("*.lua")):
       with self.subTest(path=path.name):
         self.ok(self.run_command([tool, "-p", path]))
 
   def test_neovim_documentation_contracts(self):
-    config = ROOT / "private_dot_config/nvim"
+    config = ROOT / "dot_config/nvim"
     doc = (ROOT / "docs/neovim.md").read_text()
     extras = json.loads((config / "lazyvim.json").read_text())["extras"]
     self.assertEqual(len(extras), len(set(extras)))
@@ -191,16 +191,16 @@ class SourceChecks(Fixture):
         "dot_pi/agent/settings.json",
         "dot_pi/agent/pi-goal.json",
         "dot_pi/workflows/settings.json",
-        "private_dot_config/nvim/lazyvim.json",
+        "dot_config/nvim/lazyvim.json",
       )
     ]
     for path in paths:
       with self.subTest(path=path.relative_to(ROOT)):
         json.loads(path.read_text())
     for path in (
-      ROOT / "private_dot_config/mise/config.toml",
-      ROOT / "private_dot_config/alacritty/private_alacritty.toml",
-      ROOT / "private_dot_config/nvim/stylua.toml",
+      ROOT / "dot_config/mise/config.toml",
+      ROOT / "dot_config/alacritty/private_alacritty.toml",
+      ROOT / "dot_config/nvim/stylua.toml",
     ):
       with path.open("rb") as stream:
         tomllib.load(stream)
@@ -237,11 +237,11 @@ class SourceChecks(Fixture):
       "dot_pi/agent/sessions/example.json",
       "dot_pi/workflows/projects/run.json",
       "dot_pi/agent/npm/package.json",
-      "private_dot_pi/private_agent/auth.json",
-      "private_dot_pi/private_agent/private_auth.json",
-      "private_dot_pi/private_agent/encrypted_auth.json.age",
-      "private_dot_pi/private_agent/private_mcp.json",
-      "private_dot_pi/private_agent/sessions/example.json",
+      "dot_pi/agent/auth.json",
+      "dot_pi/agent/private_auth.json",
+      "dot_pi/agent/encrypted_auth.json.age",
+      "dot_pi/agent/private_mcp.json",
+      "dot_pi/agent/sessions/example.json",
     ]
     result = self.run_command([git, "check-ignore", "--no-index", "--stdin"], script="\n".join(blocked) + "\n")
     self.ok(result)
@@ -354,8 +354,8 @@ class SourceChecks(Fixture):
       self.assertEqual(targets[f".{name}"]["type"], "symlink")
       self.assertEqual(targets[f".{name}"]["linkname"], f"{self.env['HOME']}/.config/zsh/.{name}")
     for name, mode in (
-      (".config", 0o700),
-      (".config/fish", 0o700),
+      (".config", 0o755),
+      (".config/fish", 0o755),
       (".ssh", 0o700),
       (".ssh/config", 0o600),
       (".pi", 0o755),
@@ -369,7 +369,7 @@ class SourceChecks(Fixture):
       ROOT / "README.md",
       *sorted((ROOT / "docs").rglob("*.md")),
       ZSH / "README.md",
-      ROOT / "private_dot_config/nvim/README.md",
+      ROOT / "dot_config/nvim/README.md",
     ]
     checked = 0
     for path in paths:

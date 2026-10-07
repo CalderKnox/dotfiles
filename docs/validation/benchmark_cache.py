@@ -25,7 +25,7 @@ def main():
   if args.loads < 1 + 1 or args.samples < 1:
     parser.error("loads must be >=2 and samples >=1")
   baseline = subprocess.check_output(
-    ["git", "show", f"{args.revision}:private_dot_config/zsh/sdk.zsh"], cwd=ROOT, text=True
+    ["git", "show", f"{args.revision}:dot_config/zsh/sdk.zsh"], cwd=ROOT, text=True
   )
   with tempfile.TemporaryDirectory(prefix="cache-benchmark-source-") as tmp:
     source = Path(tmp) / "sdk.zsh"

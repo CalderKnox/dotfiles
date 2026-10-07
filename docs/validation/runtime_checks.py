@@ -331,7 +331,7 @@ class NeovimRuntime(Fixture):
 
   def test_cursorline_real_mode_transitions(self):
     output = self.cwd / "modes.json"
-    source = ROOT / "private_dot_config/nvim/lua/config/autocmds.lua"
+    source = ROOT / "dot_config/nvim/lua/config/autocmds.lua"
     script = (
       "local source = "
       + json.dumps(str(source))
@@ -368,7 +368,7 @@ vim.schedule(function() step(1) end)
     self.assertEqual([s["mode"] for s in results[:4]], ["i", "n", "R", "n"])
 
   def test_autocmd_reload_and_window_entry_are_idempotent(self):
-    source = ROOT / "private_dot_config/nvim/lua/config/autocmds.lua"
+    source = ROOT / "dot_config/nvim/lua/config/autocmds.lua"
     self.ok(
       self.nvim(
         """
@@ -390,7 +390,7 @@ vim.cmd("qa!")
     )
 
   def test_local_options_keymap_and_plugin_specs(self):
-    config = ROOT / "private_dot_config/nvim"
+    config = ROOT / "dot_config/nvim"
     self.ok(
       self.nvim(
         """

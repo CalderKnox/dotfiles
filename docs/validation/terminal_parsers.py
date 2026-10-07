@@ -13,7 +13,7 @@ sys.dont_write_bytecode = True
 
 class TerminalParsers(Fixture):
   def test_kitty_configuration_and_splits_layout(self):
-    path = ROOT / "private_dot_config/kitty/kitty.local.conf"
+    path = ROOT / "dot_config/kitty/kitty.local.conf"
     script = """
 from kitty.config import load_config
 bad = []
@@ -29,7 +29,7 @@ print('kitty configuration parsed; splits layout selected')
     tool = Path("/Applications/Ghostty.app/Contents/MacOS/ghostty")
     if not tool.is_file():
       self.skipTest("Ghostty application not installed at standard macOS path")
-    config = ROOT / "private_dot_config/ghostty/config"
+    config = ROOT / "dot_config/ghostty/config"
     result = self.run_command([tool, "+validate-config", f"--config-file={config}"])
     self.ok(result)
     self.assertNotIn("error:", result.stderr.lower())
