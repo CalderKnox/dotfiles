@@ -43,11 +43,11 @@ zmodule utility
 #
 
 # Exposes how long the last command took to run to prompts.
-zmodule duration-info
+# <!-- zmodule duration-info -->
 # Formats the current working directory for prompts.
-zmodule prompt-pwd
+# <!-- zmodule prompt-pwd -->
 # A heavily reduced, ASCII-only version of the Spaceship and Starship prompts.
-zmodule asciiship
+# <!-- zmodule asciiship -->
 
 #
 # Completion

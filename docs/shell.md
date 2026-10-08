@@ -16,7 +16,7 @@
 
 ## Zim 模块清单（dot_config/zsh/dot_zimrc）
 
-Zim 模块由 `dot_config/zsh/dot_zimrc`（经 `symlink_dot_zimrc.tmpl` 部署为 `~/.zimrc` → `~/.config/zsh/.zimrc`）定义，按环境、提示符、补全、收尾四组组织，通过 `zimfw` 加载。核心包括基础环境（`environment`/`utility` 等）、提示符信息（`duration-info`/`prompt-pwd`/`asciiship`）以及补全链（Homebrew 自适应路径、`zsh-completions`、`completion`、`fzf-tab`）。收尾模块为语法高亮、历史子串搜索与自动建议。`asciiship` 实际被 Starship 覆盖，保留仅作信息源。完整清单、加载顺序与注释掉的未启用模块以 `dot_zimrc` 源码为唯一权威。
+Zim 模块由 `dot_config/zsh/dot_zimrc`（经 `symlink_dot_zimrc.tmpl` 部署为 `~/.zimrc` → `~/.config/zsh/.zimrc`）定义，按环境、提示符、补全、收尾四组组织，通过 `zimfw` 加载。核心包括基础环境（`environment`/`utility` 等）以及补全链（Homebrew 自适应路径、`zsh-completions`、`completion`、`fzf-tab`）。收尾模块为语法高亮、历史子串搜索与自动建议。提示符模块（`duration-info`/`prompt-pwd`/`asciiship`）已注释停用，提示符由 Starship 接管。完整清单、加载顺序与注释掉的未启用模块以 `dot_zimrc` 源码为唯一权威。
 
 > 已设置 `ZSH_AUTOSUGGEST_MANUAL_REBIND=1` 以提升末尾模块性能；历史的 `ZSH_HIGHLIGHT_HIGHLIGHTERS` 配置因子模块未启用而删除。
 
