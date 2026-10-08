@@ -23,6 +23,9 @@
 zmodule environment
 # Provides handy git aliases and functions.
 zmodule git
+zmodule wfxr/forgit
+zmodule unixorn/git-extra-commands
+
 # Applies correct bindkeys for input events. Add one of the following to the
 # beginning of your ~/.zshrc to set your preferred editor keymap to emacs or vi
 # respectively: bindkey -e or bindkey -v
@@ -41,8 +44,6 @@ zmodule utility
 
 # Exposes how long the last command took to run to prompts.
 zmodule duration-info
-# Exposes git repository status information to prompts.
-zmodule git-info
 # Formats the current working directory for prompts.
 zmodule prompt-pwd
 # A heavily reduced, ASCII-only version of the Spaceship and Starship prompts.
