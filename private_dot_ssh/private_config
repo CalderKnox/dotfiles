@@ -73,7 +73,13 @@ Host inner
   ProxyJump bastion
 
 # 多个git账号
-
+# https://codeup.aliyun.com
+Host codeup.aliyun.com
+  HostName codeup.aliyun.com
+  User git
+  IdentitiesOnly yes
+  PreferredAuthentications publickey
+  IdentityFile ~/.ssh/id_ed25519_devops_aliyun
 
 ## private github
 Host github.com ssh.github.com
