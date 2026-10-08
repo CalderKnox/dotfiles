@@ -70,6 +70,9 @@ zmodule Aloxaf/fzf-tab
 #
 # Modules that must be initialized last
 #
+zmodule sunlei/zsh-ssh
+zmodule reegnz/jq-zsh-plugin
+zmodule hlissner/zsh-autopair
 
 # Fish-like syntax highlighting for Zsh, must be sourced after completion.
 # <!-- zmodule zsh-users/zsh-syntax-highlighting -->  # disabled: using fast-syntax-highlighting
