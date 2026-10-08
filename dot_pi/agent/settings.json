@@ -25,7 +25,7 @@
     "find",
     "ls"
   ],
-  "defaultProvider": "cc-switch-zhipu-glm",
+  "defaultProvider": "zhipu",
   "defaultModel": "glm-5.3",
   "defaultThinkingLevel": "max",
   "steeringMode": "all",
