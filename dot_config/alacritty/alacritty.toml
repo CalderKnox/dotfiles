@@ -1,3 +1,5 @@
+#:tombi schema.strict = false
+
 # tombi / TOML-LSP schema association; alacritty itself ignores this key
 # (benign "Unused config key" warning).
 
@@ -6,10 +8,7 @@
 # No private_ prefix: file deploys 0644, parent dirs 0755.
 # Docs: https://alacritty.org/config-alacritty.html | bindings: .../config-alacritty-bindings.html
 # Reference: https://www.kevnu.com/zh/posts/18
-
-[[schemas]]
-path = "https://raw.githubusercontent.com/distinction-dev/alacritty-schema/main/alacritty/reference.json"
-strict = false
+# schema: https://raw.githubusercontent.com/distinction-dev/alacritty-schema/main/alacritty/reference.json
 
 [terminal.shell]
 program = "/opt/homebrew/bin/fish"
