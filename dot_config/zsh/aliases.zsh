@@ -94,9 +94,9 @@ alias tmux='tmux -2'                             # 强制 256 色
 # 注：原 chown/chmod/chgrp --preserve-root 别名已移除——GNU 专属标志在 macOS BSD
 # 工具链上必然报 illegal option（历史版本即已损坏），需要时从 git 历史找回。
 alias wget='wget -c'                             # 断点续传
-alias rm='rm -i'                                 # 删除前逐个确认
-alias cp='cp -i'                                 # 覆盖前确认
-alias mv='mv -i'                                 # 移动覆盖前确认
+# alias rm='rm -i'                                 # 删除前逐个确认
+# alias cp='cp -i'                                 # 覆盖前确认
+# alias mv='mv -i'                                 # 移动覆盖前确认
 alias mkdir='mkdir -p -v'                        # 自动创建父目录并显示过程
 
 # ~~~ 列表与导航 (lsd) ~~~
