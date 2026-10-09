@@ -131,9 +131,9 @@ if status is-interactive
     alias lt="ls --tree"
     alias tree="lsd --tree --depth 3"
     alias cat='bat --paging=never'
-    alias rm='rm -i'   # 删除前逐个确认（与 zsh 侧 / cp/mv 护栏一致）
-    alias cp='cp -ir'
-    alias mv='mv -i'
+    # alias rm='rm -i'   # 删除前逐个确认（与 zsh 侧 / cp/mv 护栏一致）
+    # alias cp='cp -ir'
+    # alias mv='mv -i'
     alias mkdir='mkdir -p -v'
 end
 # --preserve-root 别名已移除：BSD 的 chmod/chown/chgrp 不支持该选项
