@@ -1,5 +1,6 @@
 {
   "autoMode": {
+    "enabled": false,
     "classifierReasoningLevel": "low",
     "allowInsideWorkingDirectory": true,
     "classifyReadOnlyTools": false,
