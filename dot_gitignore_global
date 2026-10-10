@@ -7,45 +7,74 @@
 # Author      : Payne
 # =============================================================================
 # Loaded via `core.excludesfile` in dot_gitconfig; applies to all repos.
-# Keep project-specific ignores in repo-local .gitignore. Categories below.
+# Keep project-specific ignores in repo-local .gitignore.
+#
+# 规则要点（gitignore 语义，改前必读）：
+#   - 无内部斜杠的模式自动匹配任意层级，`**/foo` ≡ `foo`，`**/` 前缀是冗余
+#   - 结尾 `/` = 仅匹配目录；`*.vscode` 这类写法会误伤同名文件，故统一用目录锚定
+#   - 只有行首 `#` 是注释；行内 `#` 属于模式本身，注释一律独立成行
+#   - 父目录被忽略后，其下文件无法用 `!` 重新包含，必须先否定目录本身
 
-# --- OS / backups ---
+# --- OS / 备份 / 残留 ---
 .DS_Store
+desktop.ini
+Thumbs.db
 *~
+*.bak
+*.tmp
+*.orig
+*.db
+
+# --- 编辑器 / IDE（目录锚定，只忽略目录本身） ---
+.vscode/
+.idea/
+*.iml
 *.swp
 *.swo
-*.bak
 
-# --- Editors / IDEs ---
-.vscode
-.idea
-*.iml
-**/*.orca
-
-# --- Logs / LaTeX intermediates ---
-*.aux
+# --- 日志 / LaTeX 中间产物 ---
 *.log
 *.log.*
+*.aux
 
-# --- Python / virtualenvs ---
-*.venv
+# --- Python / 虚拟环境 ---
+.venv/
+venv/
 __pycache__/
-.tox
+*.py[cod]
+*.egg-info/
+.tox/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# --- Node / caches ---
+# --- Node / 缓存 ---
 node_modules/
 *.cache
 
-# --- Build outputs（锚定仓库根目录，避免误伤子目录里正常入库的 dist/bin 等） ---
+# --- 构建产物（`/` 锚定仓库根目录，避免误伤子目录里正常入库的 dist 等） ---
 /dist/
 /build/
 /target/
 # bin/ 已移除：无锚定的 bin/ 会把任何仓库 scripts/bin 目录无声排除，
 # git add . 静默跳过而无警告；项目级忽略请写入各仓库自身 .gitignore
 
-# --- Coding agent ---
-**/.claude
-**/.omc
-**/.pi
+# --- Coding agent（若某仓库确需入库这些目录：仓库本地 .gitignore 加 `!` 否定，
+#     或 `git add -f` 强制添加） ---
+.claude/
+.omc/
+.orca/
+.pi/
 
-# Note: `*.git` typo line removed (was ambiguous — likely *.orig/*.patch merge residue).
+# --- 文件名卫生（个人规则） ---
+# 名称含空格
+*[ ]*
+# 数字开头且含点的文件名（多为下载/截图残留）
+[0-9]*.*
+# 放行数字命名的目录及其内容；git 限制：必须先否定目录本身，
+# 否则单独的 `![0-9]*/**` 因父目录已被忽略而永不生效
+![0-9]*/
+![0-9]*/**
+
+# Note: `*.git` typo line removed (was ambiguous — likely *.orig/*.patch merge
+# residue; `*.orig` now covers it above).
