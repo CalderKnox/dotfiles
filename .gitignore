@@ -17,18 +17,18 @@
 nvim.payne
 **/.omc
 
-# --- Coding agent 运行时（本地状态，不入库）---
-.pi/
 # Pi 源文件默认不入库，仅允许与 .chezmoiignore 对应的三个配置（此处按源名匹配）。
 # Git ignore 不保护已跟踪文件，也不能阻止 git add -f；提交前仍需审查 diff。
 /dot_pi/**
 !/dot_pi/
 !/dot_pi/agent/
+!/dot_pi/agent/extensions
+!/dot_pi/agent/extensions/pi-automode
 !/dot_pi/workflows/
+
 !/dot_pi/agent/settings.json
 !/dot_pi/agent/pi-goal.json
-!/dot_pi/workflows/settings.json
-!/dot_pi/agent/pi-goal.json
+!/dot_pi/agent/extensions/pi-automode/config.json
 !/dot_pi/workflows/settings.json
 # 兼容旧源布局及 /encrypted_ 等文件属性前缀。
 dot_pi/**/sessions/

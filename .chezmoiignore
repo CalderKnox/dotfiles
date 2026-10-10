@@ -11,15 +11,16 @@
 **/*.local.*
 **/*.bak
 
-# .pi 运行时数据（sessions/npm/missions/tasks/凭据缓存/models-store/workflow 状态）不部署，仅部署以下 3 个配置
-# 注：chezmoi 忽略目录时会整棵剪枝，目录内文件的 ! 反选不生效，故每层目录都要显式 ! 回来
-.pi/**
-!.pi
-!.pi/agent
-!.pi/workflows
-!.pi/agent/settings.json
-!.pi/agent/pi-goal.json
-!.pi/workflows/settings.json
+# .pi 运行时数据不部署，仅部署以下 3 个配置
+.pi/agent/sessions/**
+.pi/agent/npm/**
+.pi/agent/missions/**
+.pi/agent/tasks/**
+.pi/agent/auth.json
+.pi/agent/credentials/**
+.pi/agent/models-store/**
+.pi/workflows/state/**
+
 
 # OS 与编辑器运行时产物
 **/.DS_Store
