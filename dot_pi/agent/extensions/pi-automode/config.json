@@ -1,40 +1,11 @@
 {
   "autoMode": {
-    "enabled": true,
-
     "classifierReasoningLevel": "low",
+    "allowInsideWorkingDirectory": true,
     "classifyReadOnlyTools": false,
     "fastClassifierMaxTokens": 4096,
-    "classifierTimeoutMs": 20000,
-
-    "allowInsideWorkingDirectory": false,
-
+    "classifierTimeoutMs": 30000,
     "maxUserTranscriptTokens": 32768,
-    "maxToolTranscriptTokens": 32768,
-
-    "deniedPaths": [
-      "~/.ssh/**",
-      "~/.aws/**",
-      "~/.config/gcloud/**",
-      "**/.env",
-      "**/.env.local",
-      "**/.env.production",
-      "**/id_rsa",
-      "**/id_ed25519"
-    ],
-
-    "environment": [ "$defaults" ],
-    "allow": [ "$defaults" ],
-    "protectedPaths": [ "$defaults" ],
-    "soft_deny": [ "$defaults" ],
-    "hard_deny": [ "$defaults" ]
-  },
-
-  "permissions": {
-    "deny": [ ],
-    "ask": [ "bash(git push *)" ],
-    "allow": [ ]
+    "maxToolTranscriptTokens": 32768
   }
 }
-
-
