@@ -190,6 +190,7 @@ class SourceChecks(Fixture):
       for path in (
         "dot_pi/agent/settings.json",
         "dot_pi/agent/pi-goal.json",
+        "dot_pi/agent/extensions/pi-automode/config.json",
         "dot_pi/workflows/settings.json",
         "dot_config/nvim/lazyvim.json",
       )
@@ -242,11 +243,17 @@ class SourceChecks(Fixture):
       "dot_pi/agent/encrypted_auth.json.age",
       "dot_pi/agent/private_mcp.json",
       "dot_pi/agent/sessions/example.json",
+      "dot_pi/agent/extensions/probe.js",
     ]
     result = self.run_command([git, "check-ignore", "--no-index", "--stdin"], script="\n".join(blocked) + "\n")
     self.ok(result)
     self.assertEqual(result.stdout.splitlines(), blocked)
-    for allowed in ("dot_pi/agent/settings.json", "dot_pi/agent/pi-goal.json", "dot_pi/workflows/settings.json"):
+    for allowed in (
+      "dot_pi/agent/settings.json",
+      "dot_pi/agent/pi-goal.json",
+      "dot_pi/agent/extensions/pi-automode/config.json",
+      "dot_pi/workflows/settings.json",
+    ):
       with self.subTest(path=allowed):
         result = self.run_command([git, "check-ignore", "--no-index", "-q", allowed])
         self.assertEqual(result.returncode, 1, result.stderr)
@@ -271,7 +278,15 @@ class SourceChecks(Fixture):
     )
     targets = set(self.ok(result).splitlines())
     pi_files = {path for path in targets if path.startswith(".pi/") and path.endswith(".json")}
-    self.assertEqual(pi_files, {".pi/agent/settings.json", ".pi/agent/pi-goal.json", ".pi/workflows/settings.json"})
+    self.assertEqual(
+      pi_files,
+      {
+        ".pi/agent/settings.json",
+        ".pi/agent/pi-goal.json",
+        ".pi/agent/extensions/pi-automode/config.json",
+        ".pi/workflows/settings.json",
+      },
+    )
     self.assertFalse(any(path == "docs" or path.startswith("docs/") for path in targets))
     self.assertFalse(any(path.endswith("README.md") for path in targets))
     self.assertNotIn(".codex/config.toml", targets)
@@ -279,7 +294,7 @@ class SourceChecks(Fixture):
     self.assertIn(".zshrc", targets)
     self.assertIn(".zimrc", targets)
 
-  def test_synthetic_pi_runtime_files_are_excluded_and_rule_is_necessary(self):
+  def test_synthetic_pi_runtime_data_is_excluded_and_rules_are_necessary(self):
     source = self.cwd / "source"
     source.mkdir()
     ignore = source / ".chezmoiignore"
@@ -316,20 +331,30 @@ class SourceChecks(Fixture):
       "managed",
     ]
     targets = set(self.ok(self.run_command(argv)).splitlines())
+    # 黑名单策略：仅运行时数据被排除；其余源文件（含 extensions 探针）按设计部署。
     expected = {
       ".pi",
       ".pi/agent",
+      ".pi/agent/extensions",
       ".pi/workflows",
+      ".pi/workflows/projects",
       ".pi/agent/settings.json",
       ".pi/agent/pi-goal.json",
+      ".pi/agent/extensions/probe.js",
+      ".pi/agent/mcp.json",
+      ".pi/agent/private-auth.json",
+      ".pi/agent/encrypted-auth.json.age",
       ".pi/workflows/settings.json",
+      ".pi/workflows/projects/state.txt",
     }
     self.assertEqual(targets, expected)
-    # Mutation control: the same fixture must expose runtime files without the deny rule.
-    ignore.write_text(rules.replace(".pi/**\n", ""))
+    # Mutation control: the same fixture must expose runtime files without the deny rules.
+    ignore.write_text("".join(line + "\n" for line in rules.splitlines() if not line.startswith(".pi/")))
     mutated = set(self.ok(self.run_command(argv)).splitlines())
     self.assertNotEqual(mutated, expected)
-    self.assertIn(".pi/agent/extensions/probe.js", mutated)
+    self.assertIn(".pi/agent/sessions/transcript.jsonl", mutated)
+    # auth.json 由凭据守卫（**/auth.json*）独立防护，不依赖 .pi 运行时规则。
+    self.assertNotIn(".pi/agent/auth.json", mutated)
 
   def test_chezmoi_rendered_symlinks_and_permission_contracts(self):
     config = self.cwd / "empty.toml"
