@@ -5,6 +5,17 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      timezone: Asia/Shanghai
+      timezone: "Asia/Shanghai"
     open-pull-requests-limit: 10
     rebase-strategy: disabled
+    commit-message:
+      prefix: "chore(deps)"
+    # 每条 actions pin 一次更新会放大 PR 数量与 macOS CI 次数；
+    # minor/patch 合并为一个 PR，major 仍单独提出以便逐个复核。
+    groups:
+      github-actions-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
