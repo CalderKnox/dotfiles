@@ -27,8 +27,8 @@
     "find",
     "ls"
   ],
-  "defaultProvider": "zhipu",
-  "defaultModel": "glm-5.3",
+  "defaultProvider": "openai",
+  "defaultModel": "deepseek/deepseek-flash",
   "defaultThinkingLevel": "max",
   "steeringMode": "all",
   "hideThinkingBlock": true,
