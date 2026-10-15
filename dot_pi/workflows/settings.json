@@ -1,11 +1,11 @@
 {
-  "defaultEffort": "ultra",
+  "defaultEffort": "off",
   "defaultConcurrency": 16,
   "defaultAgentRetries": 3,
   "defaultAgentTimeoutMs": 900000,
   "defaultTokenBudget": 100000000,
 
-  "progressPanelMode": "detailed",
+  "progressPanelMode": "compact",
   "persistAgentSessions": false,
 
   "providerMiddlewareExtensions": [ ],
