@@ -4,6 +4,6 @@
     "noProgressTurns": 3
   },
   "rpc": {
-    "enabled": false
+    "enabled": true
   }
 }
