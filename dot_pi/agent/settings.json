@@ -15,7 +15,8 @@
     "npm:@narumitw/pi-btw",
     "npm:@narumitw/pi-statusline",
     "npm:@calesennett/pi-codex-fast",
-    "npm:@piotr-oles/pi-reflag"
+    "npm:@piotr-oles/pi-reflag",
+    "npm:pi-permission-modes"
   ],
   "defaultTools": [
     "read",
