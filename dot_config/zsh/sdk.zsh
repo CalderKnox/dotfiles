@@ -49,8 +49,10 @@ if [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && (( ! $+functions[sdk] )); then
 fi
 
 ########## Android ##########
-# NDK 由 Homebrew cask 安装；目录存在时才导出，避免悬空变量
-[[ -d "/opt/homebrew/share/android-ndk" ]] && export ANDROID_NDK_HOME="/opt/homebrew/share/android-ndk"
+# NDK 由 Homebrew cask 安装；目录存在时才导出，避免悬空变量。
+# 用 ${HOMEBREW_PREFIX} 与仓库其它 Homebrew 引用（dot_zshrc / fzf.zsh 的 HOMEBREW_PREFIX
+# 与 Intel /usr/local 分支）保持一致；本文件内不再出现硬编码 /opt/homebrew。
+[[ -d "${HOMEBREW_PREFIX:-/opt/homebrew}/share/android-ndk" ]] && export ANDROID_NDK_HOME="${HOMEBREW_PREFIX:-/opt/homebrew}/share/android-ndk"
 
 ########## Python ##########
 # Python 环境由 uv 管理；conda 已卸载，相关 init 已移除（见 git 历史）
