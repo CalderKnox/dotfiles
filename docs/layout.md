@@ -99,7 +99,7 @@
 ## .chezmoiignore —— 排除部分源文件不参与部署
 
 根目录的 `.chezmoiignore` 本身**不会**被 `chezmoi apply` 到 `$HOME`
-（chezmoi 对该文件名特殊处理），作用是在源目录中**排除**部分文件不参与渲染（按目标名匹配）。完整排除列表以 `.chezmoiignore` 源文件为唯一权威，涵盖本地覆盖与备份（`*.local`/`*.bak`）、已知 Pi 运行时数据（仅黑名单，不是默认拒绝策略）、仓库文档（`README.md`/`LICENSE`/`docs/`）、敏感词（`**/*token*`/`**/*secret*`/`**/*credential*`/`**/*auth.json*`/`**/hosts.yml`，`**/` 前缀使其覆盖嵌套目录）、构建产物（`node_modules/` 等）与机器本地状态/配置（`.config/fish/fish_variables`、`.codex/config.toml`、`.claude/settings.json`）；`.orca/` 和 `.vscode/` ignore pattern 为防御性规则，当前无对应映射 source。
+（chezmoi 对该文件名特殊处理），作用是在源目录中**排除**部分文件不参与渲染（按目标名匹配）。完整排除列表以 `.chezmoiignore` 源文件为唯一权威，涵盖本地覆盖与备份（`*.local`/`*.bak`）、已知 Pi 运行时数据（仅黑名单，不是默认拒绝策略）、仓库文档（`README.md`/`LICENSE`/`docs/`）、敏感词（`**/*token*`/`**/*secret*`/`**/*credential*`/`**/*auth.json*`/`**/hosts.yml`，`**/` 前缀使其覆盖嵌套目录）、构建产物（`**/node_modules/`、`**/.pnpm-store/`、`**/*.log*` 等，均带 `**/` 前缀以覆盖嵌套路径）与机器本地状态/配置（`.config/fish/fish_variables`、`.codex/config.toml`、`.claude/settings.json`）；`.orca/` 和 `.vscode/` ignore pattern 为防御性规则，当前无对应映射 source。
 
 效果：`chezmoi diff` / `chezmoi apply` 自动跳过上述模式匹配的目标，避免污染家目录。
 

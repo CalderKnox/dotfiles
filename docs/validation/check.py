@@ -741,6 +741,157 @@ class SourceChecks(Fixture):
         without_rule = set(self.ok(self.run_command(argv)).splitlines())
         self.assertIn(target, without_rule)
 
+  def test_no_unexpected_top_level_deploy_target(self):
+    """Adding a root-level source that renders into $HOME must be a conscious change.
+
+    The deploy boundary is a name blacklist (see .chezmoiignore's own comment), so today
+    nothing fails if a maintainer adds a root `scripts/` or `pyproject.toml`: chezmoi matches
+    by TARGET name and a non-dot source name renders straight into $HOME. Pin the exact set of
+    depth-1 managed targets so such an addition fails until reviewed. Note `.github/` is absent
+    only because its source name starts with a dot — an implicit invariant no other test states.
+    """
+    config = self.cwd / "empty.toml"
+    config.write_text("")
+    argv = [
+      self.require("chezmoi"),
+      "--source",
+      ROOT,
+      "--destination",
+      self.env["HOME"],
+      "--config",
+      config,
+      "--persistent-state",
+      self.cwd / "state.boltdb",
+      "managed",
+    ]
+    top_level = {line.split("/", 1)[0] for line in self.ok(self.run_command(argv)).splitlines()}
+    self.assertEqual(
+      top_level,
+      {
+        ".codex",
+        ".config",
+        ".gitconfig",
+        ".gitignore_global",
+        ".pi",
+        ".ssh",
+        ".tmux.conf",
+        ".zimrc",
+        ".zshrc",
+      },
+      "根级部署目标集变了：请确认新条目确实应渲染进 $HOME（否则加入 .chezmoiignore 或改为 dot_ 源名）",
+    )
+    self.assertNotIn(".github", top_level)
+
+  def test_hygiene_rules_exclude_nested_targets(self):
+    """.chezmoiignore patterns are anchored to the source root.
+
+    A bare pattern such as `node_modules/` never matches `.config/*/node_modules/`;
+    only the `**/` form reaches nested targets. This is the failure the file's own
+    comment warns about, and it shipped: `**.log` excluded nothing (so a nested
+    `*.log` would be rendered into $HOME) and `node_modules/` / `.pnpm-store/`
+    were root-anchored. Each fixture below sits at depth >= 2 on purpose — a
+    root-anchored rule leaves it in `managed` and fails the assertion.
+    """
+    source = self.cwd / "source"
+    source.mkdir()
+    ignore = source / ".chezmoiignore"
+    rules = (ROOT / ".chezmoiignore").read_text()
+    ignore.write_text(rules)
+    # (rule as written in .chezmoiignore, nested source fixture, expected target)
+    excluded = (
+      ("**/*.local", "dot_config/nested/keep.local", ".config/nested/keep.local"),
+      ("**/*.local.*", "dot_config/nested/keep.local.conf", ".config/nested/keep.local.conf"),
+      ("**/*.bak", "dot_config/nested/keep.bak", ".config/nested/keep.bak"),
+      ("**/*.log*", "dot_config/nested/run.log", ".config/nested/run.log"),
+      ("**/*.log*", "dot_config/nested/run.log.1", ".config/nested/run.log.1"),
+      ("**/*.md", "dot_config/nested/notes.md", ".config/nested/notes.md"),
+      ("**/LICENSE", "dot_config/nested/LICENSE", ".config/nested/LICENSE"),
+      ("**/*token*", "dot_config/nested/my-token.txt", ".config/nested/my-token.txt"),
+      ("**/*secret*", "dot_config/nested/db.secret", ".config/nested/db.secret"),
+      ("**/*credential*", "dot_config/nested/key.credential", ".config/nested/key.credential"),
+      ("**/*auth.json*", "dot_config/nested/auth.json", ".config/nested/auth.json"),
+      ("**/hosts.yml", "dot_config/nested/hosts.yml", ".config/nested/hosts.yml"),
+      ("**/node_modules/", "dot_config/nested/node_modules/dep.js", ".config/nested/node_modules/dep.js"),
+      ("**/.pnpm-store/", "dot_config/nested/dot_pnpm-store/state.json", ".config/nested/.pnpm-store/state.json"),
+      ("**/.DS_Store", "dot_config/nested/dot_DS_Store", ".config/nested/.DS_Store"),
+    )
+    for _, fixture, _ in excluded:
+      path = source / fixture
+      path.parent.mkdir(parents=True, exist_ok=True)
+      path.write_text("{}")
+    # Positive control: an ordinary config file must still deploy, so a rule that
+    # over-matched could not pass this test by excluding everything.
+    (source / "dot_config/nested/keep.conf").write_text("ok\n")
+    config = self.cwd / "empty.toml"
+    config.write_text("")
+    argv = [
+      self.require("chezmoi"),
+      "--source",
+      source,
+      "--destination",
+      self.env["HOME"],
+      "--config",
+      config,
+      "--persistent-state",
+      self.cwd / "state.boltdb",
+      "managed",
+    ]
+    targets = set(self.ok(self.run_command(argv)).splitlines())
+    self.assertIn(".config/nested/keep.conf", targets)
+    for rule, _, target in excluded:
+      with self.subTest(rule=rule, target=target):
+        self.assertNotIn(target, targets)
+    # Mutation control: dropping the rule must expose its fixture, proving that
+    # rule (not another pattern) is what excludes it.
+    for rule, _, target in excluded:
+      with self.subTest(rule=rule, mutation="drop"):
+        ignore.write_text("".join(line + "\n" for line in rules.splitlines() if line != rule))
+        without_rule = set(self.ok(self.run_command(argv)).splitlines())
+        self.assertIn(target, without_rule)
+
+  def test_ignore_patterns_are_globstar_prefixed_or_intentionally_rooted(self):
+    """Invariant, not enumeration: no *new* root-anchored pattern can slip in.
+
+    test_hygiene_rules_exclude_nested_targets proves a fixed set of rules works, but a
+    maintainer who later adds e.g. `build/` or `*.tmp` (root-anchored, silently missing
+    nested targets) gets no signal — the failure class this repo has now hit three times.
+    This test derives its expectation from the real file: every pattern must either start
+    with `**/` (matches at any depth) or appear in ROOT_ANCHORED below, each of which is a
+    deliberate exact-path target. A new slashless/bare pattern fails until it is either
+    fixed to `**/...` or consciously allow-listed here.
+    """
+    # Patterns that are CORRECTLY anchored at a fixed source path (not name-anywhere rules):
+    # the Pi runtime blacklist, the repo-only docs/ dir, and exact machine-local config paths.
+    ROOT_ANCHORED = {
+      ".pi/agent/permission-mode",
+      ".pi/agent/sessions/**",
+      ".pi/agent/npm/**",
+      ".pi/agent/missions/**",
+      ".pi/agent/tasks/**",
+      ".pi/agent/models-store/**",
+      ".pi/workflows/state/**",
+      "docs/",
+      ".config/fish/fish_variables",
+      ".codex/config.toml",
+      ".claude/settings.json",
+    }
+    patterns = [
+      line.strip()
+      for line in (ROOT / ".chezmoiignore").read_text().splitlines()
+      if line.strip() and not line.strip().startswith("#")
+    ]
+    for pattern in patterns:
+      if pattern.startswith("**/") or pattern in ROOT_ANCHORED:
+        continue
+      with self.subTest(pattern=pattern):
+        self.fail(
+          f".chezmoiignore 模式 {pattern!r} 不以 `**/` 开头：它会锚定源根、对嵌套目标静默失效"
+          f"（历史已发生三次）。若确为固定路径锚定，请加入本测试的 ROOT_ANCHORED 集合。"
+        )
+    # Guard the allowlist itself against rot: an entry that no longer exists in the file
+    # means this test is silently excusing nothing.
+    self.assertTrue(ROOT_ANCHORED <= set(patterns), "ROOT_ANCHORED 含已不存在的模式")
+
   def test_chezmoi_rendered_symlinks_and_permission_contracts(self):
     config = self.cwd / "empty.toml"
     config.write_text("")

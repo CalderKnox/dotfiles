@@ -80,7 +80,7 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 
 - 根级与全部嵌套的 `README.md`（实际模式为 `**/*.md`（含 `zsh/README.md`、`nvim/README.md`）—— 仓库文档仅留在源目录，不污染目标机；`LICENSE` 文件（根级与 `nvim/LICENSE`）已删除，`**/LICENSE` 模式防御性保留
 - `docs/` —— 本文档所在目录整体不部署
-- `*.local` / `*.local.*` / `*.bak` / `**/.DS_Store` / `node_modules/` / `.pnpm-store/` 等本地覆盖与构建产物
+- `*.local` / `*.local.*` / `*.bak` / `**/.DS_Store` / `**/*.log*` / `**/node_modules/` / `**/.pnpm-store/` 等本地覆盖与构建产物（嵌套路径必须带 `**/` 前缀，否则只锚定仓库根）
 - Pi 已知运行时路径：agent permission-mode/sessions/npm/missions/tasks、`auth.json`、credentials、models-store 与 workflows state；这组规则是黑名单，不会屏蔽所有未列出的 Pi 源文件
 - 机器本地状态与配置：`.config/fish/fish_variables`、`.codex/config.toml`、`.claude/settings.json`
 - `.orca/` 与 `.vscode/` 的忽略条目是防御性模式；仓库中当前没有映射到这两个 target 的 dot-source 目录。根 `.vscode/` 的 Git 跟踪规则另见 `.gitignore`。

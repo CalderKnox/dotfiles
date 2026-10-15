@@ -24,8 +24,10 @@
 
 
 # OS 与编辑器运行时产物
+# `**/` 前缀必需：裸 `**.log` 只锚定仓库根，`dot_config/*/x.log` 等嵌套日志仍会部署
+# （`**/.DS_Store` 带前缀所以本就正确）。`*.log*` 同时覆盖轮转后的 `.log.1` / `.log.gz`。
 **/.DS_Store
-**.log
+**/*.log*
 
 # 仓库文档与许可（仅仓库内查阅，不部署到 $HOME）
 **/*.md
@@ -44,8 +46,9 @@ docs/
 **/hosts.yml
 
 # 构建产物与依赖（体积大 / 可重建）
-node_modules/
-.pnpm-store/
+# `**/` 前缀必需：裸 `node_modules/` / `.pnpm-store/` 只锚定仓库根，嵌套依赖目录仍会部署
+**/node_modules/
+**/.pnpm-store/
 
 # codex 配置含机器本地状态（cc-switch 注入 provider、hooks/projects trust），由各机本地维护，不入部署
 .codex/config.toml

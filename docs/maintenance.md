@@ -189,13 +189,15 @@ HTTP/HTTPS 远程均生效），与 `private_dot_ssh/private_config` 的 `ProxyC
 
 `.chezmoiignore`（仓库根）控制 `chezmoi add` / `apply` 时忽略的**目标名**模式（模式按部署后的目标路径匹配，不是源文件名），当前包括：
 
-- 本地覆盖与备份：`**/*.local`、`**/*.local.*`、`**/*.bak`（`**/` 前缀覆盖嵌套路径，如 `.config/kitty/kitty.local.conf` 仅入库不部署）、`**/.DS_Store`、`**.log`
+- 本地覆盖与备份：`**/*.local`、`**/*.local.*`、`**/*.bak`（`**/` 前缀才能覆盖嵌套路径，如 `.config/kitty/kitty.local.conf` 仅入库不部署）、`**/.DS_Store`、`**/*.log*`
 - 仓库文档：`**/*.md`（包括根级与嵌套 README 和其他 Markdown）、`docs/`；`**/LICENSE` 行保留为防御（根级与 `nvim/LICENSE` 文件均已删除）
 - 敏感信息：`**/*token*`、`**/*secret*`、`**/*credential*`、`**/*auth.json*`、`**/hosts.yml`（覆盖嵌套路径）
-- 构建产物：`node_modules/`、`.pnpm-store/`
+- 构建产物：`**/node_modules/`、`**/.pnpm-store/`
 - fish 机器本地状态：`.config/fish/fish_variables`（fish Universal Variables，仅本机）
 - 机器本地配置：`.claude/settings.json`、`.codex/config.toml`
 - `.orca/` 与 `.vscode/` 是防御性 ignore pattern；根 `.vscode/` 源目录当前不是 chezmoi target，具体 Git 例外由 `.gitignore` 管理
+
+> ⚠️ **根锚定陷阱**：`.chezmoiignore` 模式锚定在源根，**没有 `**/` 前缀的模式只匹配仓库根**，嵌套目标仍会部署——这与全局 `.gitignore`（无内部斜杠的模式自动匹配任意层级）相反。历史与现行共出现过三次“规则静默不生效”：源名失配的 `dot_gitconfig` / `**/dot_git`、拼写错误 `**/REAMDME.md`，以及本轮修复的 `**.log` / `node_modules/` / `.pnpm-store/`。新增规则务必用 `**/` 前缀，并由 `docs/validation/check.py::test_hygiene_rules_exclude_nested_targets` 以嵌套 fixture + mutation control 守住。
 - Pi：Git 的 `.gitignore` 只允许跟踪四个已审查配置；`.chezmoiignore` 是运行时黑名单，不是部署 allowlist。它排除列出的 permission-mode/sessions/npm/missions/tasks/models-store/workflows state 与敏感路径，但其他本地 `dot_pi/` 源文件若不匹配黑名单，仍可能部署。Git 跟踪规则不能替代部署规则，提交前仍需审查 diff
 
 > 历史修正（2026-08 收口）：旧版曾按源名书写 `**/dot_git` / `**/dot_DS_Store` / `dot_gitconfig`（均不匹配目标名 `.git` / `.DS_Store` / `.gitconfig`，从未生效），且 `**/README.md` 误拼为 `**/REAMDME.md`、缺 `**/LICENSE`——现已全部按目标名改写、删除无效行并补齐。因此 `dot_gitconfig` → `~/.gitconfig` 为**正常部署目标**（旧文档称其被排除、"仅作本地参考快照"系对无效行的误读）；修复后 `chezmoi managed` 目标数 59→55；后续去重又删除了被更宽模式覆盖或已无对应文件的冗余行（根级 `README.md` / `LICENSE`、`docs/**`、`**/.git`、`*client_secret*`、两条 `**.md` 及已不存在的 `REPO-INSIGHT.md`），目标数保持 55 不变（核心 targets 不变），其后 fish 配置扩容实测曾达 81（纳入 `.config/fish/fish_variables` 后为 82，详见 [layout.md](layout.md)）。随后添加 `.config/fish/fish_variables` 至 `.chezmoiignore` 进一步排除。详见 [layout.md](layout.md)。
