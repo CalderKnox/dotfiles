@@ -12,9 +12,9 @@ import sys
 import unittest
 from pathlib import Path
 
-from runtime_checks import TmuxRuntime
-
 sys.dont_write_bytecode = True
+
+from runtime_checks import TmuxRuntime  # noqa: E402
 
 
 class InstalledPlugins(TmuxRuntime):

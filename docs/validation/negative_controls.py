@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prove selected regressions fail on the original HEAD, without changing worktree."""
+"""Prove selected regressions fail on a historical baseline without changing the worktree."""
 
 import argparse
 import contextlib
@@ -11,10 +11,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import check
-import runtime_checks
-
 sys.dont_write_bytecode = True
+
+import check  # noqa: E402
+import runtime_checks  # noqa: E402
 
 CONTROLS = (
   (check.SourceChecks, "test_pi_source_allowlist"),
@@ -42,9 +42,7 @@ FILES = (
   ("private_dot_config/zsh/aliases.zsh", "private_dot_config/zsh/aliases.zsh"),
   ("private_dot_config/zsh/fzf.zsh", "private_dot_config/zsh/fzf.zsh"),
   ("private_dot_config/zsh/sdk.zsh", "private_dot_config/zsh/sdk.zsh"),
-  # 负对照基线读取重构前的旧 conf.d 源名（控制在旧代码上复现失败才有意义）；
-  # HEAD 已是新布局，默认运行会触发下方 cat-file 预检的明确报错——请用
-  # --revision 指向重构前的提交（如 9483af3）再运行。
+  # 负对照基线读取重构前的旧 conf.d 源名；指定版本必须包含这些旧路径。
   ("private_dot_config/private_fish/private_conf.d/00_aliases.fish", "private_dot_config/private_fish/private_conf.d/10_sys.fish"),
   ("private_dot_config/private_fish/private_conf.d/00_aliases.fish", "private_dot_config/private_fish/private_functions/y.fish"),
   ("private_dot_config/private_fish/private_conf.d/01_dev.fish", "private_dot_config/private_fish/private_conf.d/20_dev.fish"),
@@ -53,7 +51,11 @@ FILES = (
 
 def main():
   parser = argparse.ArgumentParser(description=__doc__)
-  parser.add_argument("--revision", default="HEAD", help="Git revision providing the original source")
+  parser.add_argument(
+    "--revision",
+    default="b4e8bac8513ef949d1c3af6c7d99b633b986898d",
+    help="historical Git revision providing the original source layout",
+  )
   args = parser.parse_args()
   git = shutil.which("git")
   if not git:

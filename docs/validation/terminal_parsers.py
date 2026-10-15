@@ -6,9 +6,9 @@ import sys
 import unittest
 from pathlib import Path
 
-from check import ROOT, Fixture
-
 sys.dont_write_bytecode = True
+
+from check import ROOT, Fixture  # noqa: E402
 
 
 class TerminalParsers(Fixture):

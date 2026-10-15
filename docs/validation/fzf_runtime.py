@@ -5,10 +5,13 @@ import pty
 import select
 import shlex
 import signal
+import sys
 import time
 import unittest
 
-from check import Fixture, ZSH, function_source
+sys.dont_write_bytecode = True
+
+from check import Fixture, ZSH, function_source  # noqa: E402
 
 
 class FzfExecution(Fixture):

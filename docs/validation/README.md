@@ -10,18 +10,17 @@
 python3 docs/validation/check.py --strict
 ```
 
-需要 Python 3.11+、zsh、fish、luac、git、chezmoi、sh、tmux、Neovim。
+需要 Python 3.11+、zsh、fish、luac、git、chezmoi、ssh、sh、tmux、Neovim。
 普通运行允许缺少可选解析器时 skipped；`--strict` 将**任何 skipped 视为失败**。
 
 覆盖：
 
 - 每个 Zsh/Fish/Lua 文件逐个语法检查（含 conf.d 六文件、functions/ 惰性函数与
-  completions/ 自有补全）；Fish autoload/补全情性加载的文件名契约
+  completions/ 自有补全）；Fish autoload/补全惰性加载的文件名契约
   （functions/<name>.fish 必须定义同名函数、completions/<cmd>.fish 必须
-  complete --command <cmd>）；JSON、TOML、Git 与初始化脚本解析；
-- Git 的 Pi 源名 allowlist；含非 JSON、加密/属性前缀与扩展脚本的合成 chezmoi
-  部署 fixture，并验证删除 deny 规则确实使测试失效；
-- 实际渲染的 Zsh/Zim symlink 目标与 private/default 权限契约（不 apply）；
+  complete --command <cmd>）；文档列出的 fish functions/conf.d/completions 清单与计数必须与源目录一致；JSON、TOML、Git 与初始化脚本解析；Git LFS filter 只在 `.gitattributes` 匹配时调用；
+- Git 的 Pi 源名 allowlist；`.chezmoiignore` 的 Pi runtime blacklist 覆盖 permission-mode、sessions、npm、missions、tasks、models-store 与 workflows/state fixture，并逐项 mutation-check；`auth.json` 与 credentials 路径由通用敏感路径规则保护。
+- 实际渲染的 Zsh/Zim symlink 目标与 private/default 权限契约（不 apply）；`.keep` 占位文件不产生部署目标；
 - updater 全参数预检、混合失败、缺失依赖、临时文件失败与 stderr；
 - Zsh/Fish yazi 成功/失败/清理/caller 变量；uv destructive reset 依赖与短路；
 - fzf 正整数 PID、去重、多选、危险 Ex 行字段、路径选项终止与 ftm 状态；
@@ -32,17 +31,17 @@ python3 docs/validation/check.py --strict
 - tmux contract stubs 的 cold/reload/能力去重与 XDG/传统/显式路径选择；
 - 真实 Neovim 输入的 Insert/Escape/Ctrl-C/Replace/Ctrl-O/Visual、窗口切换、
   augroup 重载及本地 overrides；
-- 文档相对链接和 Neovim 架构关键事实。
+- 文档相对链接和 Neovim 架构关键事实；配置文档与实际 proxy、terminal、mise、Pi、Fish shortcut 来源的一致性；bytecode hygiene（每个入口导入项目模块前关闭写字节码，`docs/validation/` 无 `__pycache__`）。
 
 ## 历史对照（negative controls）
 
 ```sh
-python3 docs/validation/negative_controls.py --revision HEAD
+python3 docs/validation/negative_controls.py --revision b4e8bac
 ```
 
 把指定 Git revision 的源码复制到临时目录，运行当前的选定回归。
 仅当每个控制都产生**断言失败**、没有 infrastructure errors/skips 时命令成功。
-不 checkout、不修改当前 worktree。可用具体 commit 替代 HEAD 重复实验。
+不 checkout、不修改当前 worktree。默认基线为 `b4e8bac`；也可指定包含兼容旧布局源码的其他历史 commit。
 
 ## 原生 fzf 行为
 
@@ -70,7 +69,7 @@ python3 docs/validation/tmux_plugins.py \
 
 ```sh
 python3 docs/validation/terminal_parsers.py
-python3 docs/validation/benchmark_cache.py --revision HEAD
+python3 docs/validation/benchmark_cache.py --revision b4e8bac
 ```
 
 前者用本机 Ghostty/kitty parser 校验配置，不开 GUI；后者只测量 stub 二进制

@@ -164,6 +164,42 @@ class SourceChecks(Fixture):
         commands = re.findall(r"--command\s+(\S+)", path.read_text())
         self.assertIn(path.stem, commands)
 
+  def test_documentation_lists_fish_inventory(self):
+    # 文档对 fish functions/、conf.d/、completions/ 的清单与计数必须与实际源文件一致，
+    # 防止目录增删后文档漂移。
+    functions = sorted(path.stem for path in FUNCS.glob("*.fish"))
+    count = len(functions)
+    layout = (ROOT / "docs/layout.md").read_text()
+    maintenance = (ROOT / "docs/maintenance.md").read_text()
+    for document, text in (
+      ("docs/layout.md", layout),
+      ("docs/maintenance.md", maintenance),
+      ("docs/shell.md", (ROOT / "docs/shell.md").read_text()),
+      ("README.md", (ROOT / "README.md").read_text()),
+    ):
+      with self.subTest(document=document):
+        self.assertIn(f"{count} 个", text)
+    for document, text in (("docs/layout.md", layout), ("docs/maintenance.md", maintenance)):
+      for name in functions:
+        with self.subTest(document=document, function=name):
+          self.assertIn(name, text)
+    conf = sorted(path.stem.removeprefix("dot_") for path in FISH.glob("*.fish"))
+    self.assertEqual(
+      conf,
+      ["00_env", "01_activate", "10_sys", "20_dev", "21_k8s", "22_rev"],
+    )
+    for name in conf:
+      with self.subTest(document="docs/layout.md", conf=name):
+        self.assertIn(name, layout)
+    completions = sorted(path.name for path in FISH_COMPLETIONS.glob("*.fish"))
+    self.assertEqual(
+      completions,
+      ["kubecolor.fish", "symlink_docker.fish", "symlink_kubectl.fish", "symlink_orbctl.fish"],
+    )
+    for name in completions:
+      with self.subTest(document="docs/layout.md", completion=name):
+        self.assertIn(name.removeprefix("symlink_"), layout)
+
   def test_lua_syntax_per_file(self):
     tool = self.require("luac")
     for path in sorted((ROOT / "dot_config/nvim").rglob("*.lua")):
@@ -209,21 +245,251 @@ class SourceChecks(Fixture):
       self.run_command([self.require("git"), "config", "--no-includes", "--file", ROOT / "dot_gitconfig", "--list"])
     )
 
+  def test_proxy_documentation_matches_configuration(self):
+    git_config = (ROOT / "dot_gitconfig").read_text()
+    ssh_config = (ROOT / "private_dot_ssh/private_config").read_text()
+    proxy_match = re.search(r"^\s*proxy = socks5h://127\.0\.0\.1:(\d+)$", git_config, re.MULTILINE)
+    self.assertIsNotNone(proxy_match)
+    proxy_port = proxy_match[1]
+    ssh_proxy_match = re.search(
+      r"^  ProxyCommand bash -c 'if nc -z 127\.0\.0\.1 (\d+); then nc -X 5 -x 127\.0\.0\.1:(\d+)",
+      ssh_config,
+      re.MULTILINE,
+    )
+    self.assertIsNotNone(ssh_proxy_match)
+    self.assertEqual(ssh_proxy_match.groups(), (proxy_port, proxy_port))
+    zsh_proxy_match = re.search(
+      r'local host="127\.0\.0\.1" port=(\d+)', (ROOT / "dot_config/zsh/aliases.zsh").read_text()
+    )
+    fish_proxy_match = re.search(
+      r"set -l proxy_port (\d+)", (ROOT / "dot_config/fish/functions/onproxy.fish").read_text()
+    )
+    self.assertIsNotNone(zsh_proxy_match)
+    self.assertIsNotNone(fish_proxy_match)
+    self.assertEqual(zsh_proxy_match[1], proxy_port)
+    self.assertEqual(fish_proxy_match[1], proxy_port)
+    for relative in (
+      "README.md",
+      "docs/getting-started.md",
+      "docs/dev-tools.md",
+      "docs/maintenance.md",
+      "docs/layout.md",
+    ):
+      with self.subTest(document=relative):
+        document = (ROOT / relative).read_text()
+        self.assertIn(f"127.0.0.1:{proxy_port}", document)
+        self.assertNotIn("5376", document)
+
+  def test_terminal_documentation_matches_active_configuration(self):
+    ghostty = (ROOT / "dot_config/ghostty/config").read_text()
+    ghostty_theme = re.search(r"^theme = (.+)$", ghostty, re.MULTILINE)[1]
+    ghostty_command = re.search(r"^command = (.+)$", ghostty, re.MULTILINE)[1]
+    terminal_docs = (ROOT / "docs/terminals.md").read_text()
+    self.assertIn(ghostty_theme, terminal_docs)
+    self.assertIn(ghostty_command, terminal_docs)
+    for relative in ("README.md", "docs/layout.md", "docs/shell.md"):
+      self.assertIn(ghostty_command, (ROOT / relative).read_text())
+    for relative in ("README.md", "docs/layout.md", "docs/terminals.md"):
+      self.assertIn(ghostty_theme, (ROOT / relative).read_text())
+    for key in ("quick-terminal-animation-duration", "scrollback-limit", "image-storage-limit"):
+      active_setting = next(line for line in ghostty.splitlines() if line.startswith(f"{key} ="))
+      self.assertIn(active_setting, terminal_docs)
+    alacritty_text = (ROOT / "dot_config/alacritty/alacritty.toml").read_text()
+    alacritty = tomllib.loads(alacritty_text)
+    self.assertIn(alacritty["font"]["normal"]["family"], terminal_docs)
+    self.assertNotIn("[[schemas]]", alacritty_text)
+    self.assertIn("#:tombi schema.strict = false", terminal_docs)
+    self.assertIn("# schema:", terminal_docs)
+
+  def test_tool_and_shell_documentation_matches_sources(self):
+    mise = tomllib.loads((ROOT / "dot_config/mise/config.toml").read_text())["tools"]
+    labels = {"bun": "Bun", "deno": "Deno", "go": "Go", "node": "Node.js", "pnpm": "pnpm"}
+    for relative in ("docs/dev-tools.md", "docs/maintenance.md"):
+      document = (ROOT / relative).read_text()
+      for tool, version in mise.items():
+        with self.subTest(document=relative, tool=tool):
+          self.assertIn(labels[tool], document)
+          self.assertIn(str(version), document)
+
+    shortcut_groups = (
+      "gob gor got gom gomt goi mvnc mvni mvnp mvnt mvnci "
+      "pipi pipid pipr pipl pipu pnpi pnpa pnpad pnps pnpt "
+      "cb cr ct cc ccl cu redis-cli mongo-local"
+    ).split()
+    fish_dev = (ROOT / "dot_config/fish/conf.d/20_dev.fish").read_text()
+    shortcut_count = sum(
+      re.search(rf"^alias {re.escape(name)}=", fish_dev, re.MULTILINE) is not None for name in shortcut_groups
+    )
+    self.assertEqual(shortcut_count, 29)
+    shell_docs = (ROOT / "docs/shell.md").read_text()
+    self.assertIn(f"共 {shortcut_count} 个", shell_docs)
+    fish_sys = (ROOT / "dot_config/fish/conf.d/10_sys.fish").read_text()
+    zsh_aliases = (ROOT / "dot_config/zsh/aliases.zsh").read_text()
+    for alias in ("finder", "iterm", "iterm_ghostty"):
+      pattern = rf"^[ \t]*alias {re.escape(alias)}="
+      self.assertIsNotNone(re.search(pattern, fish_sys, re.MULTILINE))
+      self.assertIsNotNone(re.search(pattern, zsh_aliases, re.MULTILINE))
+    for alias in ("lt", "fishsource", "cbcopy", "cbpaste"):
+      pattern = rf"^[ \t]*alias {re.escape(alias)}="
+      self.assertIsNotNone(re.search(pattern, fish_sys, re.MULTILINE))
+      self.assertIsNone(re.search(pattern, zsh_aliases, re.MULTILINE))
+    self.assertIn("Fish 侧专属；`finder` 与 `iterm*` 两侧均有", shell_docs)
+    for source in (fish_sys, zsh_aliases):
+      self.assertIsNone(re.search(r"^\s*alias\s+(?:rm|cp|mv)=", source, re.MULTILINE))
+    self.assertIn("`-i` 别名都已注释停用", shell_docs)
+    self.assertIn("应用别名在非交互 fish 中也定义", shell_docs)
+    fish = self.require("fish")
+    for relative, alias in (
+      ("dot_config/fish/conf.d/20_dev.fish", "redis-cli"),
+      ("dot_config/fish/conf.d/21_k8s.fish", "k"),
+    ):
+      source = shlex.quote(str(ROOT / relative))
+      script = f"source {source}; and functions -q {shlex.quote(alias)}; or exit 1\\n"
+      self.ok(self.run_command([fish, "--no-config", "--private", "-c", script]))
+
+    zsh_rc = (ROOT / "dot_config/zsh/dot_zshrc").read_text()
+    zsh_aliases_text = (ROOT / "dot_config/zsh/aliases.zsh").read_text()
+    fish_env_text = (ROOT / "dot_config/fish/conf.d/00_env.fish").read_text()
+    self.assertIn('[[ -n "${LANG:-}" ]] || export LANG=zh_CN.UTF-8', zsh_rc)
+    self.assertIn('[[ -n "${EDITOR:-}" ]] || export EDITOR=', zsh_aliases_text)
+    self.assertIn('[[ -n "${VISUAL:-}" ]] || export VISUAL=', zsh_aliases_text)
+    for variable in ("LANG", "EDITOR", "VISUAL"):
+      self.assertIn(f'if not set -q {variable}; or test -z "${variable}"', fish_env_text)
+    self.assertIn("未设置或为空时设置默认值", shell_docs)
+    environment_cases = (
+      ({}, "zh_CN.UTF-8|nvim|nvim"),
+      ({"LANG": "", "EDITOR": "", "VISUAL": ""}, "zh_CN.UTF-8|nvim|nvim"),
+      ({"LANG": "fr_FR.UTF-8", "EDITOR": "vi", "VISUAL": "vim"}, "fr_FR.UTF-8|vi|vim"),
+    )
+    lang_guard = next(line.strip() for line in zsh_rc.splitlines() if line.strip().startswith('[[ -n "${LANG:-}" ]]'))
+    zsh_script = (
+      f"{lang_guard}\nsource {shlex.quote(str(ROOT / 'dot_config/zsh/aliases.zsh'))}\n"
+      'print -r -- "$LANG|$EDITOR|$VISUAL"\n'
+    )
+    fish_script = (
+      f"source {shlex.quote(str(ROOT / 'dot_config/fish/conf.d/00_env.fish'))}\n"
+      'printf \'%s|%s|%s\\n\' "$LANG" "$EDITOR" "$VISUAL"\n'
+    )
+    for override, expected in environment_cases:
+      for shell, executable, script, flags in (
+        ("zsh", self.require("zsh"), zsh_script, ["-dfc"]),
+        ("fish", self.require("fish"), fish_script, ["--no-config", "--private", "-c"]),
+      ):
+        with self.subTest(shell=shell, environment=override):
+          result = self.run_command([executable, *flags, script], env=override)
+          self.assertEqual(self.ok(result).strip(), expected)
+
+    setup_docs = (ROOT / "docs/getting-started.md").read_text()
+    maintenance_docs = (ROOT / "docs/maintenance.md").read_text()
+    for excluded in (
+      ".config/fish/fish_variables",
+      ".codex/config.toml",
+      ".claude/settings.json",
+      ".orca/",
+      ".vscode/",
+    ):
+      self.assertIn(excluded, setup_docs)
+      self.assertIn(excluded, maintenance_docs)
+    for truthful_statement in (
+      "Fish 无条件定义 `k=kubecolor`",
+      "不会 source `~/.cargo/env`",
+      "普通 Git 仓库操作不依赖 `git-lfs`",
+    ):
+      self.assertIn(truthful_statement, setup_docs)
+    zsh_rc_source = (ROOT / "dot_config/zsh/dot_zshrc").read_text()
+    fish_env_source = (ROOT / "dot_config/fish/conf.d/00_env.fish").read_text()
+    self.assertIn('[[ -d "$HOME/.cargo/bin"', zsh_rc_source)
+    self.assertIn("test -d ~/.cargo/bin; and fish_add_path -g ~/.cargo/bin", fish_env_source)
+    self.assertIsNone(re.search(r"^\s*(?:source|\.)\s+.*\.cargo/env", zsh_rc_source, re.MULTILINE))
+    self.assertIsNone(re.search(r"^\s*source\s+.*\.cargo/env", fish_env_source, re.MULTILINE))
+    zsh_sdk = (ROOT / "dot_config/zsh/sdk.zsh").read_text()
+    fish_k8s = (ROOT / "dot_config/fish/conf.d/21_k8s.fish").read_text()
+    self.assertIsNotNone(re.search(r"if command -v kubectl[^\n]*; then\s+alias k='kubectl'", zsh_sdk, re.MULTILINE))
+    self.assertIn('alias k="kubecolor"', fish_k8s)
+    git_lfs = subprocess.check_output(
+      [self.require("git"), "config", "--no-includes", "--file", ROOT / "dot_gitconfig", "--get", "filter.lfs.required"],
+      text=True,
+    ).strip()
+    self.assertEqual(git_lfs, "true")
+    maintenance_docs = (ROOT / "docs/maintenance.md").read_text()
+    self.assertIn("**/*auth.json*", maintenance_docs)
+    self.assertIn("**/hosts.yml", maintenance_docs)
+    self.assertIn("由 **/*.md 排除", (ROOT / "README.md").read_text())
+    validation_docs = (ROOT / "docs/validation/README.md").read_text()
+    self.assertIn("chezmoi、ssh、sh", validation_docs)
+
+  def test_pi_workflow_documentation_matches_settings(self):
+    pi_workflows = json.loads((ROOT / "dot_pi/workflows/settings.json").read_text())
+    self.assertEqual(pi_workflows["defaultEffort"], "off")
+    self.assertTrue(pi_workflows["keywordTriggerEnabled"])
+    self.assertEqual(pi_workflows["keywordTriggerWord"], "ultracode")
+    pi_dev_docs = (ROOT / "docs/dev-tools.md").read_text()
+    self.assertIn("`defaultEffort: off`", pi_dev_docs)
+    self.assertIn("`ultracode` 是启用的显式关键词触发器", pi_dev_docs)
+    pi_docs = pi_dev_docs + (ROOT / "docs/layout.md").read_text()
+    for relative in (
+      "dot_pi/agent/settings.json",
+      "dot_pi/agent/pi-goal.json",
+      "dot_pi/agent/extensions/pi-automode/config.json",
+      "dot_pi/workflows/settings.json",
+    ):
+      self.assertIn(relative, pi_docs)
+
+  def test_git_lfs_filter_only_runs_for_attributed_files(self):
+    git = self.require("git")
+    self.stub("git-lfs", "sys.exit(23)")
+    env = {"GIT_CONFIG_GLOBAL": str(ROOT / "dot_gitconfig"), "GIT_CONFIG_NOSYSTEM": "1"}
+
+    plain_repo = self.cwd / "plain-repo"
+    plain_repo.mkdir()
+    self.ok(self.run_command([git, "init", "-q"], cwd=plain_repo, env=env))
+    (plain_repo / "notes.txt").write_text("ordinary Git file\n")
+    self.ok(self.run_command([git, "add", "notes.txt"], cwd=plain_repo, env=env))
+    self.assertEqual(self.calls("git-lfs"), [])
+
+    lfs_repo = self.cwd / "lfs-repo"
+    lfs_repo.mkdir()
+    self.ok(self.run_command([git, "init", "-q"], cwd=lfs_repo, env=env))
+    (lfs_repo / ".gitattributes").write_text("*.bin filter=lfs diff=lfs merge=lfs -text\n")
+    (lfs_repo / "payload.bin").write_bytes(b"fixture payload")
+    result = self.run_command([git, "add", "payload.bin"], cwd=lfs_repo, env=env)
+    self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+    self.assertTrue(self.calls("git-lfs"))
+
   def test_ssh_config_parses(self):
     # `ssh -G` resolves and prints the effective configuration without connecting
-    # and without executing ProxyCommand. Token expansion must key ControlPath on
-    # %n so aliases sharing user@host:port (tst/ops/sec, the github pair) each own
-    # a distinct socket and their IdentityFiles actually engage.
+    # or executing ProxyCommand. Paths use fixed safe prefixes for known aliases
+    # that share endpoints; all other aliases use only OpenSSH's hashed %C token.
     ssh = self.require("ssh")
     config = ROOT / "private_dot_ssh/private_config"
     result = None
-    for host in ("tst", "ops", "sec", "github.com"):
+    control_paths = []
+    prefixes = {
+      "tst": "tst",
+      "ops": "ops",
+      "sec": "sec",
+      "github.com": "github",
+      "ssh.github.com": "ssh-github",
+    }
+    for host, prefix in prefixes.items():
       result = self.run_command([ssh, "-G", "-F", config, host])
       self.ok(result)
       options = {line.split(" ", 1)[0]: line.split(" ", 1)[1] for line in result.stdout.splitlines() if " " in line}
       self.assertIn("controlpath", options)
-      self.assertIn(host, options["controlpath"], host)
+      self.assertRegex(options["controlpath"], rf"^.*/\.ssh/\.cm-{re.escape(prefix)}-[0-9a-f]{{40}}$")
+      self.assertEqual(Path(options["controlpath"]).parent.name, ".ssh")
+      # OpenSSH may append a temporary random suffix while creating the socket.
+      self.assertLess(len(os.fsencode(options["controlpath"])) + 17, 104)
+      control_paths.append(options["controlpath"])
+    self.assertEqual(len(control_paths), len(set(control_paths)))
     self.assertIn("proxycommand", {line.split(" ", 1)[0] for line in result.stdout.splitlines()})
+
+    traversal = self.run_command([ssh, "-G", "-F", config, "foo/../../tmp/probe"])
+    self.ok(traversal)
+    options = {line.split(" ", 1)[0]: line.split(" ", 1)[1] for line in traversal.stdout.splitlines() if " " in line}
+    self.assertRegex(options["controlpath"], r"^.*/\.ssh/\.cm-[0-9a-f]{40}$")
+    self.assertEqual(Path(options["controlpath"]).parent.name, ".ssh")
+    self.assertNotIn("..", Path(options["controlpath"]).parts)
 
   def test_pi_source_allowlist(self):
     git = self.require("git")
@@ -238,11 +504,6 @@ class SourceChecks(Fixture):
       "dot_pi/agent/sessions/example.json",
       "dot_pi/workflows/projects/run.json",
       "dot_pi/agent/npm/package.json",
-      "dot_pi/agent/auth.json",
-      "dot_pi/agent/private_auth.json",
-      "dot_pi/agent/encrypted_auth.json.age",
-      "dot_pi/agent/private_mcp.json",
-      "dot_pi/agent/sessions/example.json",
       "dot_pi/agent/extensions/probe.js",
     ]
     result = self.run_command([git, "check-ignore", "--no-index", "--stdin"], script="\n".join(blocked) + "\n")
@@ -257,6 +518,19 @@ class SourceChecks(Fixture):
       with self.subTest(path=allowed):
         result = self.run_command([git, "check-ignore", "--no-index", "-q", allowed])
         self.assertEqual(result.returncode, 1, result.stderr)
+
+  def test_vscode_repository_allowlist(self):
+    git = self.require("git")
+    (self.cwd / ".gitignore").write_text((ROOT / ".gitignore").read_text())
+    self.ok(self.run_command([git, "init", "-q"]))
+    for allowed in (".vscode/settings.json", ".vscode/extensions.json"):
+      with self.subTest(path=allowed):
+        result = self.run_command([git, "check-ignore", "--no-index", "-q", allowed])
+        self.assertEqual(result.returncode, 1, result.stderr)
+    for blocked in (".vscode/launch.json", "dot_config/.vscode/settings.json"):
+      with self.subTest(path=blocked):
+        result = self.run_command([git, "check-ignore", "--no-index", "-q", blocked])
+        self.assertEqual(result.returncode, 0, result.stderr)
 
   def test_chezmoi_source_boundaries_without_apply(self):
     tool = self.require("chezmoi")
@@ -277,6 +551,21 @@ class SourceChecks(Fixture):
       ]
     )
     targets = set(self.ok(result).splitlines())
+    ignored_result = self.run_command(
+      [
+        tool,
+        "--source",
+        ROOT,
+        "--destination",
+        self.env["HOME"],
+        "--config",
+        config,
+        "--persistent-state",
+        self.cwd / "state.boltdb",
+        "ignored",
+      ]
+    )
+    ignored = set(self.ok(ignored_result).splitlines())
     pi_files = {path for path in targets if path.startswith(".pi/") and path.endswith(".json")}
     self.assertEqual(
       pi_files,
@@ -289,6 +578,13 @@ class SourceChecks(Fixture):
     )
     self.assertFalse(any(path == "docs" or path.startswith("docs/") for path in targets))
     self.assertFalse(any(path.endswith("README.md") for path in targets))
+    self.assertFalse(any(path == ".vscode" or path.startswith(".vscode/") for path in targets))
+    self.assertFalse(any(path.endswith("/.keep") for path in targets | ignored))
+    self.assertNotIn(".pi/agent/permission-mode", targets)
+    self.assertIn(".pi/agent/permission-mode", ignored)
+    self.assertFalse(any(path == ".vscode" or path.startswith(".vscode/") for path in ignored))
+    self.assertFalse(any(path == ".orca" or path.startswith(".orca/") for path in targets | ignored))
+    self.assertIn(".codex/config.toml", ignored)
     self.assertNotIn(".codex/config.toml", targets)
     self.assertNotIn(".config/kitty/kitty.local.conf", targets)
     self.assertIn(".zshrc", targets)
@@ -303,14 +599,24 @@ class SourceChecks(Fixture):
     fixtures = (
       "dot_pi/agent/settings.json",
       "dot_pi/agent/pi-goal.json",
+      "dot_pi/agent/extensions/pi-automode/config.json",
       "dot_pi/workflows/settings.json",
       "dot_pi/agent/auth.json",
+      "dot_pi/agent/permission-mode/custom.json",
       "dot_pi/agent/private_private-auth.json",
       "dot_pi/agent/encrypted_encrypted-auth.json.age",
       "dot_pi/agent/sessions/transcript.jsonl",
+      "dot_pi/agent/npm/package.json",
+      "dot_pi/agent/missions/run.json",
+      "dot_pi/agent/tasks/run.json",
+      "dot_pi/agent/credentials/provider.json",
+      "dot_pi/agent/models-store/state.json",
+      "dot_pi/workflows/state/run.json",
       "dot_pi/agent/extensions/probe.js",
       "dot_pi/agent/private_mcp.json",
       "dot_pi/workflows/projects/state.txt",
+      "dot_vscode/settings.json",
+      "dot_orca/state.json",
     )
     for name in fixtures:
       path = source / name
@@ -336,14 +642,14 @@ class SourceChecks(Fixture):
       ".pi",
       ".pi/agent",
       ".pi/agent/extensions",
+      ".pi/agent/extensions/pi-automode",
       ".pi/workflows",
       ".pi/workflows/projects",
       ".pi/agent/settings.json",
       ".pi/agent/pi-goal.json",
+      ".pi/agent/extensions/pi-automode/config.json",
       ".pi/agent/extensions/probe.js",
       ".pi/agent/mcp.json",
-      ".pi/agent/private-auth.json",
-      ".pi/agent/encrypted-auth.json.age",
       ".pi/workflows/settings.json",
       ".pi/workflows/projects/state.txt",
     }
@@ -353,8 +659,39 @@ class SourceChecks(Fixture):
     mutated = set(self.ok(self.run_command(argv)).splitlines())
     self.assertNotEqual(mutated, expected)
     self.assertIn(".pi/agent/sessions/transcript.jsonl", mutated)
-    # auth.json 由凭据守卫（**/auth.json*）独立防护，不依赖 .pi 运行时规则。
-    self.assertNotIn(".pi/agent/auth.json", mutated)
+    for target in (
+      ".pi/agent/npm/package.json",
+      ".pi/agent/missions/run.json",
+      ".pi/agent/tasks/run.json",
+      ".pi/agent/models-store/state.json",
+      ".pi/workflows/state/run.json",
+    ):
+      self.assertIn(target, mutated)
+    # Auth-named and credentials paths remain excluded by the global sensitive-name rules.
+    for sensitive_target in (
+      ".pi/agent/auth.json",
+      ".pi/agent/private-auth.json",
+      ".pi/agent/encrypted-auth.json.age",
+      ".pi/agent/credentials/provider.json",
+    ):
+      self.assertNotIn(sensitive_target, mutated)
+
+    # Each Pi-only runtime rule must exclude its own fixture. The credentials
+    # directory is intentionally covered by the separate global sensitive-name guard.
+    required_rules = (
+      (".pi/agent/permission-mode", ".pi/agent/permission-mode/custom.json"),
+      (".pi/agent/sessions/**", ".pi/agent/sessions/transcript.jsonl"),
+      (".pi/agent/npm/**", ".pi/agent/npm/package.json"),
+      (".pi/agent/missions/**", ".pi/agent/missions/run.json"),
+      (".pi/agent/tasks/**", ".pi/agent/tasks/run.json"),
+      (".pi/agent/models-store/**", ".pi/agent/models-store/state.json"),
+      (".pi/workflows/state/**", ".pi/workflows/state/run.json"),
+    )
+    for rule, target in required_rules:
+      with self.subTest(rule=rule):
+        ignore.write_text("".join(line + "\n" for line in rules.splitlines() if line != rule))
+        without_rule = set(self.ok(self.run_command(argv)).splitlines())
+        self.assertIn(target, without_rule)
 
   def test_chezmoi_rendered_symlinks_and_permission_contracts(self):
     config = self.cwd / "empty.toml"
@@ -406,6 +743,25 @@ class SourceChecks(Fixture):
           self.assertTrue((path.parent / target).exists())
           checked += 1
     self.assertGreater(checked, 50)
+
+  def test_validation_modules_suppress_bytecode_and_stay_clean(self):
+    validation = ROOT / "docs/validation"
+    guard = "sys.dont_write_bytecode = True"
+    project_import = re.compile(r"^[ \t]*(?:import|from)\s+(?:check|runtime_checks)\b", re.MULTILINE)
+    for path in sorted(validation.glob("*.py")):
+      if path.name == "runtime_checks.py":
+        continue  # library module; only imported by scripts that set the guard first
+      with self.subTest(script=path.name):
+        text = path.read_text()
+        self.assertIn(guard, text)
+        imported = project_import.search(text)
+        self.assertIsNotNone(imported, f"{path.name} should import a project module")
+        self.assertLess(
+          text.index(guard),
+          imported.start(),
+          f"{path.name} must disable bytecode before importing a project module",
+        )
+    self.assertFalse((validation / "__pycache__").exists(), "docs/validation must not contain __pycache__")
 
 
 class ZshHelpers(Fixture):
@@ -639,7 +995,10 @@ class CompletionCache(Fixture):
       for job in jobs:
         stdout, stderr = job.communicate(timeout=20)
         self.assertEqual(job.returncode, 0, stderr)
-        self.assertEqual(stdout.strip(), "concurrent")
+        # Production deliberately skips completion loading after a 1-second lock
+        # timeout. Under load, an empty result is safe; the final fresh process
+        # below must still consume the fully published cache.
+        self.assertIn(stdout.strip(), ("", "concurrent"), stderr)
     finally:
       for job in jobs:
         if job.poll() is None:
@@ -853,9 +1212,9 @@ class FishHelpers(Fixture):
     self.assertEqual(self.ok(self.shell("", script, "fish")).strip(), "UNSET")
     self.assertEqual(self.ok(self.shell("", script, "fish", {"HOMEBREW_NO_INSTALL_CLEANUP": "1"})).strip(), "1")
 
-  def test_behavior_changing_aliases_are_interactive_only(self):
-    # 与 zsh .zshrc 只在交互 shell 加载对齐：非交互 source 后，遮蔽原生命令的
-    # 行为改变型别名（cp/cat/mkdir…）不得定义；显式函数（cdd/mkcd）仍可用。
+  def test_10_sys_command_wrappers_are_interactive_only(self):
+    # 10_sys.fish 的指定系统命令包装只在交互 shell 定义；开发/Kubernetes 别名
+    # 在非交互 Fish 中也会定义，另由 SourceChecks.test_active_configuration_documentation_matches_sources 检查。
     script = f"source {shlex.quote(str(FISH / '10_sys.fish'))}\n"
     script += "functions -q cp; and echo CP_DEFINED\nfunctions -q cat; and echo CAT_DEFINED\nfunctions -q cdd; and echo CDD_DEFINED\n"
     out = self.ok(self.shell("", script, "fish"))
