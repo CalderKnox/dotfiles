@@ -8,6 +8,7 @@
 # --- OS / IDE / 日志 ---
 **/.git
 **/.idea
+**/.vscode/
 **/node_modules
 **/.DS_Store
 **/*.log*
@@ -17,7 +18,7 @@
 nvim.payne
 **/.omc
 
-# Pi 源文件默认不入库，仅允许与 .chezmoiignore 对应的三个配置（此处按源名匹配）。
+# Git 源名 allowlist：仅跟踪下列四个 Pi 配置；chezmoi 部署过滤另由 .chezmoiignore 负责。
 # Git ignore 不保护已跟踪文件，也不能阻止 git add -f；提交前仍需审查 diff。
 /dot_pi/**
 !/dot_pi/
@@ -37,7 +38,7 @@ dot_pi/**/sessions/
 **/*token*
 **/*secret*
 **/*credential*
-**/auth.json*
+**/*auth.json*
 
 # --- 审计/测试残留（防复发，替代本地 .git/info/exclude）---
 .tmp-empty-config.toml
@@ -72,4 +73,9 @@ chezmoistate.boltdb
 **/*.bak
 **/hosts.yml
 .pnpm-store/
-!.vscode/
+
+# Keep the root VS Code metadata allowlist; ignore workspace-local additions.
+!/.vscode/
+/.vscode/*
+!/.vscode/extensions.json
+!/.vscode/settings.json

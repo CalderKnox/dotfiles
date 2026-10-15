@@ -11,13 +11,14 @@
 **/*.local.*
 **/*.bak
 
-# .pi 运行时数据不部署，仅部署以下 3 个配置
+# Pi 已知运行时状态不部署。此处是运行时黑名单，不是部署 allowlist：
+# 未命中以下规则的本地 Pi 源文件仍可能由 chezmoi 管理；Git 跟踪边界另见 .gitignore。
+# auth.json / credentials 路径由下方通用敏感文件名规则覆盖。
+.pi/agent/permission-mode
 .pi/agent/sessions/**
 .pi/agent/npm/**
 .pi/agent/missions/**
 .pi/agent/tasks/**
-.pi/agent/auth.json
-.pi/agent/credentials/**
 .pi/agent/models-store/**
 .pi/workflows/state/**
 
@@ -39,7 +40,7 @@ docs/
 **/*token*
 **/*secret*
 **/*credential*
-**/auth.json*
+**/*auth.json*
 **/hosts.yml
 
 # 构建产物与依赖（体积大 / 可重建）
@@ -51,5 +52,7 @@ node_modules/
 # claude 源已移出仓库（~/.claude/settings.json 各机本地维护，参照 .codex 模式），此行为防御性保留
 .claude/settings.json
 
+# Defensive rules for mapped targets; literal root `.orca/` and `.vscode/` source dirs
+# are not chezmoi targets without dot_ source-name mapping.
 **/.orca
 **/.vscode
