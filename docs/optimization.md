@@ -44,7 +44,7 @@ thinking/budget 设置；不更改运行时版本选择、代理或用户插件�
 | --- | --- | --- |
 | Zsh `sdk.zsh` completion loader | 同路径降级 stale cache、未来 mtime 反复生成、并发安装身份混用、临时 basename 字节码不消费 | 内建 stat 身份等值比较；每工具 flock（最多等 1 秒）覆盖检查/发布/source；最终 source 名编译、临时 .zwc 原子发布；失败保留旧数据但跳过错误版本 |
 | 同上 SDKMAN | 初始化失败递归；reload 将真实 sdk 覆盖为 lazy stub | 先移除 placeholder；保留初始化状态；未定义实现时明确失败；初始化成功后 reload 不重复 |
-| Zsh `aliases.zsh` | uv 缺失时先删除 HOME 状态；backup 混合结果吞失败 | uv 前置检查 + 独立引用路径/`--` + 步骤短路；仍保留 HOME reset 作用域；bak 聚合错误且成功才打印 |
+| Zsh `aliases.zsh` | backup 混合结果吞失败；破坏性 uv_resync 未启用却与文档不一致 | bak 聚合错误且成功才打印；`uv_resync`（HOME reset）与 Fish 同名函数当前均以注释模板保留、未启用，文档与测试改为描述“禁用模板”而非运行时行为 |
 | Zsh `fzf.zsh` | colon 文件名字段可变成 Neovim +Ex；global file actions 缺 --；fzf-tab 预览误用 sh | editor/preview 行号正整数守卫；路径使用 --；普通 sh 与 tab Zsh shell 分离；Ctrl-Y 用 printf、Ctrl-G 使用 POSIX redirection |
 | 同上 fkill / ftm | PID 0 会向整个组发信号；提取依赖 sed/awk/xargs；attach 失败被 echo 掩盖 | 全选择校验正整数/去重/独立参数，移除提取 subprocess；保留 ftm attach/error 状态，取消作为无操作 |
 | Zsh/Fish initialization | producer 输出部分代码后失败，仍被 eval/source | 成功捕获完整输出才执行，保留现有交互/非交互边界 |
@@ -92,6 +92,20 @@ Lua assert 后需要 cquit。已纠正这些假设再验证，不把测试设施
 
 此前的优化快照记录 **77 tests** 与 **82 个 aggregate 正向检查**（核心回归、fzf、终端 parser、tmux 插件）；完整历史日志为 `.pi/tasks/01a1112b-2930-75bf-a65a-b264b9d7c248-56835/b774d2979.output`。以下“后续全仓库对齐”列出当前验证结果，避免把旧快照数字当作现行计数。
 
+## 第三轮审计（`codebase-audit-mv9o0u60-hzqtov`）
+
+第三轮 `ultracode` 审查（5 项并行检查 + cross-validation）确认了以下文档与源不一致，均已核对源文件后修复：
+
+- **`uv_resync` 禁用却描述为可用**（最有影响）：Zsh `aliases.zsh` 与 Fish `conf.d/20_dev.fish` 中两个定义均为注释模板、未启用，但 `optimization.md`、`validation/README.md`、`dot_config/zsh/README.md` 与 `20_dev.fish` 头部都把它当生效行为描述。已全部改为“注释模板/未启用”，并说明测试仅校验模板存在、启用后自动恢复行为断言。
+- **模块加载方式**：`docs/getting-started.md` 曾称 `.zshrc` 用 glob `for file in *.zsh(N)` 加载三模块；`dot_zshrc` 实为显式逐文件 `source`（aliases→fzf→sdk），已改正文与文档一致。
+- **CPU 数探测**：`makes`/`xargsp` 曾称依赖 coreutils `nproc`；实现与 Fish 侧均在 `nproc` 缺失时回退 `sysctl -n hw.ncpu`，文档已补回退说明。
+- **SSH 权限措辞**：`private_dot_ssh/private_config` 曾称 `0644 被 ssh 拒绝`；OpenSSH 只拒绝 group/other 可写的配置，`0600` 是隐私收紧而非硬性要求，已在源注释校正。
+- **`onproxy` 注释**：原称“仅六个代理变量”，实际另设 `no_proxy`/`NO_PROXY`，注释已列为“六个路由变量 + 两个回环豁免变量”。
+- **验证范围措辞**：`validation/README.md` 已注明 JSON/TOML 解析为显式清单、tmux 真插件入口不校验 revision 也不沙箱隔离、caller 变量哨兵仅 Fish 侧校验。
+- 新增 `test_documented_disabled_and_fallback_states` 锁定上述文档/源一致性，防回归。
+
+审计同时确认：`docs/layout.md`/`getting-started.md` 的源边界声明、ControlPath 设计、`.vscode`/`.keep` 规则、敏感名模式均与实现一致（审计报告中的 83/88 计数为其启动时快照，已由本轮 87/92 取代）。
+
 ## 后续全仓库对齐
 
 第二轮并行审查发现并修复了以下当前文档/验证错位：
@@ -107,10 +121,10 @@ Lua assert 后需要 cquit。已纠正这些假设再验证，不把测试设施
 
 当前验证结果：
 
-- `python3 docs/validation/check.py --strict`：**86 passed，0 skipped**。
+- `python3 docs/validation/check.py --strict`：**87 passed，0 skipped**。
 - `python3 docs/validation/negative_controls.py`：**17/17 reproduced，0 invalid controls**；默认 baseline 为 `b4e8bac`。
 - `fzf_runtime.py`：**2 passed**；`terminal_parsers.py`：**2 passed**；本机插件副本上的 `tmux_plugins.py`：**1 passed**。
-- 合计 **91 个正向检查**（86+2+2+1），均来自上述独立成功的入口。
+- 合计 **92 个正向检查**（87+2+2+1），均来自上述独立成功的入口。
 - 历史 benchmark `--revision b4e8bac` 自动找到 `private_dot_config/zsh/sdk.zsh`：baseline generator calls **12/12/12**，worktree **1/1/1**。某次记录的 median 为 **1.0287s → 0.6294s**；后续审计的 wall time 波动更大，因此这些秒数只作历史快照，generator 调用次数才是稳定结果。不作整体启动提速声明。
 - `ruff check --isolated docs/validation/*.py`、`actionlint -color .github/workflows/ci.yaml`、`git diff --check` 均通过；验证目录无 `__pycache__`。
 
@@ -126,8 +140,9 @@ Lua assert 后需要 cquit。已纠正这些假设再验证，不把测试设施
   kubectl 解析为实际本机二进制。锁文件保留是正确的稳定 inode 协议，不是泄漏。
 - Fish conf.d 的非交互 aliases 边界与 alternate-XDG Fisher 迁移保持既有行为；所有测试
   必须同时隔离 HOME/XDG，不能只设 alternate XDG。
-- Zsh uv reset 仍作用于 HOME，Fish reset 仍作用于项目目录；两者都是主动调用的
-  破坏性操作，不是无损同步。
+- `uv_resync`（Zsh 目标 HOME、Fish 目标项目目录）当前在两个 shell 中都以注释模板
+  保留、**未启用**；对应测试只校验模板存在，启用后会自动恢复行为断言。将来若启用，
+  它仍是主动调用的破坏性操作，不是无损同步。
 - `bak` 保留 shell 原有命名与覆盖策略，不保证并发同一时间戳备份的事务性。
 - symlink 模板使用 HOME；指定另一个 destination 而不隔离 HOME
   不构成安全 apply 沙箱。常规 HOME 部署契约没有改变。

@@ -5,7 +5,8 @@
 #               ssh config 同端口 7890）。由原 conf.d/
 #               00_aliases.fish 迁入 functions/ 惰性加载目录。
 # Usage       : onproxy；关闭用 ofproxy（ofproxy.fish）
-# Guards      : 仅 set -gx 六个代理变量，无外部依赖
+# Guards      : set -gx 六个路由变量（http/https/socks × 大小写）+ 两个 no_proxy
+#               回环豁免变量，无外部依赖
 # Author      : Payne
 # =============================================================================
 function onproxy --description "启用终端代理 (127.0.0.1:7890, socks5/http)"

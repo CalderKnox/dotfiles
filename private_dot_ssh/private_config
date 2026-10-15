@@ -4,11 +4,12 @@
 # Description : OrbStack Include 置顶 + github.com 走 ssh.github.com:443 +
 #               自适应 SOCKS5 ProxyCommand (7890 探活, 失败直连) + Host * 默认
 # Usage       : `ssh -G dev` 排错, `ssh -T git@github.com` 测连通性
-# Guards      : 0600 必需 (0644 被 ssh 拒绝), ProxyCommand bash -c 探活
+# Guards      : 0600 为隐私收紧（OpenSSH 只拒绝 group/other 可写的配置）, ProxyCommand bash -c 探活
 # Author      : Payne
 # =============================================================================
 # SSH client config (chezmoi: private_dot_ssh/private_config -> ~/.ssh/config, 0600)
-# `private_` prefix ensures 0600 permissions (required by ssh; 0644 is rejected).
+# `private_` prefix deploys the target as 0600 (a stricter privacy choice;
+# OpenSSH only rejects configs writable by group/other, so 0644 would be tolerated).
 # OrbStack Include must stay at top before any Host block to provide `orb` hosts.
 # Added by OrbStack: 'orb' SSH host for Linux machines
 # This only works if it's at the top of ssh_config (before any Host blocks).

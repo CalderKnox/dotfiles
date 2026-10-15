@@ -7,8 +7,8 @@
 #               为注释模板，按需启用。
 # Usage       : 由 Fish 自动 source（conf.d 字典序，2x 为领域层，顺序无关）；
 #               无需手动 source；此处别名/函数在非交互 shell 中也会定义。
-# Guards      : uv_resync 先检查 uv，再删除 .venv/uv.lock，逐步成功后重建并
-#               uv sync --upgrade；仍需在项目根目录主动调用；
+# Guards      : uv_resync 当前为注释模板（未启用）；启用后需在项目根目录主动调用，
+#               会删除 .venv/uv.lock，逐步成功后重建并 uv sync --upgrade；
 #               AI 助手别名 (cla/clp 等) 为普通别名、未加 type -q 守卫，
 #               二进制缺失时错误在调用时暴露（属预期）。
 # Author      : Payne

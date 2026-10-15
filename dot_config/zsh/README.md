@@ -55,7 +55,7 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.cache/zsh/fzf_prefix`
 | `ftm [session]` | fzf.zsh | fzf 选择/创建 tmux 会话 |
 | `flf` / `flkill` / `flnet` / `fluser` | fzf.zsh | lsof+fzf 浏览/杀进程/网络/按用户过滤 |
 
-> `auto-update` 为薄包装，`update-all` 为关联数组驱动的声明式实现；二者分工与行为差异见源码注释与 `docs/shell.md`。破坏性命令 `uv_resync` 见注意事项，不在此表展开。
+> `auto-update` 为薄包装，`update-all` 为关联数组驱动的声明式实现；二者分工与行为差异见源码注释与 `docs/shell.md`。破坏性命令 `uv_resync`（当前注释禁用）见注意事项，不在此表展开。
 
 ## 依赖清单
 
@@ -79,7 +79,7 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.cache/zsh/fzf_prefix`
 
 ## 注意事项
 
-1. **破坏性命令**：`uv_resync` 先检查 uv 可用，随后删除 `~/.venv` 与 `~/uv.lock` 再执行 `uv sync`（目标为家目录路径而非当前项目），使用前请确认。定义见 `aliases.zsh`。
+1. **破坏性命令（当前禁用）**：`uv_resync` 的定义在 `aliases.zsh` 中以注释模板保留、**未启用**；若取消注释启用，它会先检查 uv 可用，随后删除 `~/.venv` 与 `~/uv.lock` 再执行 `uv sync`（目标是家目录路径而非当前项目），使用前请确认。Fish 侧同名函数当前同样为注释模板（目标为当前目录）。
 2. **`~/.config/zsh/.zshrc`（即仓库内 `dot_config/zsh/dot_zshrc`，兼容 `~/.zshrc` 符号链接）已收敛单一初始化点**：fzf 键位/补全仅在 `fzf.zsh` 内成功生成后 eval `fzf --zsh` 的完整输出一次，`dot_zshrc` 不再重复 eval；`sdk.zsh` 为无条件 `source` 但内部逐项守卫。详见 `dot_zshrc` 注释。
 3. **强绑定的个人路径与镜像**：`GOPATH`、`GOPROXY`、清华 pip 镜像别名、`ANDROID_NDK_HOME` 等以 `sdk.zsh`/`aliases.zsh` 源码为准。
 4. **被别名替换的原生命令**：`cat→bat`、`ls→lsd`、`top→htop` 等见 `aliases.zsh`；`rm`/`cp`/`mv` 的 `-i` 别名已注释停用，不提供交互确认；脚本中需原生行为时用 `command cat` 等形式。

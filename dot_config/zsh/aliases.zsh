@@ -185,7 +185,7 @@ ruff_auto() {
 
 # 使用清华镜像安装 pip 包
 alias pip_tsinghua_mirror='python3 -m pip install -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple'
-# ⚠️ 破坏性操作：删除 HOME 下 .venv 与 uv.lock 后重建并同步
+# ⚠️ 破坏性操作（当前注释禁用，取消注释后才会定义 uv_resync）：删除 HOME 下 .venv 与 uv.lock 后重建并同步
 # 先检查 uv，且每一步失败即停止，避免依赖缺失或删除失败造成额外破坏。
 # 注意：fish 侧同名函数目标为当前目录（conf.d/20_dev.fish），两侧行为不同，勿混用。
 # 兼容在旧 alias 仍存在的 shell 中 reload（alias 会参与函数定义的解析）。

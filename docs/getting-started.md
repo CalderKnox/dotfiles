@@ -105,9 +105,9 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 | Neovim | 首次运行 `nvim` 时 `lazy.nvim` 自动 `bootstrap` 并安装全部插件最新版（`lazy-lock.json` 已停止跟踪，需网络） | 首次运行 `nvim` |
 | `mise` 工具链 | `mise activate` 已挂接；按需执行 `mise install` 安装 `dot_config/mise/config.toml` 声明的工具（详见该文件） | 手动执行 |
 
-> `~/.config/zsh/.zshrc` 以 glob（`for file in ~/.config/zsh/*.zsh(N)`）加载三模块，没有逐文件 source 行；
+> `~/.config/zsh/.zshrc` 以显式逐文件 `source` 加载三模块（`aliases.zsh` → `fzf.zsh` → `sdk.zsh`），顺序即语义，不使用 glob（新掉 `.zsh` 文件不会静默改变加载集）；
 > 如需禁用 `sdk.zsh`，重命名/移除已部署文件（如 `mv ~/.config/zsh/sdk.zsh ~/.config/zsh/sdk.zsh.disabled`）
-> 或改 `dot_zshrc` 中的显式 source 行。`SDKMAN` 为惰性加载——首次调用 `sdk` 时才真正 source init 并注入 PATH（Java 等
+> 或注释 `dot_zshrc` 中对应的 source 行。`SDKMAN` 为惰性加载——首次调用 `sdk` 时才真正 source init 并注入 PATH（Java 等
 > candidate 的可用性随之延迟到首次 `sdk` 调用）；`fzf` 键位绑定只在 `fzf.zsh` 内
 > `eval "$(fzf --zsh)"` 一次，`~/.zshrc` 不再重复。详见 [shell.md](shell.md)。
 
@@ -139,7 +139,7 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 brew install bat lsd htop fastfetch neovim yazi gh lazygit tldr coreutils kubecolor uv rustup
 ```
 
-- `coreutils` 提供 `nproc`（`makes` / `xargsp` 半核并行依赖它）
+- `coreutils` 提供 `nproc`（`makes` / `xargsp` 的半核并行优先使用它；缺失时回退 macOS 原生 `sysctl -n hw.ncpu`）
 - Fish 侧：Fish 已作为终端入口依赖安装；另需 `brew install fisher`——`~/.config/fish/` 的 13 个插件由 `fish_plugins` 清单管理（`fisher update` 安装/更新）；提示符复用 `starship`、fzf 键位复用 `fzf.fish`（均已在上方依赖中）
 - `bat` / `lsd` / `htop` 分别接管 `cat` / `ls` / `top`；脚本中需要原生行为时用 `command cat` 等
 - `gh` 配合 `~/.ssh/config` 的 `Host github.com → ssh.github.com:443` 与 `dot_gitconfig` 的 `socks5h://127.0.0.1:7890` 代理共同保证 GitHub 可达；Git、SSH 与 shell 代理函数均使用端口 `7890`（详见 [dev-tools.md](dev-tools.md) 中的代理配置说明）。
