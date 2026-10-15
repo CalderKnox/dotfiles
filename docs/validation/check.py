@@ -164,6 +164,21 @@ class SourceChecks(Fixture):
         commands = re.findall(r"--command\s+(\S+)", path.read_text())
         self.assertIn(path.stem, commands)
 
+  def test_ci_workflow_runs_documented_entrypoints(self):
+    # CI 与文档共同声明的入口必须一致，避免任一侧漂移。
+    workflow = (ROOT / ".github/workflows/ci.yaml").read_text()
+    validation_docs = (ROOT / "docs/validation/README.md").read_text()
+    for command in (
+      "actionlint -color",
+      "python3 docs/validation/check.py --strict",
+      "python3 docs/validation/fzf_runtime.py",
+    ):
+      with self.subTest(command=command):
+        self.assertIn(command, workflow)
+    for token in ("actionlint", "check.py --strict", "fzf_runtime.py"):
+      with self.subTest(document="docs/validation/README.md", token=token):
+        self.assertIn(token, validation_docs)
+
   def test_documentation_lists_fish_inventory(self):
     # 文档对 fish functions/、conf.d/、completions/ 的清单与计数必须与实际源文件一致，
     # 防止目录增删后文档漂移。

@@ -109,7 +109,7 @@
 
 - **极简模板**：仅有的 `*.tmpl` 是 `symlink_dot_zshrc.tmpl` / `symlink_dot_zimrc.tmpl`（各一行 `{{ .chezmoi.homeDir }}/.config/zsh/...`，将 `~/.zshrc` 收敛至 XDG）—— 其余全部为静态文件，无 `.chezmoidata.*` 数据；无 `run_*` 脚本（历史 `run_once_create-ssh-sockets.sh` 已删除，ControlPath 改用 `~/.ssh/` 下的短路径，不依赖额外 socket 子目录）。所有机器 `chezmoi apply` 拿到同一套内容；如需进一步按机器差异化，可在现有模板基础上扩展。
 - **运行时产物不入库**：`~/.config/zsh/.gitignore` 与 `~/.config/nvim/.gitignore` 已停止管理（源树 `dot_gitignore` 已删除），运行时产物由各机自行忽略；fzf 前缀缓存位于 HOME/ZDOTDIR，不依赖任何托管 `.gitignore`。
-- **仅服务于仓库管理、不部署的文件**：根目录的 `.gitignore` 与 `.chezmoiignore` 被 chezmoi 默认忽略（源目录中点开头文件不参与 apply）；根级 `README.md`、`docs/`（本文档所在）以及全部嵌套 `README.md`（如 `zsh/README.md`、`nvim/README.md`）被 `.chezmoiignore` 排除；根级与 `nvim/LICENSE` 文件已删除，`**/LICENSE` 模式防御性保留。
+- **仅服务于仓库管理、不部署的文件**：根目录的 `.gitignore` 与 `.chezmoiignore` 被 chezmoi 默认忽略（源目录中点开头文件不参与 apply）；根级 `README.md`、`docs/`（本文档所在）以及全部嵌套 `README.md`（如 `zsh/README.md`、`nvim/README.md`）被 `.chezmoiignore` 排除；`.github/`（CI workflow 与 Dependabot 配置）同为仓库管理文件，不部署；根级与 `nvim/LICENSE` 文件已删除，`**/LICENSE` 模式防御性保留。
 - **不在仓库内的重要文件**：
   - `~/.config/gh/hosts.yml` / `config.yml`——由 `gh auth login` 生成，含凭据，切勿加入仓库；
   - `~/.zim/`——由 zimfw 自动管理（`~/.config/zsh/.zimrc` 仅为其配置，`~/.zimrc` 为符号链接）；

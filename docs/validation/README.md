@@ -6,6 +6,10 @@
 
 ## 主要验收入口
 
+CI（`.github/workflows/ci.yaml`，`macos-latest`）在 push/PR 上运行
+`actionlint`、`check.py --strict` 与 `fzf_runtime.py`；本文其余入口（negative
+controls、terminal parsers、tmux plugins、benchmark）需手动运行。
+
 ```sh
 python3 docs/validation/check.py --strict
 ```

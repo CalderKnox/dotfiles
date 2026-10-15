@@ -103,14 +103,14 @@ Lua assert 后需要 cquit。已纠正这些假设再验证，不把测试设施
 - 将根 `.vscode/` 的 Git 跟踪收紧为只跟踪 `extensions.json` 与 `settings.json`，并验证新增/嵌套文件仍被忽略；该 literal dot-source 目录当前不是 chezmoi target，相关 ignore pattern 为防御性规则。
 - 修正文档中的 VS Code Git-editor 前置要求、关闭的 `rm/cp/mv -i` 别名、Fish-only shortcut 数量/范围、`k` shell 差异、Cargo PATH 初始化、Git LFS 条件依赖及 sensitive-name ignore patterns。
 - 修复 concurrent completion 测试：生产锁等待超时后允许安全跳过；随后仍要求新进程加载完整发布缓存。
-- 修复基准脚本对旧 `private_dot_config/zsh/sdk.zsh` 路径的探测，并在所有 Python 验证入口导入项目模块前禁止写 `.pyc`；negative controls 默认改用兼容旧布局的历史提交。新增 bytecode-hygiene 测试，断言每个入口在导入项目模块前关闭写字节码且 `docs/validation/` 无 `__pycache__`；并新增 fish 清单一致性测试，断言文档中的 functions/conf.d/completions 清单、名称与计数与源目录一致（据此发现并修正 maintenance.md 函数枚举漏项）。
+- 修复基准脚本对旧 `private_dot_config/zsh/sdk.zsh` 路径的探测，并在所有 Python 验证入口导入项目模块前禁止写 `.pyc`；negative controls 默认改用兼容旧布局的历史提交。新增 bytecode-hygiene 测试，断言每个入口在导入项目模块前关闭写字节码且 `docs/validation/` 无 `__pycache__`；并新增 fish 清单一致性测试，断言文档中的 functions/conf.d/completions 清单、名称与计数与源目录一致（据此发现并修正 maintenance.md 函数枚举漏项）；新增 CI 一致性测试，断言 `.github/workflows/ci.yaml` 与 validation README 声明的入口一致。
 
 当前验证结果：
 
-- `python3 docs/validation/check.py --strict`：**85 passed，0 skipped**。
+- `python3 docs/validation/check.py --strict`：**86 passed，0 skipped**。
 - `python3 docs/validation/negative_controls.py`：**17/17 reproduced，0 invalid controls**；默认 baseline 为 `b4e8bac`。
 - `fzf_runtime.py`：**2 passed**；`terminal_parsers.py`：**2 passed**；本机插件副本上的 `tmux_plugins.py`：**1 passed**。
-- 合计 **90 个正向检查**（85+2+2+1），均来自上述独立成功的入口。
+- 合计 **91 个正向检查**（86+2+2+1），均来自上述独立成功的入口。
 - 历史 benchmark `--revision b4e8bac` 自动找到 `private_dot_config/zsh/sdk.zsh`：baseline generator calls **12/12/12**，worktree **1/1/1**。某次记录的 median 为 **1.0287s → 0.6294s**；后续审计的 wall time 波动更大，因此这些秒数只作历史快照，generator 调用次数才是稳定结果。不作整体启动提速声明。
 - `ruff check --isolated docs/validation/*.py`、`actionlint -color .github/workflows/ci.yaml`、`git diff --check` 均通过；验证目录无 `__pycache__`。
 
