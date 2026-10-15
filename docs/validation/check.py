@@ -267,7 +267,8 @@ class SourceChecks(Fixture):
     self.assertIsNotNone(proxy_match)
     proxy_port = proxy_match[1]
     ssh_proxy_match = re.search(
-      r"^  ProxyCommand bash -c 'if nc -z 127\.0\.0\.1 (\d+); then nc -X 5 -x 127\.0\.0\.1:(\d+)",
+      # 探活可带 -G/-w 超时（见 private_config 注释）；不变式是它与 git 代理端口一致。
+      r"^  ProxyCommand bash -c 'if nc -z(?: -G \d+ -w \d+)? 127\.0\.0\.1 (\d+); then nc -X 5 -x 127\.0\.0\.1:(\d+)",
       ssh_config,
       re.MULTILINE,
     )

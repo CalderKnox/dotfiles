@@ -97,9 +97,10 @@ Host github.com ssh.github.com
   HostName ssh.github.com
   User git
   Port 443
-  # Adaptive SOCKS5 proxy (127.0.0.1:7890): if the local proxy is listening, tunnel via SOCKS5;
-  # otherwise fall back to a direct connection.
-  ProxyCommand bash -c 'if nc -z 127.0.0.1 7890; then nc -X 5 -x 127.0.0.1:7890 %h %p; else nc %h %p; fi'
+  # 自适应 SOCKS5 proxy (127.0.0.1:7890): if the local proxy is listening, tunnel via SOCKS5;
+  # otherwise fall back to a direct connection. 探活带 -G/-w 超时：7890 半开（SYN 被接受但
+  # 无响应）时，无超时的 nc -z 会阻塞到内核 connect 超时（约 75s），拖垮每个 github.com 连接。
+  ProxyCommand bash -c 'if nc -z -G 2 -w 2 127.0.0.1 7890; then nc -X 5 -x 127.0.0.1:7890 %h %p; else nc %h %p; fi'
 
 
 ## github work（模板，当前未启用）
@@ -116,7 +117,7 @@ Host github.com ssh.github.com
 #     IdentityFile ~/.ssh/id_ed25519_work
 #     IdentitiesOnly yes
 #     ControlPath ~/.ssh/.cm-github-work-%C
-#     ProxyCommand bash -c 'if nc -z 127.0.0.1 7890; then nc -X 5 -x 127.0.0.1:7890 %h %p; else nc %h %p; fi'
+#     ProxyCommand bash -c 'if nc -z -G 2 -w 2 127.0.0.1 7890; then nc -X 5 -x 127.0.0.1:7890 %h %p; else nc %h %p; fi'
 
 
 # 对所有主机生效的默认配置（必须放最后）
