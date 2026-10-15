@@ -2,7 +2,7 @@
 # private_config — SSH 客户端配置 (chezmoi: -> ~/.ssh/config, 0600)
 # =============================================================================
 # Description : OrbStack Include 置顶 + github.com 走 ssh.github.com:443 +
-#               自适应 SOCKS5 ProxyCommand (5376 探活, 失败直连) + Host * 默认
+#               自适应 SOCKS5 ProxyCommand (7890 探活, 失败直连) + Host * 默认
 # Usage       : `ssh -G dev` 排错, `ssh -T git@github.com` 测连通性
 # Guards      : 0600 必需 (0644 被 ssh 拒绝), ProxyCommand bash -c 探活
 # Author      : Payne
@@ -33,14 +33,14 @@ Host dev
   IdentitiesOnly yes
 
 # 注意：tst/ops/sec 的 user@host:port 完全相同（ubuntu@192.168.1.101:2222），
-# 但 ControlPath 含 %n（命令行别名），三别名各持独立 socket/master，
-# 各自的 IdentityFile 正常生效，不会互相串扰认证。
+# 使用固定安全前缀区分各自的 ControlPath，避免不同 IdentityFile 共用 master。
 Host tst
   HostName 192.168.1.101
   User ubuntu
   Port 2222
   IdentityFile ~/.ssh/id_rsa_tst
   IdentitiesOnly yes
+  ControlPath ~/.ssh/.cm-tst-%C
 
 Host ops
   HostName 192.168.1.101
@@ -48,6 +48,7 @@ Host ops
   Port 2222
   IdentityFile ~/.ssh/id_rsa_ops
   IdentitiesOnly yes
+  ControlPath ~/.ssh/.cm-ops-%C
 
 Host sec
   HostName 192.168.1.101
@@ -55,6 +56,7 @@ Host sec
   Port 2222
   IdentityFile ~/.ssh/id_rsa_sec
   IdentitiesOnly yes
+  ControlPath ~/.ssh/.cm-sec-%C
 
 # jump server
 # 直接 ssh inner 即可穿透跳板机。ProxyJump 支持多级：ProxyJump bastion,inner1
@@ -81,13 +83,20 @@ Host codeup.aliyun.com
   PreferredAuthentications publickey
   IdentityFile ~/.ssh/id_ed25519_devops_aliyun
 
+# Fixed prefixes keep the two same-endpoint GitHub aliases on separate sockets.
+Host github.com
+  ControlPath ~/.ssh/.cm-github-%C
+
+Host ssh.github.com
+  ControlPath ~/.ssh/.cm-ssh-github-%C
+
 ## private github
 Host github.com ssh.github.com
   # ssh.github.com:443 — HTTPS port, traverses firewalls that block 22
   HostName ssh.github.com
   User git
   Port 443
-  # Adaptive SOCKS5 proxy (127.0.0.1:5376): if the local proxy is listening, tunnel via SOCKS5;
+  # Adaptive SOCKS5 proxy (127.0.0.1:7890): if the local proxy is listening, tunnel via SOCKS5;
   # otherwise fall back to a direct connection.
   ProxyCommand bash -c 'if nc -z 127.0.0.1 7890; then nc -X 5 -x 127.0.0.1:7890 %h %p; else nc %h %p; fi'
 
@@ -98,15 +107,15 @@ Host github.com ssh.github.com
 ## github.com:22 绕过了上面 github.com 块的 ssh.github.com:443 + SOCKS5 路由。
 ## 启用步骤：生成独立工作密钥（ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_work）、
 ## 加入 ssh-agent 并上传公钥后，取消下列整块注释：
-## 注意：ControlPath 含 %n（命令行别名），github-work.com 与 github.com 使用
-## 不同 socket，启用后无需先关闭复用连接即可走工作身份。
-# Host github-work.com ssh.github.com
+## ControlPath 使用固定安全前缀，github-work.com 与 github.com 使用不同 socket。
+# Host github-work.com
 #     HostName ssh.github.com
 #     User git
 #     Port 443
 #     IdentityFile ~/.ssh/id_ed25519_work
 #     IdentitiesOnly yes
-#     ProxyCommand bash -c 'if nc -z 127.0.0.1 5376; then nc -X 5 -x 127.0.0.1:5376 %h %p; else nc %h %p; fi'
+#     ControlPath ~/.ssh/.cm-github-work-%C
+#     ProxyCommand bash -c 'if nc -z 127.0.0.1 7890; then nc -X 5 -x 127.0.0.1:7890 %h %p; else nc %h %p; fi'
 
 
 # 对所有主机生效的默认配置（必须放最后）
@@ -115,10 +124,8 @@ Host *
   ServerAliveCountMax 3
   StrictHostKeyChecking accept-new
   ControlMaster auto
-  # 目录由 chezmoi 管理（源 private_dot_ssh/private_sockets/.keep，每次 apply 确保 0700）
-  # %n（命令行别名）入键：同 user@host:port 的不同别名（tst/ops/sec、双 github）
-  # 各持独立 socket，身份互不串扰；代价是交替使用 github.com/ssh.github.com 时
-  # 会建立两条 master（同一终点），可接受。
-  ControlPath ~/.ssh/sockets/%n-%r@%h-%p
+  # Hash the connection tuple and keep sockets directly under private ~/.ssh.
+  # Identity-sensitive aliases set a fixed safe prefix in their Host blocks above.
+  ControlPath ~/.ssh/.cm-%C
   ControlPersist 600
 
