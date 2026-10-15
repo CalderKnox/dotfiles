@@ -44,9 +44,9 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .tox/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
 
 # --- Node / 缓存 ---
 node_modules/
@@ -68,9 +68,9 @@ node_modules/
 
 # --- 文件名卫生（个人规则） ---
 # 名称含空格
-*[ ]*
+**/*[ ]*
 # 数字开头且含点的文件名（多为下载/截图残留）
-[0-9]*.*
+**/[0-9]*.*
 # 放行数字命名的目录及其内容；git 限制：必须先否定目录本身，
 # 否则单独的 `![0-9]*/**` 因父目录已被忽略而永不生效
 ![0-9]*/
