@@ -35,7 +35,7 @@ thinking/budget 设置；不更改运行时版本选择、代理或用户插件�
    InsertEnter，Ctrl-O 也触发 InsertLeave；真正漏掉的是 Ctrl-C。Fish sourced-file
    guard 的 exit 并不退出整个 shell；该怀疑在实际 Fish 中被否证，未修改。
 7. **Git 与 chezmoi 是两个排除域。** 前者按源名防普通提交，后者按目标名防部署；
-   都不构成 Pi OS 沙箱。仅用已有的三配置查询无法证明 runtime deny 规则，因此
+   都不构成 Pi OS 沙箱。仅用配置文件清单无法证明 runtime deny 规则，因此
    需要合成非 JSON、encrypted/private 前缀等 fixture 与删除规则的 mutation control。
 
 ## 优化与行为变化
@@ -56,7 +56,7 @@ thinking/budget 设置；不更改运行时版本选择、代理或用户插件�
 
 前轮已存在且本轮重新验证的修复：flkill header/多选/失败、frg quoting/rg filename、
 fzf 可执行 prefix 与 NO_CLOBBER、Zsh y trap/status、双侧 updater 参数预检、Fish cdd/uv、
-Homebrew cleanup presence-style 开关、netcheck 只调用本机 speedtest-cli、Pi 源名 allowlist、
+Homebrew cleanup presence-style 开关、netcheck 只调用本机 speedtest-cli、Pi Git 源名 allowlist（chezmoi 仍采用运行时黑名单）、
 不存在的 sandbox 说明修正。
 
 ## 验证证据
@@ -86,23 +86,35 @@ git diff --check
 set_color 的输出、macOS `/var` 路径 canonicalization、tmux list-keys 参数差异与
 Lua assert 后需要 cquit。已纠正这些假设再验证，不把测试设施错误算成缺陷。
 
-窄场景性能实验已完成：每个 sample 在隔离 Zsh 中重复加载 12 次未来 mtime 的同一
-stub 二进制，3 个 samples。原始 HEAD 每次生成（12/12/12 次），优化后只生成一次
-（1/1/1 次）；本机 median 为 0.7803s → 0.5232s。该差值受进程启动/系统负载影响，
-不是整体 shell 启动提速；调用次数才是稳定验收条件。
+窄场景性能实验在隔离 Zsh 中重复加载 12 次未来 mtime 的同一 stub 二进制，3 个 samples。
+后续重跑发现并修正了历史路径布局假设；见下方“后续全仓库对齐”的新 benchmark 结果。该实验
+只测 loader 场景，不代表整体 shell 启动提速；系统负载会影响秒数，generator 调用次数才是稳定验收条件。
 
-已获得当前源的 **77 tests 全部通过，0 skipped**（strict 模式；最近完整核心运行
-34.152s），历史 commit `b4e8bac8513ef949d1c3af6c7d99b633b986898d` 的
-**17/17 negative controls** 均复现断言失败、0 invalid controls。
-Ghostty/kitty native parser 2/2 通过；实际 tmux plugin 初始化/重载测试通过。
-原生 fzf 的 PTY 检查也已 2/2 通过：实际 fzf 对空格/引号/leading-dash/分号路径
-传参正确，拒绝 filename-controlled `+Ex` 字段，并选择 fzf-tab 的 Zsh shell。
-所有入口串成的最终 aggregate run `b774d2979` **exit=0**：77 个 strict 回归 +
-2 个 native fzf + 2 个 terminal parser + 1 个实际 tmux plugin 集成，共 **82 个正向测试
-全部通过**；17 个历史控制均复现原缺陷；最后 `git diff --check` 通过。
-完整本机日志在 `.pi/tasks/01a1112b-2930-75bf-a65a-b264b9d7c248-56835/b774d2979.output`
-（Git/chezmoi 均排除；上方命令可重新生成证据）。最后文档链接检查为 63 个相对链接
-全部存在，验证脚本没有遗留 `.pyc` 文件。
+此前的优化快照记录 **77 tests** 与 **82 个 aggregate 正向检查**（核心回归、fzf、终端 parser、tmux 插件）；完整历史日志为 `.pi/tasks/01a1112b-2930-75bf-a65a-b264b9d7c248-56835/b774d2979.output`。以下“后续全仓库对齐”列出当前验证结果，避免把旧快照数字当作现行计数。
+
+## 后续全仓库对齐
+
+第二轮并行审查发现并修复了以下当前文档/验证错位：
+
+- 将所有 Git/SSH/Zsh/Fish 代理说明统一到源配置的 `7890`，并用回归测试比较端口来源。
+- 同步 Ghostty Frappe、`direct:` Fish 命令、有效 quick-terminal/内存限制；同步 Alacritty 字体与 Tombi 指令注释（仅记源意图，不声称已验证 LSP 执行）；修正 mise Node 固定版本与 Zsh locale 守卫说明。
+- 补全 Pi 四个配置的映射，并明确 Git 是四配置 source allowlist、chezmoi 是已知 runtime blacklist；不改变此既有部署策略。synthetic fixture 现逐条 mutation-test permission-mode 与六条 Pi 专用 runtime blacklist 规则，auth/credentials 由通用敏感路径规则验证。
+- SSH ControlPath 改到既有 `~/.ssh/` 目录，使用 `%C` 哈希与已知别名的固定安全前缀，避免缺失的 sockets placeholder 和 `%n` 原始主机名导致的路径穿越；`ssh -G` 回归覆盖同端点别名及含 `../` 的恶意别名。
+- 将根 `.vscode/` 的 Git 跟踪收紧为只跟踪 `extensions.json` 与 `settings.json`，并验证新增/嵌套文件仍被忽略；该 literal dot-source 目录当前不是 chezmoi target，相关 ignore pattern 为防御性规则。
+- 修正文档中的 VS Code Git-editor 前置要求、关闭的 `rm/cp/mv -i` 别名、Fish-only shortcut 数量/范围、`k` shell 差异、Cargo PATH 初始化、Git LFS 条件依赖及 sensitive-name ignore patterns。
+- 修复 concurrent completion 测试：生产锁等待超时后允许安全跳过；随后仍要求新进程加载完整发布缓存。
+- 修复基准脚本对旧 `private_dot_config/zsh/sdk.zsh` 路径的探测，并在所有 Python 验证入口导入项目模块前禁止写 `.pyc`；negative controls 默认改用兼容旧布局的历史提交。新增 bytecode-hygiene 测试，断言每个入口在导入项目模块前关闭写字节码且 `docs/validation/` 无 `__pycache__`；并新增 fish 清单一致性测试，断言文档中的 functions/conf.d/completions 清单、名称与计数与源目录一致（据此发现并修正 maintenance.md 函数枚举漏项）。
+
+当前验证结果：
+
+- `python3 docs/validation/check.py --strict`：**85 passed，0 skipped**。
+- `python3 docs/validation/negative_controls.py`：**17/17 reproduced，0 invalid controls**；默认 baseline 为 `b4e8bac`。
+- `fzf_runtime.py`：**2 passed**；`terminal_parsers.py`：**2 passed**；本机插件副本上的 `tmux_plugins.py`：**1 passed**。
+- 合计 **90 个正向检查**（85+2+2+1），均来自上述独立成功的入口。
+- 历史 benchmark `--revision b4e8bac` 自动找到 `private_dot_config/zsh/sdk.zsh`：baseline generator calls **12/12/12**，worktree **1/1/1**。某次记录的 median 为 **1.0287s → 0.6294s**；后续审计的 wall time 波动更大，因此这些秒数只作历史快照，generator 调用次数才是稳定结果。不作整体启动提速声明。
+- `ruff check --isolated docs/validation/*.py`、`actionlint -color .github/workflows/ci.yaml`、`git diff --check` 均通过；验证目录无 `__pycache__`。
+
+没有运行 `chezmoi apply`、外网更新器或 GUI 视觉验收。`.chezmoiignore` 保持已记录的 Pi runtime blacklist（不是 deployment allowlist）；本仓库仍未附完整 `LICENSE` 文本，README 已明确提示该分发前置事项。
 
 ## 保留边界与兼容性决定
 

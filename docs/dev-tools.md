@@ -5,11 +5,11 @@
 
 ## Git — `dot_gitconfig` → `~/.gitconfig`
 
-`dot_gitconfig` 会随 `chezmoi apply` 部署为 `~/.gitconfig`（chezmoi managed 实测包含 `.gitconfig`）。它统一设置编辑器（VS Code）、默认分支 `main`、LFS 四件套、push 行为与全局忽略文件 `~/.gitignore_global`（`~` 由 git 原生展开，无用户名硬编码）。所有实际字段以源文件 `dot_gitconfig` 为唯一权威。
+`dot_gitconfig` 会随 `chezmoi apply` 部署为 `~/.gitconfig`（chezmoi managed 实测包含 `.gitconfig`）。它统一设置编辑器（`code --wait`）、默认分支 `main`、LFS 四件套、push 行为与全局忽略文件 `~/.gitignore_global`（`~` 由 git 原生展开，无用户名硬编码）。Git 操作若需打开编辑器，必须能在 `PATH` 中找到 VS Code 的 `code` CLI；Shell 的 `EDITOR=nvim` 不会覆盖显式的 `core.editor`。需要其他编辑器时可在本机覆盖 `core.editor`。所有实际字段以源文件 `dot_gitconfig` 为唯一权威。
 
-> **代理说明**：当前 `dot_gitconfig` 仅保留一条按域名限定的代理行 `[http "https://github.com"]`（socks5h://127.0.0.1:5376；socks5h 与 socks5 的差别是 DNS 由代理端解析）；非标准键（如 `[https …]`）会被 git 静默忽略。SSH 侧代理由 `private_dot_ssh/private_config` 的自适应 `ProxyCommand` 负责，探测端口同为 `5376`；如需 `git pull` 一律变基，应使用标准键 `pull.rebase = true`（当前未启用）。早期版本 `.chezmoiignore` 中按源文件名书写的 `dot_gitconfig` / `**/dot_git` 行从不匹配任何目标、未生效，现已删除，本文件正常随 `apply` 部署。
+> **代理说明**：当前 `dot_gitconfig` 仅保留一条按域名限定的代理行 `[http "https://github.com"]`（socks5h://127.0.0.1:7890；socks5h 与 socks5 的差别是 DNS 由代理端解析）；非标准键（如 `[https …]`）会被 git 静默忽略。SSH 侧代理由 `private_dot_ssh/private_config` 的自适应 `ProxyCommand` 负责，探测端口同为 `7890`；如需 `git pull` 一律变基，应使用标准键 `pull.rebase = true`（当前未启用）。早期版本 `.chezmoiignore` 中按源文件名书写的 `dot_gitconfig` / `**/dot_git` 行从不匹配任何目标、未生效，现已删除，本文件正常随 `apply` 部署。
 
-全局忽略规则（`dot_gitignore_global` → `~/.gitignore_global`，完整清单以源文件为准）：编辑器临时文件与交换文件（`*~`、`.DS_Store`、`*.swp` 等）、IDE 目录（`.idea` / `*.iml` / `.vscode`）、构建产物（`*.aux` / `*.log*` 及根锚定的 `/dist/` / `/build/` / `/target/`；`bin/` 已移除以免误伤正常入库的同名目录）、Python 相关（`__pycache__/` / `*.venv` / `*.cache`）与 Node 依赖（`node_modules/`）。具体条目与分类以源文件 `dot_gitignore_global` 为准。
+全局忽略规则（`dot_gitignore_global` → `~/.gitignore_global`，完整清单以源文件为准）：编辑器临时文件与交换文件（`*~`、`.DS_Store`、`*.swp` 等）、IDE 目录（`.idea` / `*.iml` / `.vscode`；本仓库仅例外跟踪根级 `extensions.json` 与 `settings.json`）、构建产物（`*.aux` / `*.log*` 及根锚定的 `/dist/` / `/build/` / `/target/`；`bin/` 已移除以免误伤正常入库的同名目录）、Python 相关（`__pycache__/` / `*.venv` / `*.cache`）与 Node 依赖（`node_modules/`）。具体条目与分类以源文件 `dot_gitignore_global` 为准。
 
 ## GitHub CLI — `gh`
 
@@ -19,11 +19,11 @@
 - 常用别名：`gh co` = `pr checkout`（若在本地配置）。
 - `pager` / `browser` 留空，跟随环境变量；`spinner` 动画开启。
 - 配合 `dot_config/zsh/aliases.zsh` 中的 `gopen`（`gh browse`）在浏览器打开当前仓库。
-- 网络可达性与 `dot_gitconfig` / `private_dot_ssh/private_config` 共用本机 `127.0.0.1:5376` SOCKS5 代理（见 [getting-started.md](getting-started.md)「弱网环境：bootstrap 前先设代理」），已统一为 `5376`，不再区分 `7890`。
+- 网络可达性与 `dot_gitconfig` / `private_dot_ssh/private_config` 共用本机 `127.0.0.1:7890` SOCKS5 代理（见 [getting-started.md](getting-started.md)「弱网环境：bootstrap 前先设代理」）；Git、SSH 与 shell 代理函数均使用端口 `7890`。
 
 ## mise — `dot_config/mise/config.toml`
 
-mise 工具链由 `dot_config/mise/config.toml` 声明（当前各工具使用 `latest` 浮动选择器，非钉版；以源文件为准），由 `dot_config/zsh/dot_zshrc` 中的 `eval "$(mise activate zsh)"` 接管 zsh 环境（fish 侧由 `conf.d/01_activate.fish` 守卫激活）；实际声明以源文件为准。常用操作见 `mise` 文档与 `aliases.zsh` 的 `update-all` 复用。
+mise 工具链由 `dot_config/mise/config.toml` 声明（Bun、Deno、Go 与 pnpm 使用 `latest` 浮动选择器，Node.js 固定为 `24.19.0`；以源文件为准），由 `dot_config/zsh/dot_zshrc` 中的 `eval "$(mise activate zsh)"` 接管 zsh 环境（fish 侧由 `conf.d/01_activate.fish` 守卫激活）；实际声明以源文件为准。常用操作见 `mise` 文档与 `aliases.zsh` 的 `update-all` 复用。
 
 ### 包管理器更新：`aliases.zsh` 的 `auto-update` 与 `update-all`
 
@@ -47,18 +47,21 @@ mise 工具链由 `dot_config/mise/config.toml` 声明（当前各工具使用 `
 
 ## pi coding agent — `dot_pi/`
 
-本仓库仅部署三个 [pi](https://github.com/earendil-works/pi) 配置，值与扩展清单以对应源文件为准：
+本仓库跟踪四个 [pi](https://github.com/earendil-works/pi) 配置；下表列出当前文件与目标，值与扩展清单以对应源文件为准：
 
 | 源文件 | 目标 | 用途 |
 | --- | --- | --- |
 | `dot_pi/agent/settings.json` | `~/.pi/agent/settings.json` | 扩展包、默认 provider/tools/model、思考等级等 |
 | `dot_pi/agent/pi-goal.json` | `~/.pi/agent/pi-goal.json` | Goal 扩展设置 |
-| `dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` | `ultracode` 触发词、工作流并发/重试/预算/进度面板等 |
+| `dot_pi/agent/extensions/pi-automode/config.json` | `~/.pi/agent/extensions/pi-automode/config.json` | Pi Automode 扩展设置 |
+| `dot_pi/workflows/settings.json` | `~/.pi/workflows/settings.json` | `ultracode` 显式触发词、工作流默认 effort/并发/重试/预算/进度面板等 |
 
-`dot_pi`、`agent`、`workflows` 均无 `private_` 前缀：默认目标目录属性为 `0755`，配置文件为 `0644`；不代表当前机器上的实际权限。`.chezmoiignore` 按目标名只开放上述三文件，`.gitignore` 按源名镜像该 allowlist，其余 Pi 运行时、会话与凭据默认排除。Git 忽略规则不保护已跟踪文件或强制添加；部署忽略规则不能阻止提交。
+`ultracode` 是启用的显式关键词触发器；`defaultEffort: off` 会关闭基于 effort 的自动触发。其他当前值以工作流设置源文件为准。
+
+`dot_pi`、`agent`、`workflows`、`extensions` 均无 `private_` 前缀：默认目标目录属性为 `0755`，配置文件为 `0644`；不代表当前机器上的实际权限。`.gitignore` 按源名只跟踪上述四个配置；`.chezmoiignore` 是运行时黑名单，不是部署 allowlist，只排除已列出的 permission-mode/sessions/npm/missions/tasks/models-store/workflows-state 与敏感文件名。其他本地 `dot_pi/` 源文件若不匹配黑名单，仍可能部署。Git 忽略规则不保护已跟踪文件或强制添加；部署忽略规则也不能阻止 Git 跟踪。
 
 ### 安全边界
 
 本仓库**没有** `sandbox.json`、`landstrip.json` 或 `pi-permission-system` 权限矩阵。扩展声明、项目 trust、代理地址与工作流预算都不构成 OS 安全边界；不能据此承诺拒绝读取 `.env`/SSH 凭据或禁止 `sudo`/`rm`。
 
-Pi、扩展和子进程通常拥有启动账户的权限。需要强隔离时，应另外部署容器、VM 或操作系统沙箱，并限制挂载、凭据和网络。请参阅上游 [security.md](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/security.md) 与 [containerization.md](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/containerization.md)。本次修正只更新说明与 Git 排除，不改 provider/model、扩展策略或目录权限。
+Pi、扩展和子进程通常拥有启动账户的权限。需要强隔离时，应另外部署容器、VM 或操作系统沙箱，并限制挂载、凭据和网络。请参阅上游 [security.md](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/security.md) 与 [containerization.md](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/containerization.md)。

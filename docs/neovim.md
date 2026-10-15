@@ -2,7 +2,7 @@
 
 `dot_config/nvim/` 是 chezmoi 管理的静态 LazyVim 配置，部署到
 `~/.config/nvim/`。首次启动可能联网安装 lazy.nvim 与插件；离线验证不会执行这个
-bootstrap。当前验证使用 Neovim 0.12.5；本机 LazyVim 16.0.1 要求 Neovim ≥ 0.11.2
+bootstrap。当前验证使用 Neovim 0.12.6；本机 LazyVim 16.0.1 要求 Neovim ≥ 0.11.2
 （LuaJIT）。由于插件未由仓库锁定，最低版本应同时核对上游要求。
 
 ## 架构与事实来源

@@ -11,11 +11,9 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # —— chezmoi 本体与字体 ——
 brew install chezmoi
-brew install --cask font-jetbrains-mono-nerd-font   # Ghostty / Alacritty / Neovim 均依赖该字体
+brew install --cask font-jetbrains-mono-nerd-font   # Ghostty / Alacritty / kitty / Neovim 均依赖该字体
 
-# —— git-lfs（必装）：本仓库 dot_gitconfig 配置了 [filter "lfs"] 且 required = true，
-#    部署后对全机所有仓库生效——未装 git-lfs 时任何 clone/push 都会因 LFS filter
-#    缺失而直接报错失败，必须在首次 git 操作前装好并初始化
+# —— 可选：使用 LFS 跟踪文件的仓库需要 Git LFS；普通 Git 仓库不依赖它。
 brew install git-lfs && git lfs install
 
 # —— 启动必需工具（首次启动 zsh 即被使用，建议随本节一并装；完整清单与说明见 §4）——
@@ -46,20 +44,20 @@ brew install tmux
 插件（各插件最新版，`lazy-lock.json` 已不入库）。弱网/受限网络环境建议在执行下面任何 bootstrap 步骤**之前**先临时设置代理：
 
 ```bash
-# 示例：本机代理监听 5376（与 dot_gitconfig / ~/.ssh/config 中的代理端口一致）
-export https_proxy=http://127.0.0.1:5376
-export http_proxy=http://127.0.0.1:5376
-export all_proxy=socks5h://127.0.0.1:5376
+# 示例：本机代理监听 7890（与 dot_gitconfig / ~/.ssh/config 中的代理端口一致）
+export https_proxy=http://127.0.0.1:7890
+export http_proxy=http://127.0.0.1:7890
+export all_proxy=socks5h://127.0.0.1:7890
 
 # 探活：确认代理端口确实在监听，再继续后面的 bootstrap
-nc -z 127.0.0.1 5376 && echo "proxy ok" || echo "proxy not listening on 5376"
+nc -z 127.0.0.1 7890 && echo "proxy ok" || echo "proxy not listening on 7890"
 ```
 
 - 代理不在监听时先解决代理本身，或改走直连/镜像；探活通过后再执行 `chezmoi init`、
   首次启动 `zsh`、首次运行 `nvim`。
 - 两通道行为不对称：`dot_gitconfig` 中仅一处按域名限定的 GitHub 代理（`[http "https://github.com"]`，对该 URL 匹配的 HTTP/HTTPS 远程均生效；冗余的 `[https …]` / `[ssh …]` 段已删）固定为
-  `socks5h://127.0.0.1:5376` 且**无直连回退**——代理离线时对 GitHub 的 git 操作会卡住或报
-  `Connection refused`；`~/.ssh/config` 的 `ProxyCommand` 则先探测 `127.0.0.1:5376`，
+  `socks5h://127.0.0.1:7890` 且**无直连回退**——代理离线时对 GitHub 的 git 操作会卡住或报
+  `Connection refused`；`~/.ssh/config` 的 `ProxyCommand` 则先探测 `127.0.0.1:7890`，
   在线走 SOCKS5、离线自动回退直连。
 - 首次启动 `zsh` 时 `zimfw` 拉模块走 HTTPS（新机默认无 `~/.gitconfig` 即不受 git 代理
   影响），此时 shell 侧导出的 `https_proxy` 即为其提供代理通道。
@@ -83,7 +81,10 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 - 根级与全部嵌套的 `README.md`（实际模式为 `**/*.md`（含 `zsh/README.md`、`nvim/README.md`）—— 仓库文档仅留在源目录，不污染目标机；`LICENSE` 文件（根级与 `nvim/LICENSE`）已删除，`**/LICENSE` 模式防御性保留
 - `docs/` —— 本文档所在目录整体不部署
 - `*.local` / `*.local.*` / `*.bak` / `**/.DS_Store` / `node_modules/` / `.pnpm-store/` 等本地覆盖与构建产物
-- `*token*` / `*secret*` / `*credential*` 等敏感文件名匹配
+- Pi 已知运行时路径：agent permission-mode/sessions/npm/missions/tasks、`auth.json`、credentials、models-store 与 workflows state；这组规则是黑名单，不会屏蔽所有未列出的 Pi 源文件
+- 机器本地状态与配置：`.config/fish/fish_variables`、`.codex/config.toml`、`.claude/settings.json`
+- `.orca/` 与 `.vscode/` 的忽略条目是防御性模式；仓库中当前没有映射到这两个 target 的 dot-source 目录。根 `.vscode/` 的 Git 跟踪规则另见 `.gitignore`。
+- `*token*` / `*secret*` / `*credential*` / `*auth.json*` / `hosts.yml` 等敏感文件名匹配
 
 > 注意：`dot_gitconfig` **不在**忽略之列——`apply` 会正常生成 `~/.gitconfig`（历史上的
 > 源名失配行 `dot_gitconfig` / `**/dot_git` 与 `**/REAMDME.md` 拼写错误均已修复，
@@ -96,7 +97,7 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 
 | 组件 | 行为 | 触发时机 |
 | --- | --- | --- |
-| `fish` / `pi` | `dot_config/fish/config.fish`（interactive 时初始化 Starship，插件由 `fish_plugins` 清单管理）、`dot_pi/**`（Pi 的三个配置；不提供沙箱）直接生效，均随 `apply` 写入 `$HOME`；本文档只覆盖 `zsh` 栈，其余见 [layout.md](layout.md) | 首次启动 `fish` / `pi` 时 |
+| `fish` / `pi` | `dot_config/fish/config.fish`（interactive 时初始化 Starship，插件由 `fish_plugins` 清单管理）、`dot_pi/**`（Pi 的四个 Git-allowlisted 配置；`.chezmoiignore` 只屏蔽已知运行时路径，其他本地 Pi 源文件仍可能部署；不提供沙箱）直接生效，均随 `apply` 写入 `$HOME`；本文档只覆盖 `zsh` 栈，其余见 [layout.md](layout.md) | 首次启动 `fish` / `pi` 时 |
 | Zim 框架 | `~/.config/zsh/.zshrc` 检测 `~/.zim/zimfw.zsh` 缺失时自动下载并 `zimfw init` 安装 `dot_zimrc` 中声明的全部模块（详见 `dot_config/zsh/dot_zimrc`） | 首次启动 `zsh` |
 | `PATH` / `brew` | 按 `dot_zshrc` 中守卫逻辑注入 Homebrew 与本地路径（前置 `~/bin` 等，cargo/rustup 按目录存在性守卫，详见 `dot_config/zsh/dot_zshrc`） | 每次启动 `zsh` |
 | `zoxide` / `mise` / `starship` / `fzf` | 按 `command -v` 守卫 `eval` 初始化，未安装静默跳过；`fzf` 键位绑定唯一收敛于 `fzf.zsh`（详见 `dot_zshrc` 与 `fzf.zsh`） | 每次启动 `zsh` |
@@ -112,11 +113,16 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 
 ## 4. 依赖清单
 
-### 启动必需（缺失会导致功能明显退化或报错；已随 §1 安装，此处为清单备查）
+### 条件依赖
 
 | 工具 | 用途 | 安装 |
 | --- | --- | --- |
-| `git-lfs` | Git LFS filter——`dot_gitconfig` 配置 `[filter "lfs"] required = true`，缺失时**全机所有仓库**的 clone/push 直接失败（硬性中断，非静默退化） | `brew install git-lfs && git lfs install` |
+| `git-lfs` | 处理具有 LFS 跟踪文件的仓库；普通 Git 仓库操作不依赖 `git-lfs` | `brew install git-lfs && git lfs install` |
+
+### 启动必需（缺失会导致功能明显退化；已随 §1 安装，此处为清单备查）
+
+| 工具 | 用途 | 安装 |
+| --- | --- | --- |
 | `fzf` | `Ctrl-R` / `Ctrl-T` / `Alt-C` 及所有 `f*` 函数（`frg` / `fkill` / `ftm` / `fl*`） | `brew install fzf` |
 | `fzf-tab` | 补全菜单模糊化（Zim 模块 `Aloxaf/fzf-tab`） | 无需手动安装，由 `zimfw` 按 `dot_config/zsh/dot_zimrc` 的 `zmodule Aloxaf/fzf-tab` 首次启动时自动安装并加载 |
 | `starship` | 提示符（配置为机器本地 `~/.config/starship.toml` Catppuccin Mocha，未随仓库分发，跨机需自行拷贝） | `brew install starship` |
@@ -136,7 +142,7 @@ brew install bat lsd htop fastfetch neovim yazi gh lazygit tldr coreutils kubeco
 - `coreutils` 提供 `nproc`（`makes` / `xargsp` 半核并行依赖它）
 - Fish 侧：Fish 已作为终端入口依赖安装；另需 `brew install fisher`——`~/.config/fish/` 的 13 个插件由 `fish_plugins` 清单管理（`fisher update` 安装/更新）；提示符复用 `starship`、fzf 键位复用 `fzf.fish`（均已在上方依赖中）
 - `bat` / `lsd` / `htop` 分别接管 `cat` / `ls` / `top`；脚本中需要原生行为时用 `command cat` 等
-- `gh` 配合 `~/.ssh/config` 的 `Host github.com → ssh.github.com:443` 与 `dot_gitconfig` 的 `socks5h://127.0.0.1:5376` 代理共同保证 GitHub 可达。代理已统一为 `5376`，不再区分 `7890`（详见 [dev-tools.md](dev-tools.md) 中的代理配置说明）。
+- `gh` 配合 `~/.ssh/config` 的 `Host github.com → ssh.github.com:443` 与 `dot_gitconfig` 的 `socks5h://127.0.0.1:7890` 代理共同保证 GitHub 可达；Git、SSH 与 shell 代理函数均使用端口 `7890`（详见 [dev-tools.md](dev-tools.md) 中的代理配置说明）。
 
 按需补装（别名 / 函数指向的目标，未装时对应功能退化）：
 
@@ -149,11 +155,11 @@ brew install speedtest-cli
 brew install jadx scrcpy
 ```
 
-另需注意：VS Code 及其 `code` CLI 是 `git config editor = code` 以及 `clp_cfg` / `cla_cfg` 别名的目标（`fzf` 的 `Ctrl-E` 绑定已注释停用，现为 `Ctrl-G` 走 `$EDITOR`），未安装时上述功能退化。
+另需注意：VS Code 及其 `code` CLI 是 Git 的 `core.editor = code --wait` 与 `clp_cfg` / `cla_cfg` 别名的目标（`fzf` 的 `Ctrl-E` 绑定已注释停用，现为 `Ctrl-G` 走 `$EDITOR`）。若 Git 操作需要打开编辑器，必须安装 `code` CLI，或在本机将 `core.editor` 覆盖为已安装的编辑器；`EDITOR=nvim` 不会自动覆盖仓库明确设置的 `core.editor`。
 
-### 有守卫的可选组件（未安装时静默跳过）
+### 可选组件（按 shell 守卫或调用时使用）
 
-SDKMAN（Java）、Android NDK（`/opt/homebrew/share/android-ndk`）、Docker、`kubectl`（`k` → `kubectl` 别名；已装 `kubecolor` 时由 `kubectl()` 函数透明包装彩色输出）、`pnpm`、`~/.cargo/env`、`onproxy` 函数。
+SDKMAN（Java）、Android NDK（`/opt/homebrew/share/android-ndk`）、Docker、`kubectl` / `kubecolor`、`pnpm`、`onproxy` 函数。Zsh 在 `kubectl` 存在时才定义 `k`，并在可用时用 `kubecolor` 包装 `kubectl`；Fish 无条件定义 `k=kubecolor`，调用 `k` 需要安装 `kubecolor`。Zsh/Fish 会在 Cargo bin 目录存在时直接加入 PATH，不会 source `~/.cargo/env`。
 
 ### 终端模拟器（二选一即可，建议都装）
 
@@ -194,8 +200,8 @@ nvim --headless +qa                  # 无插件加载错误
 
 # SSH / GitHub 可达性
 cat ~/.ssh/config                    # 顶部含 Include ~/.orbstack/ssh/config，github.com 走 ssh.github.com:443
-git lfs version                      # 确认 git-lfs 已装（缺失时 clone/push 会因 filter lfs required=true 全局失败）
-git config --get-regexp proxy        # 应为 socks5h://127.0.0.1:5376（与 SSH ProxyCommand 5376 统一；
+git lfs version                      # 可选：使用 LFS 跟踪文件时确认 Git LFS 可用
+git config --get-regexp proxy        # 应为 socks5h://127.0.0.1:7890（与 SSH ProxyCommand 7890 统一；
                                      # apply 已部署 ~/.gitconfig，可直接读取）
                                      # 也可直接校验源文件：
                                      # git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy

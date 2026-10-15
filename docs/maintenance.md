@@ -94,17 +94,17 @@ ghostty +show-config
 nvim --headless +qa
 nvim --headless -c "lua require('config.lazy')" -c "qa"  # 可选：校验 lazy spec
 
-# git 配置合法（未知键不会报错，但可确认解析；proxy 与 SSH 统一为 5376）
+# git 配置合法（未知键不会报错，但可确认解析；proxy 与 SSH 统一为 7890）
 git config --list --show-origin | head
 git config --get core.editor
 git config --get safe.directory
-git config --get-regexp proxy               # 应为 socks5h://127.0.0.1:5376（与 SSH ProxyCommand 5376 统一）
+git config --get-regexp proxy               # 应为 socks5h://127.0.0.1:7890（与 SSH ProxyCommand 7890 统一）
 # 或校验源文件：
 git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy
 
 # fish 配置语法检查（fish -n 只校验首个文件，必须逐个检查；实测多文件传参时后续文件被静默跳过）
 for f in ~/.config/fish/config.fish ~/.config/fish/conf.d/*.fish; do fish --no-config -n "$f" || exit 1; done
-# conf.d 现为六文件分层：00_env / 01_activate / 10_sys / 20_dev / 21_k8s / 22_rev（01_activate 以 type -q mise 守卫激活，与 zsh 侧 dot_zshrc 的 activate 对应；编号=加载阶段，文件名=领域）。可调用大函数（update-all/auto-update、onproxy/ofproxy、y、serve、netcheck、makes/xargsp、bak/timer/decide、磁盘分析四件套共 18 个）在 dot_config/fish/functions/ 惰性加载（首次调用才 source）；kubecolor 补全在 dot_config/fish/completions/kubecolor.fish；fisher 插件安装于 ~/.config/fish/fisher = fisher_path，退出 chezmoi 管理域，config.fish 注入其 functions/completions/conf.d，不写入仓库 dot_config/fish/functions/
+# conf.d 现为六文件分层：00_env / 01_activate / 10_sys / 20_dev / 21_k8s / 22_rev（01_activate 以 type -q mise 守卫激活，与 zsh 侧 dot_zshrc 的 activate 对应；编号=加载阶段，文件名=领域）。可调用大函数（update-all/auto-update、onproxy/ofproxy、y、serve、netcheck、makes/xargsp/__half_cpu_count、bak/timer/decide、find-large/dus/filestats/recent/tree-size，共 18 个）在 dot_config/fish/functions/ 惰性加载（首次调用才 source）；kubecolor 补全在 dot_config/fish/completions/kubecolor.fish；fisher 插件安装于 ~/.config/fish/fisher = fisher_path，退出 chezmoi 管理域，config.fish 注入其 functions/completions/conf.d，不写入仓库 dot_config/fish/functions/
 
 # ⚠️ conf.d 分层重排的迁移清理：chezmoi 不删除源里移除的条目，旧四文件在其他机器
 # git pull && chezmoi apply 后仍会残留并被继续 source（与新文件双份定义、旧 k8s 别名复活），
@@ -114,7 +114,7 @@ rm -f ~/.config/fish/conf.d/{00_aliases,01_dev,01_rev,02_mise}.fish
 
 # mise 环境体检
 mise doctor
-mise ls                                     # 工具声明见 dot_config/mise/config.toml，当前使用 latest 浮动选择器
+mise ls                                     # Bun/Deno/Go/pnpm 使用 latest；Node.js 固定为 24.19.0
 
 # alacritty：CLI 无 --print-config 子命令（0.17 实测报错），配置解析在启动时进行，
 # 冒烟启动（瞬间退出）即可验证配置可解析
@@ -143,9 +143,9 @@ rm -f ~/.cache/zsh/fzf_prefix && exec zsh
 
 ### 换了代理端口 / 地址
 
-`dot_gitconfig` 中仅一处引用 `socks5h://127.0.0.1:5376`（`http "https://github.com"`，对该 URL 匹配的
-HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/private_config` 的 `ProxyCommand` 探测端口 `5376` 统一
-（`nc -z 127.0.0.1 5376`），全局替换即可。
+`dot_gitconfig` 中仅一处引用 `socks5h://127.0.0.1:7890`（`http "https://github.com"`，对该 URL 匹配的
+HTTP/HTTPS 远程均生效），与 `private_dot_ssh/private_config` 的 `ProxyCommand` 探测端口 `7890` 一致
+（`nc -z 127.0.0.1 7890`），更换端口时需同步修改 Git、SSH、Zsh/Fish shell 代理设置与相关文档。
 历史遗留的冗余 `[https …]` / `[ssh "ssh.github.com"]` 段及注释化全局代理段均已清理，无需再处理旧注释。详见 [dev-tools.md](dev-tools.md) 与 [getting-started.md](getting-started.md)。
 
 ### auto-update 与 update-all 的区别
@@ -191,11 +191,12 @@ HTTP/HTTPS 远程均生效），已与 `private_dot_ssh/private_config` 的 `Pro
 
 - 本地覆盖与备份：`**/*.local`、`**/*.local.*`、`**/*.bak`（`**/` 前缀覆盖嵌套路径，如 `.config/kitty/kitty.local.conf` 仅入库不部署）、`**/.DS_Store`、`**.log`
 - 仓库文档：`**/*.md`（包括根级与嵌套 README 和其他 Markdown）、`docs/`；`**/LICENSE` 行保留为防御（根级与 `nvim/LICENSE` 文件均已删除）
-- 敏感信息：`**/*token*`、`**/*secret*`、`**/*credential*`（`**` 前缀覆盖嵌套目录）
+- 敏感信息：`**/*token*`、`**/*secret*`、`**/*credential*`、`**/*auth.json*`、`**/hosts.yml`（覆盖嵌套路径）
 - 构建产物：`node_modules/`、`.pnpm-store/`
 - fish 机器本地状态：`.config/fish/fish_variables`（fish Universal Variables，仅本机）
-- 机器本地配置（不跨机部署，源已移出或仅作参考）：`.claude/settings.json`、`.codex/config.toml`
-- Pi：`.pi/**` 默认不部署，仅开放 `.pi/agent/settings.json`、`.pi/agent/pi-goal.json` 与 `.pi/workflows/settings.json` 三个配置及其父目录。Git 提交域另由 `.gitignore` 的源名 allowlist 保护，不能用部署规则代替提交审查
+- 机器本地配置：`.claude/settings.json`、`.codex/config.toml`
+- `.orca/` 与 `.vscode/` 是防御性 ignore pattern；根 `.vscode/` 源目录当前不是 chezmoi target，具体 Git 例外由 `.gitignore` 管理
+- Pi：Git 的 `.gitignore` 只允许跟踪四个已审查配置；`.chezmoiignore` 是运行时黑名单，不是部署 allowlist。它排除列出的 permission-mode/sessions/npm/missions/tasks/models-store/workflows state 与敏感路径，但其他本地 `dot_pi/` 源文件若不匹配黑名单，仍可能部署。Git 跟踪规则不能替代部署规则，提交前仍需审查 diff
 
 > 历史修正（2026-08 收口）：旧版曾按源名书写 `**/dot_git` / `**/dot_DS_Store` / `dot_gitconfig`（均不匹配目标名 `.git` / `.DS_Store` / `.gitconfig`，从未生效），且 `**/README.md` 误拼为 `**/REAMDME.md`、缺 `**/LICENSE`——现已全部按目标名改写、删除无效行并补齐。因此 `dot_gitconfig` → `~/.gitconfig` 为**正常部署目标**（旧文档称其被排除、"仅作本地参考快照"系对无效行的误读）；修复后 `chezmoi managed` 目标数 59→55；后续去重又删除了被更宽模式覆盖或已无对应文件的冗余行（根级 `README.md` / `LICENSE`、`docs/**`、`**/.git`、`*client_secret*`、两条 `**.md` 及已不存在的 `REPO-INSIGHT.md`），目标数保持 55 不变（核心 targets 不变），其后 fish 配置扩容实测曾达 81（纳入 `.config/fish/fish_variables` 后为 82，详见 [layout.md](layout.md)）。随后添加 `.config/fish/fish_variables` 至 `.chezmoiignore` 进一步排除。详见 [layout.md](layout.md)。
 
