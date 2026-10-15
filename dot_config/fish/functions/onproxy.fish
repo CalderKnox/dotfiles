@@ -10,7 +10,7 @@
 # =============================================================================
 function onproxy --description "启用终端代理 (127.0.0.1:5376, socks5/http)"
     set -l proxy_host "127.0.0.1"
-    set -l proxy_port 5376
+    set -l proxy_port 7890
     set -l proxy_url "http://$proxy_host:$proxy_port"
     set -l socks_url "socks5h://$proxy_host:$proxy_port"
 

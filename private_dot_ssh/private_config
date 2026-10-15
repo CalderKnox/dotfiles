@@ -89,7 +89,7 @@ Host github.com ssh.github.com
   Port 443
   # Adaptive SOCKS5 proxy (127.0.0.1:5376): if the local proxy is listening, tunnel via SOCKS5;
   # otherwise fall back to a direct connection.
-  ProxyCommand bash -c 'if nc -z 127.0.0.1 5376; then nc -X 5 -x 127.0.0.1:5376 %h %p; else nc %h %p; fi'
+  ProxyCommand bash -c 'if nc -z 127.0.0.1 7890; then nc -X 5 -x 127.0.0.1:7890 %h %p; else nc %h %p; fi'
 
 
 ## github work（模板，当前未启用）

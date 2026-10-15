@@ -23,10 +23,10 @@
 [init]
 	defaultBranch = main
 
-# NOTE: GitHub HTTPS 仅有此代理 socks5h://127.0.0.1:5376，代理离线时无直连回退；
+# NOTE: GitHub HTTPS 仅有此代理 socks5h://127.0.0.1:7890，代理离线时无直连回退；
 # 临时恢复直连：git config --global --unset http.https://github.com.proxy
 [http "https://github.com"]
-	proxy = socks5h://127.0.0.1:5376
+	proxy = socks5h://127.0.0.1:7890
 
 [push]
 	default = current
