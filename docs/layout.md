@@ -42,7 +42,7 @@
 | --- | --- | --- |
 | `dot_config/zsh/dot_zshrc` | `~/.config/zsh/.zshrc` | Zsh 入口：Zim 引导、PATH、工具 eval（zoxide/mise/starship/fzf/brew）、模块加载入口（aliases→fzf→sdk）—— 与 `symlink_dot_zshrc.tmpl` 配合 |
 | `dot_config/zsh/dot_zimrc` | `~/.config/zsh/.zimrc` | Zim 模块清单（仅供 zimfw 读取，非 shell 启动时 source）—— 与 `symlink_dot_zimrc.tmpl` 配合 |
-| `dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`update-all`、`auto-update`、`y`、`ruff_auto` 等）；`update-all` 为关联数组 7 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`/`pi`，支持传参过滤、失败计数与耗时统计；`auto-update` 为兼容旧习惯的一键入口（可选 `onproxy` 切代理后直接委托 `update-all`，覆盖目标一致，均含 `mise`）；新增 `chezc/chezdf/chezap` 三别名 |
+| `dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`update-all`、`auto-update`、`y`、`ruff_auto` 等）；`update-all` 为关联数组 7 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`/`pi`，支持传参过滤、失败计数与耗时统计；`auto-update` 为兼容旧习惯的一键入口（可选 `onproxy` 切代理后直接委托 `update-all`，覆盖目标一致，均含 `mise`）；新增 `chezc/chezs/chezdf/chezap` 四别名 |
 | `dot_config/zsh/fzf.zsh` | `~/.config/zsh/fzf.zsh` | fzf 前缀探测/缓存、全局选项、Ctrl-R/T/Alt-C 及 `frg`/`fkill`/`ftm`/`fl*` 函数 |
 | `dot_config/zsh/sdk.zsh` | `~/.config/zsh/sdk.zsh` | SDK 环境与补全（pnpm/SDKMAN(可选)/Android NDK/Python(uv)/Go/Rust/Docker/kubectl+kubecolor） |
 | `dot_config/zsh/README.md` | —（不部署） | 模块内部文档（加载顺序契约、函数速查）；由 `**/*.md` 排除，仅仓库内查阅 |
@@ -51,7 +51,7 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `dot_config/ghostty/config` | `~/.config/ghostty/config` | Ghostty 主终端配置（JetBrainsMonoNL Nerd Font Mono，`command = direct:/opt/homebrew/bin/fish -l` 启动登录 Fish，Catppuccin Frappe 主题；`zsh -l` / `tmux` 方案注释保留） |
+| `dot_config/ghostty/config` | `~/.config/ghostty/config` | Ghostty 主终端配置（JetBrainsMonoNL Nerd Font Mono，`command = direct:/opt/homebrew/bin/fish -l` 启动登录 Fish，Catppuccin Frappe 主题） |
 | `dot_config/alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` | Alacritty 备用配置（活跃配色为 Catppuccin Mocha，Dracula 调色板整块注释保留为模板；`[terminal.shell]` 经 Fish 进 tmux） |
 | `dot_config/kitty/kitty.local.conf` | —（不部署，机器本地维护） | kitty 增量个人配置（字体/光标/Catppuccin Mocha/快捷键，`shell = fish`）仅入库作参考，不随 apply 部署（被 `.chezmoiignore` 的 `**/*.local.*` 排除，`chezmoi ignored` 含 `.config/kitty/kitty.local.conf`）；目标机 `~/.config/kitty/kitty.local.conf` 各机本地维护，在 kitty 首次生成的 `~/.config/kitty/kitty.conf` 末尾手工添加 `include kitty.local.conf` 引入（仓库有意不含 kitty.conf） |
 | `dot_tmux.conf` | `~/.tmux.conf` | tmux 配置：`default-shell` 经 if-shell 回退链设定（Homebrew fish → `/usr/bin/fish` → `/bin/bash`，无 fish 环境自动回退；不设 default-command，保持登录语义）、tpm 插件（yank/sensible/open/cpu/battery）、Catppuccin Mocha 状态栏、鼠标与 100k 历史 |

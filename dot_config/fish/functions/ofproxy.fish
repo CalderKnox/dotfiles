@@ -1,7 +1,7 @@
 # =============================================================================
 # ofproxy.fish — 关闭终端代理
 # =============================================================================
-# Description : 清除 onproxy 设置的六个代理环境变量。由原 conf.d/
+# Description : 清除 onproxy 设置的六个路由变量（http/https/socks × 大小写）+ 两个 no_proxy。由原 conf.d/
 #               00_aliases.fish 迁入 functions/ 惰性加载目录。
 # Usage       : ofproxy；开启用 onproxy（onproxy.fish）
 # Guards      : 仅 set -e 清除变量，无外部依赖

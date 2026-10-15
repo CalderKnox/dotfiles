@@ -87,8 +87,8 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 - `*token*` / `*secret*` / `*credential*` / `*auth.json*` / `hosts.yml` 等敏感文件名匹配
 
 > 注意：`dot_gitconfig` **不在**忽略之列——`apply` 会正常生成 `~/.gitconfig`（历史上的
-> 源名失配行 `dot_gitconfig` / `**/dot_git` 与 `**/REAMDME.md` 拼写错误均已修复，
-> `managed` 目标数 59→55）。详见 [layout.md](layout.md)。
+> 源名失配行 `dot_gitconfig` / `**/dot_git` 与 `**/REAMDME.md` 拼写错误均已修复）。
+> `managed` 目标数随配置与 chezmoi 版本浮动，请以 `chezmoi managed` 实测为准，不要依赖历史硬编码数字。详见 [layout.md](layout.md)。
 
 因此 `chezmoi diff` 中不会出现 `docs/` 的新增，`chezmoi doctor` 亦不会告警缺失——属预期行为。
 如需排查可执行 `chezmoi ignored` / `chezmoi status` 查看被忽略列表。
@@ -142,7 +142,7 @@ brew install bat lsd htop fastfetch neovim yazi gh lazygit tldr coreutils kubeco
 - `coreutils` 提供 `nproc`（`makes` / `xargsp` 的半核并行优先使用它；缺失时回退 macOS 原生 `sysctl -n hw.ncpu`）
 - Fish 侧：Fish 已作为终端入口依赖安装；另需 `brew install fisher`——`~/.config/fish/` 的 13 个插件由 `fish_plugins` 清单管理（`fisher update` 安装/更新）；提示符复用 `starship`、fzf 键位复用 `fzf.fish`（均已在上方依赖中）
 - `bat` / `lsd` / `htop` 分别接管 `cat` / `ls` / `top`；脚本中需要原生行为时用 `command cat` 等
-- `gh` 配合 `~/.ssh/config` 的 `Host github.com → ssh.github.com:443` 与 `dot_gitconfig` 的 `socks5h://127.0.0.1:7890` 代理共同保证 GitHub 可达；Git、SSH 与 shell 代理函数均使用端口 `7890`（详见 [dev-tools.md](dev-tools.md) 中的代理配置说明）。
+- `gh` 的可达性：SSH 侧由 `~/.ssh/config` 的 `Host github.com → ssh.github.com:443` 负责；`gh` 的 API 走 HTTPS（`api.github.com`），**不受** `dot_gitconfig` 那条 `[http "https://github.com"]` 影响（该前缀不匹配 `api.github.com`），而是依赖 shell 代理函数（`onproxy`）导出的 `https_proxy`。Git、SSH 与 shell 代理函数均使用端口 `7890`（详见 [dev-tools.md](dev-tools.md) 中的代理配置说明）。
 
 按需补装（别名 / 函数指向的目标，未装时对应功能退化）：
 
