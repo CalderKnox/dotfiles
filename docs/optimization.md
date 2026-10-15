@@ -106,6 +106,85 @@ Lua assert 后需要 cquit。已纠正这些假设再验证，不把测试设施
 
 审计同时确认：`docs/layout.md`/`getting-started.md` 的源边界声明、ControlPath 设计、`.vscode`/`.keep` 规则、敏感名模式均与实现一致（审计报告中的 83/88 计数为其启动时快照，已由本轮 87/92 取代）。
 
+## 第四轮审计（本机 ultracode 工作流 + 主代理独立复核）
+
+第四轮以 9 域并行读取、每域洞察双镜对抗验证（源码准确性 / 行为反例）复核，并由主代理独立执行命令复现。只记录亲自复现的结论，未复现的模型投票不计入证据。核心发现是**一类反复出现的静默失效**：
+
+- `.chezmoiignore` 模式**锚定在源根**：缺少 `**/` 前缀的规则只匹配仓库根，嵌套目标照常部署——与全局 `.gitignore`（无内部斜杠的模式匹配任意层级）语义相反，两种写法极易混淆，是同一份心智模型在两处得到相反结果。
+- 现存三处回归：`**.log`（**只匹配仓库根、不匹配嵌套**——与 `*.log` 等效；任何 `dot_config/*/x.log` 都会被渲染进 `$HOME`。仓库内 `nvim.log` 恰好位于根目录故被排除，不能作为“已覆盖”的证据）、`node_modules/`、`.pnpm-store/`（后两者同样根锚定，嵌套依赖目录会部署）。
+- 已改为 `**/*.log*`（同时覆盖轮转/压缩后的 `.log.1` / `.log.gz`）、`**/node_modules/`、`**/.pnpm-store/`；`**/.DS_Store` 因自带前缀本就正确。三处旧写法均以隔离 fixture 逐一复现为“部署”，新写法逐一复现为“排除”。
+- 同一失配类此前**已发生两次**并有文档记录：源名失配的 `dot_gitconfig` / `**/dot_git` 与拼写错误 `**/REAMDME.md`（见 getting-started.md）。本轮为**第三次**，说明缺的不是单点修复而是**测试守卫**。
+- 根因是覆盖缺口：`check.py` 只对 7 条 `.pi/*` 运行时规则做嵌套 fixture + mutation control，其余规则（含全部卫生规则）仅以**文档字符串**断言，从不验证其是否真能排除目标。已新增 `test_hygiene_rules_exclude_nested_targets`：15 组嵌套 fixture 逐条断言“规则生效”，并删除该规则后断言 fixture 暴露（mutation control），另加正向对照（普通配置仍部署，防止“全都排除”蒙混）。负向对照已验证：把三处规则改回旧写法后该测试按预期失败。此类回归至此**首次具备自动守卫**。
+- 顺带修正三处把失效写法当生效描述的文档（`maintenance.md`、`getting-started.md`、`layout.md`），并在 `maintenance.md` 增加“根锚定陷阱”告警与新规则必须用 `**/` 前缀的约定。
+
+### 工作流超时与本轮证据来源
+
+本轮 9 域映射全部返回（约 70 条候选洞察），但每个洞察的双镜验证子代理在该非标准 provider 下大面积挂起（journal 停止增长十余分钟，与历史记录的 validator 超时同因）。因此**未把模型投票当作证据**：由主代理逐条以只读命令亲自复现，仅保留复现通过的条目。以下为除 `.chezmoiignore` 外，经独立复现并修复的条目。
+
+### 测试自身可被欺骗（根因治理）
+
+- `test_tool_and_shell_documentation_matches_sources` 的“快捷别名 29 个”断言是**自证**：测试内硬编码 29 个名字，再统计这些名字在 `20_dev.fish` 中是否存在——只能证明“清单里的名字还在”，新增别名不会改变计数（该文件实有 39 条 `^alias`）。已改为由源推导（`全部 alias − 显式登记的非快捷别名`），新增别名会改变计数并强制同步文档。负向对照：临时新增 `alias goz=` 后该测试按预期失败。
+- `test_documentation_lists_fish_inventory` 用裸 `assertIn(name, text)` 断言函数名出现在文档中，对单字母函数 `y` 是**空断言**（字母 y 几乎必然出现在正文）。已改为词边界正则。负向对照：移除 `layout.md` 中独立的 `y` 词条后该测试按预期失败。
+- 新增 `dot_zshrc` 三模块 source **顺序**断言：原测试只断言三条 `source` 字符串“存在”，与顺序无关，把 `fzf.zsh` 挪到 `aliases.zsh` 之前仍会通过——而 `fzf.zsh` 在 source 时展开 `$EDITOR`，顺序即语义。负向对照：交换顺序后该断言按预期失败。
+- 新增 `test_fish_plugin_inventory_matches_documentation`：`fish_plugins` 的插件数此前**无任何**验证，增删插件不触发失败、文档“13 插件”可静默漂移。改为由源文件推导计数并对照四处文档声明。负向对照：追加第 14 个插件后该测试按预期失败。
+
+### 已复现并修复的源码/文档不一致
+
+| 位置 | 复现结论 | 修复 |
+| --- | --- | --- |
+| fish `update-all.fish` | 全部请求目标缺失时**无** `attempted==0` 分支（zsh 侧有），会误报 “✨ All updates completed”；文件头却声称“记账与 zsh 对齐” | 补 `attempted==0` → “⚠️ no runnable targets” 并 `return 0`；新增 `test_update_all_with_no_runnable_target_matches_zsh`（负向对照已验证） |
+| fish `conf.d/10_sys.fish` `cdd` | `ls -la --group-directories-first` 在无 lsd 别名（非交互）时被 BSD `/bin/ls` 拒绝，错误被 `2>/dev/null` 吞掉，静默无输出 | 回退 `or command ls -la`；新增 `test_cdd_falls_back_when_lsd_alias_is_absent`（负向对照已验证） |
+| fish `ofproxy.fish` | 注释称“清除六个代理变量”，实际 unset 八个（含 `no_proxy`/`NO_PROXY`）；同一第三轮只修了 `onproxy` 孪生 | 注释改为“六个路由变量 + 两个 no_proxy” |
+| fish `dus.fish` / `tree-size.fish` | 注释引用 `du='du -kh'` 别名，实际别名为 `du -h -d 2`（已与 zsh 对齐后遗留） | 注释更正为实际别名 |
+| `dot_config/zsh/sdk.zsh` | `ANDROID_NDK_HOME` 硬编码 `/opt/homebrew`，而同文件/同树其它 Homebrew 引用均用 `${HOMEBREW_PREFIX:-/opt/homebrew}` | 改用 `${HOMEBREW_PREFIX:-/opt/homebrew}`（Intel 前缀兼容） |
+| `docs/layout.md:45` | 称 `aliases.zsh` 新增“三别名 chezc/chezdf/chezap”，源文件实为四个（漏 `chezs`） | 更正为四别名 |
+| `docs/layout.md` / `docs/shell.md` / `docs/terminals.md` | 三处称 Ghostty 保留 `zsh -l` / `tmux` 注释方案，但 `dot_config/ghostty/config` 中并无这些 token；真实注释方案在 `alacritty.toml` | 从 Ghostty 描述中删除该错误声明 |
+| `README.md` / `dot_config/zsh/fzf.zsh` / `dot_config/zsh/README.md` | fzf 版本引用三处不一致（0.74.3 / 0.74.4 / 0.74.5），本机为 0.74.5 | 统一为 0.74.5 |
+| `dot_config/zsh/fzf.zsh` `find_large_files` | 直接调用 `fd` 无守卫（缺失即 `command not found`），而 `dot_config/zsh/README.md:78` 称 fd“缺省回退 `rg`”——该回退实际只作用于 `FZF_DEFAULT_COMMAND`/`FZF_ALT_C_COMMAND` | 增加 `command -v fd` 守卫，缺失回退 `find`；文档更正为“FZF 走 rg 回退、`find_large_files` 走 find 回退” |
+| `docs/getting-started.md:145` | 称 `gh` 依赖 `dot_gitconfig` 的 `socks5h` 代理，但该代理锚定 `[http "https://github.com"]`，**不匹配** `gh` 的 `api.github.com` | 更正为：`gh` 的 API 走 HTTPS，依赖 `onproxy` 导出的 `https_proxy`，与 `dot_gitconfig` 无关 |
+| `docs/getting-started.md` / `docs/maintenance.md` | 硬编码 `managed` 目标数（`59→55`、曾达 81/82），与 README「勿依赖历史硬编码数量」自相矛盾，实测为 80 | 改为“以 `chezmoi managed` 实测为准”，保留历史叙述但去掉会过期的数字
+
+### 已复现但**未**修改（保留待决）
+
+- **`luac` 版本门与实际解释器不符（已补门）**：`check.py` 用宿主 `luac`（本机 5.5.1）做语法门，而 Neovim 用 LuaJIT（Lua 5.1）；5.3+ 专有语法（如 `//` 整除）可过门而在 Neovim 加载时崩溃。且 `init.lua` / `lua/config/lazy.lua` **仅**有此语法检查，从不被 `-u NONE` 运行时测试加载。已新增 `test_lua_syntax_under_neovim_luajit`：用 Neovim 自身的 LuaJIT 经 `loadfile` 编译每个配置（只编译不执行），使语法门与真实运行时解释器一致；宿主 `luac -p` 保留为快速前置门。负向对照：向 `options.lua` 注入 `local _ = 7 // 2` 后 `luac -p` 仍通过、新门按预期失败。
+- **CI 工具不锁版本**：`ci.yaml:45` `brew install actionlint chezmoi fish fzf lua neovim tmux` 全不锁版本，且 dependabot 仅覆盖 `github-actions`，无任何机制跟踪这些 formula——门禁二进制可因上游发布而无仓库改动变红。
+- **代理只开不关**：zsh `auto-update` 与 fish `auto-update.fish` 均调用 `onproxy` 而从不 `ofproxy`，更新后代理变量持续生效至手动清除（属设计取向，需人工确认是否改为“用完还原”）。
+- **`find_large_files` 无 fd 回退**：`fzf.zsh` 中 `fd` 无守卫（`fd` 缺失即报“command not found”），而 `dot_config/zsh/README.md:78` 称“`fd`（缺省回退 `rg`）”——该回退实际只接在 `FZF_DEFAULT_COMMAND` / `FZF_ALT_C_COMMAND`，与函数无关。
+- **其它已复现条目**：`.codex/` 与 `.config/kitty/` 空目录仍被 `managed` 创建（文档称“不部署”）；`ProxyCommand` 探活无 `-w` 超时；`gitconfig` 的 `[http "https://github.com"]` 不覆盖 `api.github.com`（文档称 `gh` 依赖它）；全局 `[user]` 身份写入每个 commit；Neovim 侧 `mason.lua` 装 `typescript-language-server` 而 LazyVim 用 `vtsls`、`pyrefly` 依赖浮动 lspconfig、`~/.config/nvim` 同时是独立 git 仓库、`lazyvim.json` 混入 LazyVim 运行时记账；`fish_plugins` 的“13”无测试；终端硬编码 `/opt/homebrew/bin/fish` 无回退（tmux 独有回退链）、`tmux` truecolor 覆写仅命中 `xterm-256color`；`ControlPath` 手工前缀无自动校验。均已在审计记录中留证，未改动行为。
+
+## 第五轮审计（重设计 / 重分析 / 再验证 / 外部真值）
+
+本轮**刻意更换视角**：不再找"文档与源码漂移"（前三轮已扫过），而是 redesign（架构是否合适）、reanalysis（真实缺陷）、review（整体风险）、revalidation（推翻既有结论），并**首次联网核验外部真值**。工作流 6 个视角、16 个 agent 全部返回（本次 verify 阶段未像前几轮那样超时）。
+
+### 外部真值（首次联网核验，全部实测）
+
+- **CI action SHA pin 正确且为最新**：`actions/checkout@3d3c42e5…` = `v7.0.1`、`actions/setup-python@5fda3b95…` = `v7.0.0`，两者与上游 tag 逐一相符，且正是上游最新发布（2026-07-20）。此前只把它们当"未核验的信任项"，现已证实。
+- **README 版本表全部实测一致**：chezmoi v2.73.1 · zsh 5.9 · Fish 4.9.3 · fzf 0.74.5 · tmux 3.8 · Neovim 0.12.6；`mise` 的 `node = 24.19.0` 与已安装 v24.19.0 相符。
+- **`optimization.md` 的 tmux 插件 revision 表**四项（Catppuccin `b2f219c`、tmux-cpu `bcb110d`、tmux-battery `4383265`、TPM `e261deb`）与本地 checkout 逐一相符。
+- **无凭据泄露**：扫描全部 tracked 文件未发现 API key / token / 私钥；公开仓库的暴露面仅为 `dot_gitconfig` 中的个人邮箱与 localhost 代理（README 已提示 fork 前脱敏），`private_config` 仅含示例主机与密钥*名*。
+- **发现：维护者链接已失效**——账号由 `azwpayne` 更名为 `CalderKnox`（同一 repo id 1346001910；`github.com/azwpayne` 现为 404），而 `README.md:146` 的链接与 `dot_gitconfig:20` 的 `name` 仍指旧名。**因涉及公开身份，未擅自改动**，列为待决事项。
+
+### 自我纠错（再验证推翻了上一轮我自己写的文字）
+
+- `optimization.md` 曾把 `**.log` 描述为"完全不匹配"，与同一提交里我写的源码注释（"只锚定仓库根"）自相矛盾。实测 `**.log` ≡ `*.log`：**匹配根级、不匹配嵌套**；根目录的 `nvim.log` 确实被排除，不能当作"意外未外泄"。已更正叙述。
+- `maintenance.md` 一边声明"不要依赖硬编码 `managed` 计数"，一边写"（当前实测 80）"。已删除该数字。
+- `sdk.zsh` 注释称 `ANDROID_NDK_HOME` 的改法"与同一文件其它 Homebrew 引用一致"，但该文件并无其它 Homebrew 引用。已改为指向 `dot_zshrc` / `fzf.zsh` 的既有惯例。
+
+### 新修复（每项均已复现并配负向对照）
+
+| 位置 | 已复现的问题 | 修复 |
+| --- | --- | --- |
+| `docs/validation/fzf_runtime.py` | 用裸 `unittest.main()`，**skip 视为通过**：fzf 缺失时 CI 第二道门变绿却零断言执行，与套件"任何 skip 即失败"的声明冲突 | 与 `check.py` / `terminal_parsers.py` / `tmux_plugins.py` 统一 skip 语义；隐藏 fzf 时现按预期返回非零 |
+| zsh `aliases.zsh` + fish `update-all.fish` | `brew cu`（**第三方 tap** `buo/homebrew-cask-upgrade` 提供，非 brew 核心）被硬接进 `&&` 链：未装该 tap 的机器把 brew 整体误报为 failed，且 `brew cleanup` 被跳过 | 先探测 `brew commands` 再决定是否跑 cask 升级；不可用则跳过并在 stderr 提示，**真失败仍传播非零**。新增 3 个 zsh + 2 个 fish 回归测试，负向对照已验证 |
+| `private_dot_ssh/private_config` | 探活 `nc -z 127.0.0.1 7890` **无超时**：7890 半开（SYN 被接受、无响应）时阻塞到内核 connect 超时（约 75s），拖垮每个 `github.com` 连接 | 改为 `nc -z -G 2 -w 2`（`-G` 已确认受支持）；`ssh -G` 解析通过，端口关闭时 4ms 返回 |
+| fish `conf.d/21_k8s.fish` | `kg`/`kl`/`kd` 调用**裸 `kubectl`**（不着色），而 zsh 经 `kubecolor` 包装（着着色），文件注释却称"与 zsh 一致" | 增加受 `type -q kubecolor` 守卫的 `kubectl` 包装，与 `sdk.zsh:136` 等价；有 kubecolor 时着色、无则回落原生。注释与 getting-started 更正 |
+
+### 新增守卫（负向对照均已验证）
+
+- **`test_ignore_patterns_are_globstar_prefixed_or_intentionally_rooted`**：把"根锚定陷阱"从**枚举**升级为**不变式**——任何新的不带 `**/` 前缀的 `.chezmoiignore` 模式都会失败，除非显式加入 `ROOT_ANCHORED` 白名单（当前 11 条，均为刻意固定路径）。负向对照：追加 `*.tmp` 后按预期失败。这是该缺陷类（已发生三次）**首次具备结构性守卫**，而非"把已修的四条写进清单"。
+- **`test_no_unexpected_top_level_deploy_target`**：固定 depth-1 部署目标集（9 项），使"新增根级源文件静默渲染进 `$HOME`"失败。负向对照：加入 `root_probe.conf` 后按预期失败。同时首次断言了 `.github` 不部署这一此前只靠"源名以点开头"的隐式不变式。
+- 新增的 5 个 brew 回归测试与上文 hygiene/不变式测试**均已加入 `negative_controls.py`**（现 **20/20**），即它们对历史基线 `b4e8bac` 确实失败——覆盖上一轮"新测试无对照"的缺口。
+
 ## 后续全仓库对齐
 
 第二轮并行审查发现并修复了以下当前文档/验证错位：
@@ -121,10 +200,11 @@ Lua assert 后需要 cquit。已纠正这些假设再验证，不把测试设施
 
 当前验证结果：
 
-- `python3 docs/validation/check.py --strict`：**87 passed，0 skipped**。
-- `python3 docs/validation/negative_controls.py`：**17/17 reproduced，0 invalid controls**；默认 baseline 为 `b4e8bac`。
+- `python3 docs/validation/check.py --strict`：**99 passed，0 skipped**。
+- `python3 docs/validation/negative_controls.py`：**20/20 reproduced，0 invalid controls**；默认 baseline 为 `b4e8bac`。
 - `fzf_runtime.py`：**2 passed**；`terminal_parsers.py`：**2 passed**；本机插件副本上的 `tmux_plugins.py`：**1 passed**。
-- 合计 **92 个正向检查**（87+2+2+1），均来自上述独立成功的入口。
+- 合计 **104 个正向检查**（99+2+2+1），但**必须区分 CI 可复现的部分**：CI 只运行 `check.py --strict` 与 `fzf_runtime.py` = **101**；`terminal_parsers.py`（2）与 `tmux_plugins.py`（1）需 macOS GUI 应用与本机插件副本，**只在本地运行、CI 不执行**。此前把 97 说成"均来自独立成功的入口"会让人误以为 CI 覆盖 97——这是自我纠正。
+- 各入口的 skip 语义已统一：`check.py`、`fzf_runtime.py`、`terminal_parsers.py`、`tmux_plugins.py` 在**任何 skip 时都返回非零**。`fzf_runtime.py` 此前用裸 `unittest.main()`（skip 视为通过），fzf 缺失会让 CI 第二道门变绿却零断言执行，已修复。
 - 历史 benchmark `--revision b4e8bac` 自动找到 `private_dot_config/zsh/sdk.zsh`：baseline generator calls **12/12/12**，worktree **1/1/1**。某次记录的 median 为 **1.0287s → 0.6294s**；后续审计的 wall time 波动更大，因此这些秒数只作历史快照，generator 调用次数才是稳定结果。不作整体启动提速声明。
 - `ruff check --isolated docs/validation/*.py`、`actionlint -color .github/workflows/ci.yaml`、`git diff --check` 均通过；验证目录无 `__pycache__`。
 
@@ -149,3 +229,6 @@ Lua assert 后需要 cquit。已纠正这些假设再验证，不把测试设施
 - 浮动 mise/plugin 选择保留；本次验证覆盖所列本机版本，不保证所有历史或未来版本。
 - **没有测量真实 shell 全链路启动时间，不声明整体提速百分比。** 可证明的性能收益是
   generator/提取子进程调用数、真实 bytecode 消费和不再增长的 reload 状态。
+- **属"所有权决策"、记录但未改**：① `lazyvim.json` 混入 LazyVim 运行时键（`version`/`install_version`/`news`）而它同时是 chezmoi 管理目标——剥离 volatile 键并不能阻止 LazyVim 回写，而不管理则失去 extras 的跨机复现，需人工定夺哪一侧是唯一真源；② `fisher` 会覆写 chezmoi 管理的 `~/.config/fish/fish_plugins`（`fisher.fish:4,220` 证实清单路径为 `$__fish_config_dir`）——把清单迁到 `$fisher_path` 会失去"新机自带 13 插件"，保留则每次 `fisher update` 后需 `apply` 复原头部注释；③ fish 侧的 `k=kubecolor` 仍为**无条件**别名（与 zsh 的 `command -v kubecolor` 守卫不同），已在 getting-started 说明但未改为守卫式，以保留既有行为。
+- **需独立一轮的设计项（已复现，本轮不动）**：`.chezmoiroot` 结构化部署集（一次性搬移约 70 文件）；zsh/fish 单一真源 + 跨 shell 一致性测试（手工镜像的别名已漂移）；`sdk.zsh` 中并发敏感的补全缓存引擎与声明式 env 混居于每个交互启动路径；`mason` 的 19 个包名仅 2 个被断言、`lazyvim.json` extras 仅校验计数（需 opt-in 的 `neovim_inventory.py`）；harness 的能力分层（`--strict` 可移植 vs `--strict-runtime` 需 socket/PTY）；文档清单由生成器产出而非 grep 断言。
+- **zsh SDKMAN 桩在初始化失败后不可重试**（`unfunction sdk` 先于 `source`），与"失败不得递归"的守卫耦合；现测只断言不递归。改为"成功后解除、失败重装可重试"需同时保持递归守卫，留待独立改动。
