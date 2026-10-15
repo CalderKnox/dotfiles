@@ -185,6 +185,27 @@ Lua assert 后需要 cquit。已纠正这些假设再验证，不把测试设施
 - **`test_no_unexpected_top_level_deploy_target`**：固定 depth-1 部署目标集（9 项），使"新增根级源文件静默渲染进 `$HOME`"失败。负向对照：加入 `root_probe.conf` 后按预期失败。同时首次断言了 `.github` 不部署这一此前只靠"源名以点开头"的隐式不变式。
 - 新增的 5 个 brew 回归测试与上文 hygiene/不变式测试**均已加入 `negative_controls.py`**（现 **20/20**），即它们对历史基线 `b4e8bac` 确实失败——覆盖上一轮"新测试无对照"的缺口。
 
+### CI 自 `e429be9` 起持续失败：定位与修复
+
+`main` 的 CI 自 `e429be9`（2026-10-15）起连续三次失败，最后一次绿是 `cf626cd`。经 `gh run view --log-failed` 取到失败断言：
+
+```
+FAIL: test_chezmoi_source_boundaries_without_apply
+  check.py: AssertionError: '.pi/agent/permission-mode' not found in
+    {'.config/zsh/README.md', '.codex/config.toml', '.config/kitty/kitty.local.conf',
+     'docs', '.config/nvim/README.md', 'README.md'}
+```
+
+**根因**：该测试直接在**真实仓库**上断言 `.pi/agent/permission-mode` ∈ `chezmoi ignored`。但该目录是 Pi 运行时状态，本机存在而**未被 Git 跟踪**——CI 的全新 checkout 中它根本不存在，`chezmoi ignored` 自然不列出。这与本机"脏状态"耦合，是本机绿、CI 红的原因。本地此前看不出来，是因为本机恰好有该目录。
+
+**定位手段**：用 `git archive HEAD | tar -x` 造一个**只含跟踪文件**的干净副本（88 文件），在其上复现——得到与 CI **逐字节一致**的失败集合。这成为验证"CI 是否会过"的可靠手段。
+
+**修复**：删除该对未跟踪运行时目录的断言（`assertNotIn … targets` / `assertIn … ignored`），留注释说明原因。该规则的覆盖本就在 `test_synthetic_pi_runtime_data_is_excluded_and_rules_are_necessary`——自造 fixture 并对规则逐条 mutation control，与工作区状态无关，故无覆盖损失。
+
+**验证**：干净副本上该测试转绿，全量仅剩 5 个沙箱 tmux socket 失败（CI 上这些为 ok，日志可证）；真实仓库同样只剩这 5 个；`negative_controls` 20/20；ruff 通过。
+
+（另：本轮排除了 Python 版本——装 3.11 跑出 99 OK；以及 chezmoi/fish/neovim/tmux 版本漂移——本机均已是最新上游。都不是原因。）
+
 ## 后续全仓库对齐
 
 第二轮并行审查发现并修复了以下当前文档/验证错位：

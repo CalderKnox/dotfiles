@@ -683,8 +683,11 @@ class SourceChecks(Fixture):
     self.assertFalse(any(path.endswith("README.md") for path in targets))
     self.assertFalse(any(path == ".vscode" or path.startswith(".vscode/") for path in targets))
     self.assertFalse(any(path.endswith("/.keep") for path in targets | ignored))
-    self.assertNotIn(".pi/agent/permission-mode", targets)
-    self.assertIn(".pi/agent/permission-mode", ignored)
+    # `.pi/agent/permission-mode` 是 Pi 运行时状态目录：本机存在但未被 Git 跟踪，CI 的全新
+    # checkout 中并不存在，`chezmoi ignored` 自然不会列出它。此处**不能**对它断言——那会让
+    # 测试依赖本机脏状态（正是该断言使 CI 自 e429be9 起持续失败）。该规则的覆盖在
+    # test_synthetic_pi_runtime_data_is_excluded_and_rules_are_necessary：自造 fixture
+    # 并逐条做 mutation control，与工作区状态无关。
     self.assertFalse(any(path == ".vscode" or path.startswith(".vscode/") for path in ignored))
     self.assertFalse(any(path == ".orca" or path.startswith(".orca/") for path in targets | ignored))
     self.assertIn(".codex/config.toml", ignored)
