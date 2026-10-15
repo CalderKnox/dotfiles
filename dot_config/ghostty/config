@@ -31,7 +31,7 @@ adjust-cell-height = 2
 # --- Theme and Colors ---
 # Catppuccin Mocha (dark). `window-theme = auto` derives the window theme
 # from the terminal background rather than the system appearance.
-theme = Catppuccin Mocha
+theme = Catppuccin Frappe
 
 # --- Window and Appearance ---
 # 背景透明度与模糊
