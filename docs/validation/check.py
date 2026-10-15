@@ -450,6 +450,39 @@ class SourceChecks(Fixture):
     ):
       self.assertIn(relative, pi_docs)
 
+  def test_documented_disabled_and_fallback_states(self):
+    # uv_resync 在两个 shell 中均为注释模板，文档必须说明“未启用/禁用”。
+    zsh_aliases = (ZSH / "aliases.zsh").read_text()
+    fish_dev = (FISH / "20_dev.fish").read_text()
+    self.assertIn("# uv_resync() {", zsh_aliases)
+    self.assertIn("# function uv_resync", fish_dev)
+    self.assertIsNone(re.search(r"^uv_resync\(\)", zsh_aliases, re.MULTILINE))
+    self.assertIsNone(re.search(r"^function uv_resync", fish_dev, re.MULTILINE))
+    for relative in ("docs/optimization.md", "docs/validation/README.md", "dot_config/zsh/README.md"):
+      with self.subTest(document=relative):
+        self.assertIsNotNone(
+          re.search(r"uv_resync[^\n]*(未启用|禁用|注释模板)", (ROOT / relative).read_text())
+        )
+    # 三模块是显式 source，不是 glob。
+    zshrc = (ROOT / "dot_config/zsh/dot_zshrc").read_text()
+    for module in ("aliases.zsh", "fzf.zsh", "sdk.zsh"):
+      with self.subTest(module=module):
+        self.assertIn(f'source "$HOME/.config/zsh/{module}"', zshrc)
+    self.assertNotIn("*.zsh(N)", zshrc)
+    self.assertNotIn("*.zsh(N)", (ROOT / "docs/getting-started.md").read_text())
+    # 半核并行：优先 nproc，缺失回退 macOS sysctl。
+    self.assertIn("sysctl -n hw.ncpu", zsh_aliases)
+    self.assertIn("sysctl -n hw.ncpu", (FUNCS / "__half_cpu_count.fish").read_text())
+    self.assertIn("sysctl -n hw.ncpu", (ROOT / "docs/getting-started.md").read_text())
+    # SSH 权限说明不得声称 0644 被 ssh 拒绝。
+    ssh_config = (ROOT / "private_dot_ssh/private_config").read_text()
+    self.assertNotIn("0644 被 ssh 拒绝", ssh_config)
+    self.assertNotIn("0644 is rejected", ssh_config)
+    # onproxy 注释区分六个路由变量与两个 no_proxy 豁免变量。
+    onproxy = (FUNCS / "onproxy.fish").read_text()
+    self.assertIn("六个路由变量", onproxy)
+    self.assertIn("set -gx no_proxy", onproxy)
+
   def test_git_lfs_filter_only_runs_for_attributed_files(self):
     git = self.require("git")
     self.stub("git-lfs", "sys.exit(23)")

@@ -1,8 +1,12 @@
 # 验证与回归
 
 验证只读取仓库源码，使用临时目录、隔离 HOME/XDG 与 stub 命令。**不会**执行
-`chezmoi apply`、bootstrap 插件、运行真实更新器/进程 killer 或访问网络。
+`chezmoi apply`、bootstrap 插件、运行真实更新器/进程 killer 或主动访问网络。
 私有 tmux socket 与 `nvim -u NONE -i NONE -n` 不连接用户现有实例。
+
+> 隔离说明：“不联网”靠 stub 与隔离环境实现，不是内核级网络沙箱。个别入口
+> （如 `tmux_plugins.py`）会执行调用者提供的插件目录中的代码，无法保证
+> 任意外部代码不联网；只应传入可信的插件副本。
 
 ## 主要验收入口
 
@@ -22,11 +26,11 @@ python3 docs/validation/check.py --strict
 - 每个 Zsh/Fish/Lua 文件逐个语法检查（含 conf.d 六文件、functions/ 惰性函数与
   completions/ 自有补全）；Fish autoload/补全惰性加载的文件名契约
   （functions/<name>.fish 必须定义同名函数、completions/<cmd>.fish 必须
-  complete --command <cmd>）；文档列出的 fish functions/conf.d/completions 清单与计数必须与源目录一致；JSON、TOML、Git 与初始化脚本解析；Git LFS filter 只在 `.gitattributes` 匹配时调用；
+  complete --command <cmd>）；文档列出的 fish functions/conf.d/completions 清单与计数必须与源目录一致；受管配置清单的 JSON/TOML/Git 解析（显式列举的文件，不扫描全仓库）；Git LFS filter 只在 `.gitattributes` 匹配时调用；
 - Git 的 Pi 源名 allowlist；`.chezmoiignore` 的 Pi runtime blacklist 覆盖 permission-mode、sessions、npm、missions、tasks、models-store 与 workflows/state fixture，并逐项 mutation-check；`auth.json` 与 credentials 路径由通用敏感路径规则保护。
 - 实际渲染的 Zsh/Zim symlink 目标与 private/default 权限契约（不 apply）；`.keep` 占位文件不产生部署目标；
 - updater 全参数预检、混合失败、缺失依赖、临时文件失败与 stderr；
-- Zsh/Fish yazi 成功/失败/清理/caller 变量；uv destructive reset 依赖与短路；
+- Zsh/Fish yazi 成功/失败/清理/导航（caller 变量哨兵仅 Fish 侧校验）；`uv_resync` 当前为注释模板（未启用），测试仅校验模板存在、启用后自动恢复行为断言；
 - fzf 正整数 PID、去重、多选、危险 Ex 行字段、路径选项终止与 ftm 状态；
 - SDKMAN 惰性加载、失败不递归、reload 不重复初始化（zsh）；fish 侧 SDKMAN 桩未安装不定义、惰性、经 bass 转发参数；
 - completion 冷/热缓存、未来 mtime、同路径降级、NO_CLOBBER、无效生成、编译失败、
@@ -66,8 +70,10 @@ python3 docs/validation/tmux_plugins.py \
 
 输入目录需包含 Catppuccin 的 `tmux`、`tmux-cpu`、`tmux-battery` 与 TPM。
 复制到 disposable HOME 后运行实际 initializer；所有 status collectors 被 stub，
-不会调用真实 CPU/battery/network 工具。测试只证明这些输入版本的契约，不能
-保证所有未来上游版本；具体 revisions 见 [optimization.md](../optimization.md)。
+不会主动调用真实 CPU/battery/network 工具。脚本会执行所给插件目录中的代码，
+不校验其 Git revision 是否等于 [optimization.md](../optimization.md) 所列
+（该表仅为已知良好版本，非自动断言），因此只应传入可信副本；测试只证明这些
+输入版本的契约，不能保证所有未来上游版本。
 
 ## 终端 parser 与窄场景性能实验
 
