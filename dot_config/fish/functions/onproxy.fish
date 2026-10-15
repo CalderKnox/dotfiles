@@ -2,7 +2,7 @@
 # onproxy.fish — 启用终端代理
 # =============================================================================
 # Description : 设置 HTTP/HTTPS + SOCKS5 代理环境变量（与 dot_gitconfig /
-#               ssh config 同端口 5376，统一为 5376）。由原 conf.d/
+#               ssh config 同端口 7890）。由原 conf.d/
 #               00_aliases.fish 迁入 functions/ 惰性加载目录。
 # Usage       : onproxy；关闭用 ofproxy（ofproxy.fish）
 # Guards      : 仅 set -gx 六个代理变量，无外部依赖

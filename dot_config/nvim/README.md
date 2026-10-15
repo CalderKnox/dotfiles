@@ -15,7 +15,7 @@ nvim
 ```
 
 The first Neovim launch bootstraps lazy.nvim and downloads plugins if missing.
-Current local verification uses Neovim 0.12.5 / LuaJIT; the inspected LazyVim
+Current local verification uses Neovim 0.12.6 / LuaJIT; the inspected LazyVim
 16.0.1 requires Neovim ≥ 0.11.2. Check upstream requirements when upgrading.
 
 ## Configuration

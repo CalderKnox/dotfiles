@@ -30,7 +30,7 @@ alias zshconfig='code ~/.zshrc'                  # 编辑 ~/.zshrc
 alias zshsource='source ~/.zshrc'                # 重新加载配置
 
 
-# 启用终端代理 (127.0.0.1:5376, HTTP/HTTPS + SOCKS5)
+# 启用终端代理 (127.0.0.1:7890, HTTP/HTTPS + SOCKS5)
 onproxy() {
     local host="127.0.0.1" port=7890
     local http="http://$host:$port" socks="socks5h://$host:$port"
@@ -132,7 +132,7 @@ alias format='biome format --write --files-max-size=10485760'
 # =============================================================================
 # 必须为环境变量（非 alias），供 git/crontab/fzf 的 Ctrl-G 绑定等子进程读取；
 # fzf.zsh 的 ctrl-g:execute($EDITOR ...) 在 source 时展开，故本文件必须先于 fzf.zsh 加载。
-# 守卫：已继承的 EDITOR/VISUAL（远端/launchd 注入）优先，缺省回落 nvim（与 fish 00_env.fish 一致）
+# 守卫：已继承的非空 EDITOR/VISUAL（远端/launchd 注入）优先，缺省或空值回落 nvim。
 [[ -n "${EDITOR:-}" ]] || export EDITOR='nvim'
 [[ -n "${VISUAL:-}" ]] || export VISUAL='nvim'
 

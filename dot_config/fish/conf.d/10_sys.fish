@@ -8,8 +8,9 @@
 #               迁至 functions/ 惰性加载目录，首次调用时才 source。
 # Usage       : 由 Fish 自动 source（conf.d 字典序，1x 为系统基础层，
 #               顺序无关）；行为改变型别名（top/df/du/ping/tmux/wget/ls 系/
-#               cat/rm/cp/mv/mkdir）仅在交互 shell 定义——对齐 zsh 侧 .zshrc
+#               cat/mkdir）仅在交互 shell 定义——对齐 zsh 侧 .zshrc
 #               只在交互 shell 加载的语义，非交互 fish -c 脚本拿到原生命令。
+#               rm/cp/mv 的 -i 确认别名在两侧均注释停用。
 # Guards      : 本文件无外部强依赖；别名未加 type -q 守卫，依赖缺失时
 #               错误在调用时暴露（属预期）；与 zsh aliases.zsh 职责对齐。
 # Author      : Payne
@@ -114,8 +115,9 @@ alias timestamp_millisecond='python3 -c "import time; print(int(time.time()*1000
 alias timestamp_microsecond='python3 -c "import time; print(int(time.time()*1000*1000))"'
 
 # 行为改变型别名仅交互 shell 定义（见文件头 Usage）：非交互脚本中 top/du/cat
-# /cp/mv/mkdir 等保持原生语义，不被 lsd/bat/-i 等包装劫持（等价 zsh 侧
-# .zshrc 只在交互 shell 加载的语义；cdd/mkcd 等显式函数调用不受影响）
+# /cp/mv/mkdir 等保持原生命令语义，不被 lsd/bat 等别名包装劫持（等价 zsh 侧
+# .zshrc 只在交互 shell 加载的语义；cdd/mkcd 等显式函数调用不受影响）。
+# rm/cp/mv 的 -i aliases 两侧均已禁用。
 if status is-interactive
     alias top='htop'
     alias df='df -h'

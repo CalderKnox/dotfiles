@@ -5,7 +5,7 @@
 #               加载，mise shim 因此覆盖 Homebrew/系统同名二进制）。
 #               `mise activate fish` 注入 shim 与目录钩子，使 node/go/bun 等
 #               由 ~/.config/mise/config.toml 管理的工具自动进入 PATH；
-#               版本选择由该文件声明（当前 latest 浮动），此处仅负责激活。
+#               版本选择由该文件声明（部分工具 latest 浮动、Node 固定），此处仅负责激活。
 #               starship/zoxide 等交互初始化仍留在 config.fish 的
 #               status is-interactive 块（仅交互 shell 生效）；另含 SDKMAN
 #               惰性桩（见文末，与 zsh 侧 sdk.zsh 同契约）。

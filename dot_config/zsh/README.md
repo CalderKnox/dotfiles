@@ -71,7 +71,7 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.cache/zsh/fzf_prefix`
 
 ### 有守卫的可选组件（未安装时静默跳过）
 
-`pnpm`（tabtab 补全）、SDKMAN（惰性加载，详见 `sdk.zsh` 注释）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/`，按二进制 stat 身份失效并使用带锁的 zcompile，二进制替换自动重建；`k` 别名带守卫）、krew、`~/.cargo/env`。`update-all` 的 7 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`/`pi` 逐项 `command -v` 守卫，未安装跳过、失败汇总并返回非零；其中 `brew` 任务依赖 `brew tap buo/homebrew-cask-upgrade`（提供 `brew cu`），新机器上未 tap 时该任务会在 `brew cu` 处失败。详见 `sdk.zsh` 与 `aliases.zsh` 源码。
+`pnpm`（tabtab 补全）、SDKMAN（惰性加载，详见 `sdk.zsh` 注释）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/`，按二进制 stat 身份失效并使用带锁的 zcompile，二进制替换自动重建；`k` 别名带守卫）、krew、`~/.cargo/bin`（存在时直接加入 PATH；不 source `~/.cargo/env`）。`update-all` 的 7 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`/`pi` 逐项 `command -v` 守卫，未安装跳过、失败汇总并返回非零；其中 `brew` 任务依赖 `brew tap buo/homebrew-cask-upgrade`（提供 `brew cu`），新机器上未 tap 时该任务会在 `brew cu` 处失败。详见 `sdk.zsh` 与 `aliases.zsh` 源码。
 
 ### 运行时工具（对应别名/函数调用时才需要）
 
@@ -82,7 +82,7 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.cache/zsh/fzf_prefix`
 1. **破坏性命令**：`uv_resync` 先检查 uv 可用，随后删除 `~/.venv` 与 `~/uv.lock` 再执行 `uv sync`（目标为家目录路径而非当前项目），使用前请确认。定义见 `aliases.zsh`。
 2. **`~/.config/zsh/.zshrc`（即仓库内 `dot_config/zsh/dot_zshrc`，兼容 `~/.zshrc` 符号链接）已收敛单一初始化点**：fzf 键位/补全仅在 `fzf.zsh` 内成功生成后 eval `fzf --zsh` 的完整输出一次，`dot_zshrc` 不再重复 eval；`sdk.zsh` 为无条件 `source` 但内部逐项守卫。详见 `dot_zshrc` 注释。
 3. **强绑定的个人路径与镜像**：`GOPATH`、`GOPROXY`、清华 pip 镜像别名、`ANDROID_NDK_HOME` 等以 `sdk.zsh`/`aliases.zsh` 源码为准。
-4. **被别名替换的原生命令**：`cat→bat`、`ls→lsd`、`top→htop`、`rm/cp/mv→-i` 等见 `aliases.zsh`；脚本中需原生行为时用 `command cat` 等形式。
+4. **被别名替换的原生命令**：`cat→bat`、`ls→lsd`、`top→htop` 等见 `aliases.zsh`；`rm`/`cp`/`mv` 的 `-i` 别名已注释停用，不提供交互确认；脚本中需原生行为时用 `command cat` 等形式。
 
 ## 修改与验收流程
 
