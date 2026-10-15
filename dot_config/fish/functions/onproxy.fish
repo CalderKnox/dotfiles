@@ -8,7 +8,7 @@
 # Guards      : 仅 set -gx 六个代理变量，无外部依赖
 # Author      : Payne
 # =============================================================================
-function onproxy --description "启用终端代理 (127.0.0.1:5376, socks5/http)"
+function onproxy --description "启用终端代理 (127.0.0.1:7890, socks5/http)"
     set -l proxy_host "127.0.0.1"
     set -l proxy_port 7890
     set -l proxy_url "http://$proxy_host:$proxy_port"
