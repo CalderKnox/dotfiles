@@ -993,6 +993,45 @@ class ZshHelpers(Fixture):
     self.assertEqual(self.calls("uv"), [])
     self.assertIn("Cannot allocate stderr file", result.stderr)
 
+  def brew_stub(self, with_cu):
+    """A brew whose `commands` output advertises (or omits) the tap-provided `cu`."""
+    listed = "install\\nlist\\nupgrade\\ncleanup" + ("\\ncu" if with_cu else "")
+    self.stub(
+      "brew",
+      f"if sys.argv[1] == 'commands':\n    print('{listed}')\n    raise SystemExit(0)\n"
+      f"if sys.argv[1] == 'cu':\n    raise SystemExit(1 if not {with_cu!r} else 0)\n"
+      "raise SystemExit(0)",
+    )
+
+  def test_update_brew_tolerates_missing_cask_upgrade_tap(self):
+    # `brew cu` 由第三方 tap（buo/homebrew-cask-upgrade）提供，不在 brew 核心内。原先把它硬接进
+    # && 链：未装该 tap 时 `brew cu` 返回非零 → 整条链短路 → brew 被误报为失败，且 cleanup 被跳过。
+    self.brew_stub(with_cu=False)
+    result = self.shell(self.updater(), "update-all brew\n")
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+    self.assertIn("✓ brew done", result.stdout)
+    self.assertIn("brew cu 不可用", result.stderr)
+    self.assertNotIn(["brew", "cu", "-y", "-a"], self.calls("brew"))
+    self.assertIn(["brew", "cleanup", "--prune=all"], self.calls("brew"))
+
+  def test_update_brew_runs_cask_upgrade_when_tap_is_present(self):
+    self.brew_stub(with_cu=True)
+    result = self.shell(self.updater(), "update-all brew\n")
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+    self.assertIn(["brew", "cu", "-y", "-a"], self.calls("brew"))
+
+  def test_update_brew_propagates_a_real_cask_upgrade_failure(self):
+    # 探测命中但 `brew cu` 真的失败时必须照旧计入失败，不能被守卫吞掉。
+    self.stub(
+      "brew",
+      "if sys.argv[1] == 'commands':\n    print('install\\ncu')\n    raise SystemExit(0)\n"
+      "if sys.argv[1] == 'cu':\n    sys.exit(23)\n"
+      "raise SystemExit(0)",
+    )
+    result = self.shell(self.updater(), "update-all brew\n")
+    self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+    self.assertIn("✗ brew failed", result.stdout)
+
   def test_yazi_failure_cleanup_and_trap_preservation(self):
     self.stub("yazi", "sys.exit(23)")
     definition = function_source(ZSH / "aliases.zsh", "y")

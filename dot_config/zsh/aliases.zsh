@@ -244,7 +244,10 @@ y() {
 # ---------------------------------------------------------------------------
 update-all() {
     local -A tasks=(
-        brew  "brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all"
+        # brew cu 由第三方 tap（buo/homebrew-cask-upgrade）提供，不在 brew 核心内。原先直接串进
+        # && 链：未装该 tap 时 `brew cu` 报 Unknown command，整条链非零 → brew 被误判为失败。
+        # 先探测再决定是否跑 cask 升级：不可用则跳过并在 stderr 提示；brew cu 真的失败仍传播非零。
+        brew  "brew update -f && brew upgrade -f --greedy-latest -y && { if brew commands 2>/dev/null | grep -qx cu; then brew cu -y -a; else echo '⚠️  brew cu 不可用（缺 buo/homebrew-cask-upgrade tap），跳过 cask 升级' >&2; fi; } && brew cleanup --prune=all"
         sdk   "sdk update && sdk upgrade && sdk selfupdate && sdk flush"
         rustup  "rustup update"
         tldr  "tldr --update"

@@ -153,6 +153,37 @@ class FishRuntime(Fixture):
     self.assertIn("no runnable targets", result.stdout)
     self.assertNotIn("All updates completed", result.stdout)
 
+  def test_update_all_brew_tolerates_missing_cask_upgrade_tap(self):
+    # `brew cu` 由第三方 tap（buo/homebrew-cask-upgrade）提供，不在 brew 核心内。hardcoded 进
+    # && 链会让未装该 tap 的机器把 brew 整体误判为 failed（且跳过 cleanup）。
+    self.stub(
+      "brew",
+      "if sys.argv[1] == 'commands':\n    print('install\\nlist\\nupgrade\\ncleanup')\n    raise SystemExit(0)\n"
+      "if sys.argv[1] == 'cu':\n    sys.exit(1)\n"
+      "raise SystemExit(0)",
+    )
+    definition = function_source(FUNCS / "update-all.fish", "update-all", "fish")
+    result = self.shell(definition, "update-all brew\n", "fish", {"TERM": "xterm-256color"})
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+    self.assertIn("✓ brew done", result.stdout)
+    self.assertIn("brew cu 不可用", result.stderr)
+    self.assertNotIn(["brew", "cu", "-y", "-a"], self.calls("brew"))
+    self.assertIn(["brew", "cleanup", "--prune=all"], self.calls("brew"))
+
+  def test_update_all_brew_runs_and_propagates_cask_upgrade(self):
+    self.stub(
+      "brew",
+      "if sys.argv[1] == 'commands':\n    print('install\\ncu')\n    raise SystemExit(0)\n"
+      "if sys.argv[1] == 'cu':\n    sys.exit(23)\n"
+      "raise SystemExit(0)",
+    )
+    definition = function_source(FUNCS / "update-all.fish", "update-all", "fish")
+    result = self.shell(definition, "update-all brew\n", "fish", {"TERM": "xterm-256color"})
+    self.assertIn(["brew", "cu", "-y", "-a"], self.calls("brew"))
+    # 探测命中但 cu 真失败时必须仍报失败，不能被守卫吞掉。
+    self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+    self.assertIn("✗ brew failed", result.stdout)
+
   def test_cdd_falls_back_when_lsd_alias_is_absent(self):
     # cdd 用 `ls -la --group-directories-first`：交互式下 ls 是 lsd 别名可接受该 GNU 选项，
     # 但非交互/无 lsd 时 BSD /bin/ls 拒绝它且错误被 2>/dev/null 吞掉，导致静默无输出。

@@ -55,7 +55,23 @@ function update-all --description "一键更新所有开发环境 (fish 版)"
             case brew
                 if type -q brew
                     set -a attempted_names $name
-                    if brew update -f && brew upgrade -f --greedy-latest -y && brew cu -y -a && brew cleanup --prune=all
+                    # brew cu 由第三方 tap（buo/homebrew-cask-upgrade）提供，不在 brew 核心内。
+                    # 直接串进 && 链会让未装该 tap 的机器把 brew 整体误判为失败；先探测再执行。
+                    set -l ok 0
+                    if brew update -f && brew upgrade -f --greedy-latest -y
+                        set ok 1
+                        if brew commands 2>/dev/null | grep -qx cu
+                            if not brew cu -y -a
+                                set ok 0
+                            end
+                        else
+                            echo "⚠️  brew cu 不可用（缺 buo/homebrew-cask-upgrade tap），跳过 cask 升级" >&2
+                        end
+                        if test $ok -eq 1; and not brew cleanup --prune=all
+                            set ok 0
+                        end
+                    end
+                    if test $ok -eq 1
                         echo (set_color green)"✓ $name done"(set_color normal)
                     else
                         set failed (math $failed + 1)

@@ -29,8 +29,8 @@ python3 docs/validation/check.py --strict
   complete --command <cmd>）；文档列出的 fish functions/conf.d/completions 清单与计数必须与源目录一致；受管配置清单的 JSON/TOML/Git 解析（显式列举的文件，不扫描全仓库）；Git LFS filter 只在 `.gitattributes` 匹配时调用；
 - Git 的 Pi 源名 allowlist；`.chezmoiignore` 的 Pi runtime blacklist 覆盖 permission-mode、sessions、npm、missions、tasks、models-store 与 workflows/state fixture，并逐项 mutation-check；`auth.json` 与 credentials 路径由通用敏感路径规则保护。
 - 实际渲染的 Zsh/Zim symlink 目标与 private/default 权限契约（不 apply）；`.keep` 占位文件不产生部署目标；
-- updater 全参数预检、混合失败、缺失依赖、临时文件失败与 stderr；
-- Zsh/Fish yazi 成功/失败/清理/导航（caller 变量哨兵仅 Fish 侧校验）；`uv_resync` 当前为注释模板（未启用），测试仅校验模板存在、启用后自动恢复行为断言；
+- updater 全参数预检、混合失败、缺失依赖、临时文件失败与 stderr；全部目标缺失（`attempted==0`）时 zsh/fish 均须报“no runnable targets”而非“更新完成”；brew 目标的第三方 `brew cu`（tap `buo/homebrew-cask-upgrade`）不可用时须跳过并提示、不得把 brew 误报为 failed，同时真实 `cu` 失败仍须传播；
+- Zsh/Fish yazi 成功/失败/清理/导航（caller 变量哨兵仅 Fish 侧校验）；fish `cdd` 在无 lsd 别名时回退到可移植 `ls`；`uv_resync` 当前为注释模板（未启用），测试仅校验模板存在、启用后自动恢复行为断言；
 - fzf 正整数 PID、去重、多选、危险 Ex 行字段、路径选项终止与 ftm 状态；
 - SDKMAN 惰性加载、失败不递归、reload 不重复初始化（zsh）；fish 侧 SDKMAN 桩未安装不定义、惰性、经 bass 转发参数；
 - completion 冷/热缓存、未来 mtime、同路径降级、NO_CLOBBER、无效生成、编译失败、
