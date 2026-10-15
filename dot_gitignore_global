@@ -61,10 +61,10 @@ node_modules/
 
 # --- Coding agent（若某仓库确需入库这些目录：仓库本地 .gitignore 加 `!` 否定，
 #     或 `git add -f` 强制添加） ---
-.claude/
-.omc/
-.orca/
-.pi/
+**/.claude/**
+**/.omc/**
+**/.orca/**
+**/.pi/**
 
 # --- 文件名卫生（个人规则） ---
 # 名称含空格
