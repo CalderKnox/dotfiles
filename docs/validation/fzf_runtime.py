@@ -98,4 +98,11 @@ class FzfExecution(Fixture):
 
 
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    # CI runs this as a separate gate alongside `check.py --strict`. Bare unittest.main()
+    # exits 0 when every test SKIPS, so a missing/unusable fzf would silently degrade this
+    # gate to a green no-op — contradicting the strict doctrine that a skip is a failure.
+    # Match terminal_parsers.py / tmux_plugins.py: any skip is a non-zero exit.
+    result = unittest.TextTestRunner(verbosity=2).run(
+        unittest.defaultTestLoader.loadTestsFromTestCase(FzfExecution)
+    )
+    raise SystemExit(0 if result.wasSuccessful() and not result.skipped else 1)

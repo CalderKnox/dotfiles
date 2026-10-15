@@ -18,6 +18,13 @@ import runtime_checks  # noqa: E402
 
 CONTROLS = (
   (check.SourceChecks, "test_pi_source_allowlist"),
+  # 根锚定卫生规则：b4e8bac 基线含 `**.log` / `node_modules/` / `.pnpm-store/`，
+  # 嵌套 fixture 在旧源码下会部署，故当前测试必须对其失败。
+  (check.SourceChecks, "test_hygiene_rules_exclude_nested_targets"),
+  # 不变式版：基线里 `**.log` 等不带 `**/` 前缀的模式不在 ROOT_ANCHORED 白名单中，必须失败。
+  (check.SourceChecks, "test_ignore_patterns_are_globstar_prefixed_or_intentionally_rooted"),
+  # brew cu 守卫：基线 aliases.zsh 仍把 `brew cu` 硬接进 && 链，无 tap 时会误报失败。
+  (check.ZshHelpers, "test_update_brew_tolerates_missing_cask_upgrade_tap"),
   (check.ZshHelpers, "test_update_preflight_and_caller_variable"),
   (check.ZshHelpers, "test_flkill_multiselect_is_validated_and_deduplicated"),
   (check.ZshHelpers, "test_frg_uses_shell_quoted_placeholders_and_option_terminators"),
@@ -36,6 +43,7 @@ CONTROLS = (
   (runtime_checks.NeovimRuntime, "test_cursorline_real_mode_transitions"),
 )
 FILES = (
+  (".chezmoiignore", ".chezmoiignore"),
   (".gitignore", ".gitignore"),
   ("dot_tmux.conf", "dot_tmux.conf"),
   ("private_dot_config/nvim/lua/config/autocmds.lua", "private_dot_config/nvim/lua/config/autocmds.lua"),

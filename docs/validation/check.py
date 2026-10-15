@@ -197,7 +197,12 @@ class SourceChecks(Fixture):
     for document, text in (("docs/layout.md", layout), ("docs/maintenance.md", maintenance)):
       for name in functions:
         with self.subTest(document=document, function=name):
-          self.assertIn(name, text)
+          # 词边界匹配：裸 assertIn 对单字母函数名（如 y）是空断言——字母 y 几乎必然
+          # 出现在正文中，删除该函数在文档里的整行也不会失败。
+          self.assertIsNotNone(
+            re.search(rf"(?<![\w-]){re.escape(name)}(?![\w-])", text),
+            f"{name} 未作为独立词条出现在 {document}",
+          )
     conf = sorted(path.stem.removeprefix("dot_") for path in FISH.glob("*.fish"))
     self.assertEqual(
       conf,
@@ -215,11 +220,52 @@ class SourceChecks(Fixture):
       with self.subTest(document="docs/layout.md", completion=name):
         self.assertIn(name.removeprefix("symlink_"), layout)
 
+  def test_fish_plugin_inventory_matches_documentation(self):
+    # fish_plugins 的插件数此前无任何测试覆盖（只有 functions/conf.d/completions 有清单一致性
+    # 测试），增删插件不会触发失败，文档中的“13 插件”可静默漂移。此处由源文件推导计数并
+    # 对照文档声明，任一侧变动都会失败。
+    plugins = [
+      line
+      for line in (ROOT / "dot_config/fish/fish_plugins").read_text().splitlines()
+      if line.strip() and not line.lstrip().startswith("#")
+    ]
+    count = len(plugins)
+    self.assertEqual(count, 13, "fish_plugins 条目数变化时必须同步各文档中的插件计数")
+    for relative, pattern in (
+      ("README.md", rf"{count}\s*个插件"),
+      ("docs/shell.md", rf"{count}\s*插件"),
+      ("docs/getting-started.md", rf"{count}\s*个插件"),
+      ("docs/layout.md", rf"{count}\s*个"),
+    ):
+      with self.subTest(document=relative):
+        self.assertIsNotNone(
+          re.search(pattern, (ROOT / relative).read_text()),
+          f"{relative} 未声明 {count} 个 fish 插件",
+        )
+
   def test_lua_syntax_per_file(self):
     tool = self.require("luac")
     for path in sorted((ROOT / "dot_config/nvim").rglob("*.lua")):
       with self.subTest(path=path.name):
         self.ok(self.run_command([tool, "-p", path]))
+
+  def test_lua_syntax_under_neovim_luajit(self):
+    # 宿主 `luac`（本机 5.5）与 Neovim 的 LuaJIT（Lua 5.1）版本不同：5.3+ 专有语法（如 `//`
+    # 整除）能过 `luac -p` 却在 Neovim 加载时崩溃，而 `init.lua` / `lua/config/lazy.lua` 只有
+    # luac 这一道语法门（从不被 -u NONE 运行时测试 dofile）。此处改用 Neovim 自身的 LuaJIT
+    # 编译每个配置文件——loadfile 只编译不执行——使语法门与真实运行时解释器一致。
+    nvim = self.require("nvim")
+    for path in sorted((ROOT / "dot_config/nvim").rglob("*.lua")):
+      with self.subTest(path=path.name):
+        source = str(path).replace("\\", "\\\\").replace("'", "\\'")
+        script = (
+          f"lua local h, e = loadfile('{source}'); "
+          "if not h then io.stderr:write(e or 'load failed'); os.exit(1) end"
+        )
+        result = self.run_command(
+          [nvim, "--headless", "-u", "NONE", "-i", "NONE", "-n", "-c", script, "-c", "qa!"]
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
   def test_neovim_documentation_contracts(self):
     config = ROOT / "dot_config/nvim"
@@ -327,15 +373,17 @@ class SourceChecks(Fixture):
           self.assertIn(labels[tool], document)
           self.assertIn(str(version), document)
 
-    shortcut_groups = (
-      "gob gor got gom gomt goi mvnc mvni mvnp mvnt mvnci "
-      "pipi pipid pipr pipl pipu pnpi pnpa pnpad pnps pnpt "
-      "cb cr ct cc ccl cu redis-cli mongo-local"
-    ).split()
+    # 快捷别名总数必须由源文件“推导”断言，不能与测试内的硬编码清单自证：
+    # 后者只能证明“清单里的名字仍存在”，新增一个快捷别名（如再添一个 Go 别名）
+    # 不会改变计数，文档与源码可静默漂移。这里改为「源文件全部 alias − 显式登记
+    # 的非快捷别名」；新增别名会改变 derived 计数并使文档断言失败，从而强制同步。
     fish_dev = (ROOT / "dot_config/fish/conf.d/20_dev.fish").read_text()
-    shortcut_count = sum(
-      re.search(rf"^alias {re.escape(name)}=", fish_dev, re.MULTILINE) is not None for name in shortcut_groups
-    )
+    non_shortcut_aliases = {
+      "gopen", "lg", "ruff_auto", "format", "pip_tsinghua_mirror",
+      "cla", "cla-unsafe", "clp", "clpconfig", "claconfig",
+    }
+    all_aliases = set(re.findall(r"^alias ([A-Za-z0-9_.-]+)=", fish_dev, re.MULTILINE))
+    shortcut_count = len(all_aliases - non_shortcut_aliases)
     self.assertEqual(shortcut_count, 29)
     shell_docs = (ROOT / "docs/shell.md").read_text()
     self.assertIn(f"共 {shortcut_count} 个", shell_docs)
@@ -469,6 +517,12 @@ class SourceChecks(Fixture):
     for module in ("aliases.zsh", "fzf.zsh", "sdk.zsh"):
       with self.subTest(module=module):
         self.assertIn(f'source "$HOME/.config/zsh/{module}"', zshrc)
+    # 加载顺序即语义：fzf.zsh 在 source 时展开 $EDITOR，sdk.zsh 的 compdef 需 compinit 已跑。
+    # 仅断言“字符串存在”是顺序无关的——把 fzf 挪到 aliases 之前仍会通过，故显式校验位置顺序。
+    positions = [zshrc.index(f'source "$HOME/.config/zsh/{module}"') for module in ("aliases.zsh", "fzf.zsh", "sdk.zsh")]
+    self.assertEqual(
+      positions, sorted(positions), f"三模块 source 顺序必须为 aliases→fzf→sdk，实测位置 {positions}"
+    )
     self.assertNotIn("*.zsh(N)", zshrc)
     self.assertNotIn("*.zsh(N)", (ROOT / "docs/getting-started.md").read_text())
     # 半核并行：优先 nproc，缺失回退 macOS sysctl。

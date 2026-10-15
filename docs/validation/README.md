@@ -13,6 +13,13 @@
 CI（`.github/workflows/ci.yaml`，`macos-latest`）在 push/PR 上运行
 `actionlint`、`check.py --strict` 与 `fzf_runtime.py`；本文其余入口（negative
 controls、terminal parsers、tmux plugins、benchmark）需手动运行。
+因此 **CI 可复现的正向检查为 101 项**（check.py 99 + fzf_runtime 2）；terminal
+parsers（2）与 tmux plugins（1）需 macOS GUI 应用与本机插件副本，只在本地运行。
+
+所有测试入口（`check.py` / `fzf_runtime.py` / `terminal_parsers.py` /
+`tmux_plugins.py`）在**任何 skip 时都返回非零**——缺依赖会显式失败而不是让门变绿。
+测试需要 unix socket 绑定（tmux）与 PTY（fzf）；在受限容器/沙箱中会以
+`Operation not permitted` / `out of pty devices` 失败，这是环境能力限制而非用例缺陷。
 
 ```sh
 python3 docs/validation/check.py --strict
@@ -23,11 +30,12 @@ python3 docs/validation/check.py --strict
 
 覆盖：
 
-- 每个 Zsh/Fish/Lua 文件逐个语法检查（含 conf.d 六文件、functions/ 惰性函数与
-  completions/ 自有补全）；Fish autoload/补全惰性加载的文件名契约
+- 每个 Zsh/Fish/Lua 文件逐个语法检查（含 conf.d 六文件、functions/ 惰性函数与 completions/ 自有补全）；Lua 额外用 Neovim 自身的 LuaJIT（`loadfile`，只编译不执行）复核，因宿主 `luac` 版本高于 Neovim 的 Lua 5.1，5.3+ 专有语法只有该门能拦；Fish autoload/补全惰性加载的文件名契约
   （functions/<name>.fish 必须定义同名函数、completions/<cmd>.fish 必须
   complete --command <cmd>）；文档列出的 fish functions/conf.d/completions 清单与计数必须与源目录一致；受管配置清单的 JSON/TOML/Git 解析（显式列举的文件，不扫描全仓库）；Git LFS filter 只在 `.gitattributes` 匹配时调用；
 - Git 的 Pi 源名 allowlist；`.chezmoiignore` 的 Pi runtime blacklist 覆盖 permission-mode、sessions、npm、missions、tasks、models-store 与 workflows/state fixture，并逐项 mutation-check；`auth.json` 与 credentials 路径由通用敏感路径规则保护。
+- `.chezmoiignore` 的**非 Pi 卫生规则**（`**/*.local*`/`**/*.bak`/`**/*.log*`/`**/*.md`/`**/LICENSE`/敏感名/`**/node_modules/`/`**/.pnpm-store/`/`**/.DS_Store` 等）以**嵌套** fixture 逐条断言：规则生效、删除后目标暴露（mutation control）、且普通配置仍部署（正向对照）。模式锚定源根，缺 `**/` 前缀的规则只匹配仓库根——该类静默失效历史上已发生三次；除上述枚举外，另有**不变式**测试断言任何新的、不带 `**/` 前缀且不在显式白名单内的模式一律失败，使该类**无法再次静默复发**。
+- 部署边界不变式：固定 depth-1 受管目标集合（9 项），使"新增根级源文件静默渲染进 `$HOME`"失败；并断言 `.github` 不部署（此前仅依赖"源名以点开头"的隐式规则）。
 - 实际渲染的 Zsh/Zim symlink 目标与 private/default 权限契约（不 apply）；`.keep` 占位文件不产生部署目标；
 - updater 全参数预检、混合失败、缺失依赖、临时文件失败与 stderr；全部目标缺失（`attempted==0`）时 zsh/fish 均须报“no runnable targets”而非“更新完成”；brew 目标的第三方 `brew cu`（tap `buo/homebrew-cask-upgrade`）不可用时须跳过并提示、不得把 brew 误报为 failed，同时真实 `cu` 失败仍须传播；
 - Zsh/Fish yazi 成功/失败/清理/导航（caller 变量哨兵仅 Fish 侧校验）；fish `cdd` 在无 lsd 别名时回退到可移植 `ls`；`uv_resync` 当前为注释模板（未启用），测试仅校验模板存在、启用后自动恢复行为断言；
@@ -39,7 +47,7 @@ python3 docs/validation/check.py --strict
 - tmux contract stubs 的 cold/reload/能力去重与 XDG/传统/显式路径选择；
 - 真实 Neovim 输入的 Insert/Escape/Ctrl-C/Replace/Ctrl-O/Visual、窗口切换、
   augroup 重载及本地 overrides；
-- 文档相对链接和 Neovim 架构关键事实；配置文档与实际 proxy、terminal、mise、Pi、Fish shortcut 来源的一致性；bytecode hygiene（每个入口导入项目模块前关闭写字节码，`docs/validation/` 无 `__pycache__`）。
+- 文档相对链接和 Neovim 架构关键事实；配置文档与实际 proxy、terminal、mise、Pi、Fish shortcut 来源的一致性；`dot_zshrc` 三模块 source **顺序**（aliases→fzf→sdk，仅断言存在是顺序无关的空断言）；`fish_plugins` 插件计数与文档声明一致；bytecode hygiene（每个入口导入项目模块前关闭写字节码，`docs/validation/` 无 `__pycache__`）。
 
 ## 历史对照（negative controls）
 
@@ -50,6 +58,7 @@ python3 docs/validation/negative_controls.py --revision b4e8bac
 把指定 Git revision 的源码复制到临时目录，运行当前的选定回归。
 仅当每个控制都产生**断言失败**、没有 infrastructure errors/skips 时命令成功。
 不 checkout、不修改当前 worktree。默认基线为 `b4e8bac`；也可指定包含兼容旧布局源码的其他历史 commit。
+控制清单包含 `.chezmoiignore` 根锚定卫生规则（基线含 `**.log` 等失效写法，故当前测试必须对其失败）。
 
 ## 原生 fzf 行为
 
