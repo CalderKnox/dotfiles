@@ -35,7 +35,7 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.cache/zsh/fzf_prefix`
 
 ### 内联注释的兼容性
 
-`FZF_DEFAULT_OPTS` 等多行值中的行内 `#` 注释已在本机 fzf **0.74.3** 实测可正常解析；升级或更换 fzf 后如遇解析异常，优先检查 `fzf.zsh` 第 3 节全局选项。
+`FZF_DEFAULT_OPTS` 等多行值中的行内 `#` 注释已在本机 fzf **0.74.5** 实测可正常解析；升级或更换 fzf 后如遇解析异常，优先检查 `fzf.zsh` 第 3 节全局选项。
 
 ## 函数速查
 
@@ -75,7 +75,7 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.cache/zsh/fzf_prefix`
 
 ### 运行时工具（对应别名/函数调用时才需要）
 
-`fd`（主力，缺省回退 `rg`）、`bat`、`lsd`、`nvim`、`code`、`htop`、`fastfetch`、`tmux`、`yazi`、`gh`、`lazygit`、`claude`、`opencode`、`ruff`、`uv`、`rustup`、`tldr`、`mise`、`nproc`（coreutils）、`wget`、`jadx-gui`、`scrcpy`。`java` 仅经 `update-all` 的 `sdk` 任务间接使用。已移除的死引用可从更早的独立 `zsh-config` 仓库历史找回；本仓库从未有过 `baseline` 标签，勿凭空创建。
+`fd`（主力；FZF 的 `FZF_DEFAULT_COMMAND`/`FZF_ALT_C_COMMAND` 缺省回退 `rg`，`find_large_files` 缺省回退 `find`）、`bat`、`lsd`、`nvim`、`code`、`htop`、`fastfetch`、`tmux`、`yazi`、`gh`、`lazygit`、`claude`、`opencode`、`ruff`、`uv`、`rustup`、`tldr`、`mise`、`nproc`（coreutils）、`wget`、`jadx-gui`、`scrcpy`。`java` 仅经 `update-all` 的 `sdk` 任务间接使用。已移除的死引用可从更早的独立 `zsh-config` 仓库历史找回；本仓库从未有过 `baseline` 标签，勿凭空创建。
 
 ## 注意事项
 

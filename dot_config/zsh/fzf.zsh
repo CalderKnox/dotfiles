@@ -6,7 +6,8 @@
 # Usage       : 由 ~/.zshrc source 加载；必须在 aliases.zsh 之后（依赖其导出的
 #               $EDITOR——Ctrl-G 绑定在 source 时展开）、在 sdk.zsh 之前
 # Guards      : 前缀探测带缓存与自愈；fzf 初始化与补全均 command -v 守卫
-# Depends     : 必需 fzf、fzf-tab；主力 fd（缺失时回退 rg）；预览用 bat/lsd
+# Depends     : 必需 fzf、fzf-tab；主力 fd（FZF_DEFAULT_COMMAND 缺失时回退 rg，
+#               find_large_files 缺失时回退 find）；预览用 bat/lsd
 # Author      : Payne
 # =============================================================================
 
@@ -196,7 +197,14 @@ fkill() {
 # Usage: find_large_files 500M
 find_large_files() {
     local size=${1:-100M}
-    fd -t f -S "+$size" -X du -h {} | sort -k1hr
+    # 本函数必需 fd；上面 FZF_DEFAULT_COMMAND 的 rg 回退不覆盖这里，故单独守卫。
+    # 回退用 POSIX find，保真度更低：fd 默认跳过隐藏文件并尊重 .gitignore，find 不会——
+    # 因此仍需至少剪掉 .git，避免把对象库当成"大文件"报出来。
+    if command -v fd &>/dev/null; then
+        fd -t f -S "+$size" -X du -h {} | sort -k1hr
+    else
+        find . -path ./.git -prune -o -type f -size "+$size" -exec du -h {} + 2>/dev/null | sort -k1hr
+    fi
 }
 
 # tm - 快速创建/切换 tmux 会话（@bag-man）
