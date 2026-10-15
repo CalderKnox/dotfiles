@@ -1,6 +1,6 @@
 {
-  "defaultEffort": "off",
-  "defaultConcurrency": 9,
+  "defaultEffort": "ultra",
+  "defaultConcurrency": 16,
   "defaultAgentRetries": 3,
   "defaultAgentTimeoutMs": 900000,
   "defaultTokenBudget": 100000000,
