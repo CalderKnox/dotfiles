@@ -73,7 +73,7 @@ Zsh 与 Fish 已对齐的环境契约包括：可移植时间戳别名、`LANG`/
 | 工具快捷别名 | 无 | Go 6 个、Maven 5 个、pip 5 个、pnpm 5 个、Cargo 6 个、数据库 2 个（共 29 个） | fish 是四终端主力交互 shell，日常快捷别名集中在此；zsh 为维护中的次选入口 |
 | AI 入口命名 | `cla_cfg` / `clp_cfg` | `claconfig` / `clpconfig` | 同义不同名，各自历史习惯 |
 | `lt` / `fishsource` / 剪贴板 `cbcopy`、`cbpaste` | 无 | 有 | Fish 侧专属；`finder` 与 `iterm*` 两侧均有 |
-| `k` 定义点 | 仅当 `kubectl` 存在时定义；`kubectl()` 在可用时调用 `kubecolor` | 无条件定义 `k=kubecolor` | Zsh 有命令存在性守卫；Fish 调用 `k` 前必须安装 `kubecolor` |
+| `k` 定义点 | 仅当 `kubectl` 存在时定义；`kubectl()` 在可用时调用 `kubecolor` | 无条件定义 `k=kubecolor`；另有 `type -q kubecolor` 守卫的 `kubectl` 包装函数 | 两侧均在 kubecolor 可用时把 `kubectl` 包装为 `kubecolor`（故 `kg`/`kl`/`kd` 皆带色）；差异仅在 `k`：Zsh 有命令存在性守卫，Fish 调 `k` 前必须安装 `kubecolor` |
 | update-all stderr | 捕获 + 失败末 5 行摘要（`2>!` mktemp） | 实时透传 | fish 无 NO_CLOBBER/mktemp 模板约束 |
 | Rust 目标名 | 仅 `rustup` | `rust`（另接受 `rustup`） | fish 保持短名，兼容 zsh 肌肉记忆 |
 | fzf 环境/键位 | `fzf.zsh` 前缀探测 + `fzf --zsh` | fisher 插件 `patrickf1/fzf.fish` | 各随生态惯例，`FZF_DEFAULT_*` 子集 fish 侧不设 |

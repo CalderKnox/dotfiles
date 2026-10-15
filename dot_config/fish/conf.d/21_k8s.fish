@@ -8,13 +8,23 @@
 # Usage       : 由 Fish 自动 source（conf.d 字典序，2x 为领域层，顺序无关）；
 #               别名在非交互 shell 中也会定义。
 # Guards      : 别名未加 type -q 守卫，kubecolor/krew 缺失时错误在调用时
-#               暴露（属预期，与 20_dev 的 AI 助手别名策略一致）
+#               暴露（属预期，与 20_dev 的 AI 助手别名策略一致）；仅
+#               kubectl→kubecolor 包装加 type -q 守卫（与 zsh 侧一致）。
 # Author      : Payne
 # =============================================================================
 
 # ---------------------------------------------------------------------------
-# Kubernetes / 容器 (与 zsh sdk.zsh 的 k→kubecolor 一致，fish 侧别名形态)
+# Kubernetes / 容器：与 zsh sdk.zsh 的 k→kubecolor 对齐
 # ---------------------------------------------------------------------------
+# kubecolor 可用时用它接管 kubectl，使 kg/kl/kd… 等别名输出带色——与 zsh
+# `command -v kubecolor` 时定义 kubectl() 包装等价。不可用则不定义，别名回落
+# 到原生 kubectl（未加色，与 zsh 同样在 kubecolor 缺失时不加色）。
+if type -q kubecolor
+    function kubectl --wraps kubectl --description 'kubectl via kubecolor (colored)'
+        kubecolor $argv
+    end
+end
+
 alias k="kubecolor"
 alias kk="k krew"
 alias kg="kubectl get"

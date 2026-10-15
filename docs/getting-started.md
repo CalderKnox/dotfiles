@@ -159,7 +159,7 @@ brew install jadx scrcpy
 
 ### 可选组件（按 shell 守卫或调用时使用）
 
-SDKMAN（Java）、Android NDK（`/opt/homebrew/share/android-ndk`）、Docker、`kubectl` / `kubecolor`、`pnpm`、`onproxy` 函数。Zsh 在 `kubectl` 存在时才定义 `k`，并在可用时用 `kubecolor` 包装 `kubectl`；Fish 无条件定义 `k=kubecolor`，调用 `k` 需要安装 `kubecolor`。Zsh/Fish 会在 Cargo bin 目录存在时直接加入 PATH，不会 source `~/.cargo/env`。
+SDKMAN（Java）、Android NDK（`/opt/homebrew/share/android-ndk`）、Docker、`kubectl` / `kubecolor`、`pnpm`、`onproxy` 函数。Zsh 在 `kubectl` 存在时才定义 `k`，并在可用时用 `kubecolor` 包装 `kubectl`；Fish 同样在 `kubecolor` 可用时以函数包装 `kubectl`（故 `kg`/`kl`/`kd` 等 k8s 别名输出带色，与 zsh 一致），且 Fish 无条件定义 `k=kubecolor`，直接调用 `k` 需要安装 `kubecolor`。Zsh/Fish 会在 Cargo bin 目录存在时直接加入 PATH，不会 source `~/.cargo/env`。
 
 ### 终端模拟器（二选一即可，建议都装）
 
