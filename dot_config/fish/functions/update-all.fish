@@ -170,6 +170,12 @@ function update-all --description "一键更新所有开发环境 (fish 版)"
         echo (set_color yellow)"   skipped: "(string join ", " $skipped_names)(set_color normal)
     end
 
+    # 与 zsh 侧对齐：全部请求目标都不存在时不得报“更新完成”，应显式提示无可运行目标。
+    if test (count $attempted_names) -eq 0
+        echo (set_color --bold yellow)"⚠️  no runnable targets in "$mins"m"$secs"s"(set_color normal)
+        return 0
+    end
+
     if test $failed -eq 0
         # 耗时拼接需引号分断：fish 双引号内 {$mins} 的花括号按字面输出，${mins} 为语法错误
         echo (set_color --bold green)"✨ All updates completed in "$mins"m"$secs"s"(set_color normal)

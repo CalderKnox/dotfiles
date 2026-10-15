@@ -65,7 +65,9 @@ alias cbpaste="pbpaste"
 # ---------------------------------------------------------------------------
 function cdd --wraps='builtin cd' --description 'cd with automatic listing'
     builtin cd $argv; or return
-    ls -la --group-directories-first 2>/dev/null
+    # 交互式下 ls 为 lsd 别名（支持 --group-directories-first）；非交互或未装 lsd 时
+    # BSD /bin/ls 不认识该 GNU 选项，回退到可移植的 command ls，避免被 2>/dev/null 吞掉失败。
+    ls -la --group-directories-first 2>/dev/null; or command ls -la
 end
 
 function mkcd --description 'Create directory and cd into it'

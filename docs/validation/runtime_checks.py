@@ -141,6 +141,30 @@ class FishRuntime(Fixture):
       [["sdk", "update"], ["sdk", "upgrade"], ["sdk", "selfupdate"], ["sdk", "flush"]],
     )
 
+  def test_update_all_with_no_runnable_target_matches_zsh(self):
+    # tldr 是合法目标名，但不在 harness 的 PATH（仅 /usr/bin:/bin + stub）中，因此会被
+    # 跳过而成 attempted==0。zsh 侧有 `attempted == 0` 分支且不得声称“更新完成”；
+    # fish 侧曾缺失该分支，会把“全部目标缺失”报成 “✨ All updates completed”。
+    definition = function_source(FUNCS / "update-all.fish", "update-all", "fish")
+    result = self.shell(definition, "update-all tldr\n", "fish", {"TERM": "xterm-256color"})
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+    self.assertIn("attempted: 0", result.stdout)
+    self.assertIn("skipped: tldr", result.stdout)
+    self.assertIn("no runnable targets", result.stdout)
+    self.assertNotIn("All updates completed", result.stdout)
+
+  def test_cdd_falls_back_when_lsd_alias_is_absent(self):
+    # cdd 用 `ls -la --group-directories-first`：交互式下 ls 是 lsd 别名可接受该 GNU 选项，
+    # 但非交互/无 lsd 时 BSD /bin/ls 拒绝它且错误被 2>/dev/null 吞掉，导致静默无输出。
+    # 修复后应回退到可移植的 `command ls -la`。
+    definition = function_source(FISH / "10_sys.fish", "cdd", "fish")
+    directory = self.cwd / "cdd-target"
+    directory.mkdir()
+    (directory / "marker.txt").write_text("x")
+    result = self.shell(definition, f"cdd {directory}\necho EXIT:$status\n", "fish", {"TERM": "xterm-256color"})
+    self.assertIn("EXIT:0", self.ok(result))
+    self.assertIn("marker.txt", result.stdout)
+
   def fish_sdk_block(self):
     source = (FISH / "01_activate.fish").read_text()
     start = source.index("# --- SDKMAN")
