@@ -143,7 +143,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 
 - 目标平台：macOS (Apple Silicon)，Homebrew 前缀 `/opt/homebrew`
 - 本轮验证版本（2026-10）：chezmoi v2.73.1 · zsh 5.9 · Fish 4.9.3 · fzf 0.74.5 · tmux 3.8 · Neovim 0.12.6 · kitty 0.49.2（验证范围见 docs/optimization.md）
-- 维护者：[azwpayne](https://github.com/azwpayne)
+- 维护者：[CalderKnox](https://github.com/CalderKnox)
 
 ## License
 
