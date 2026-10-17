@@ -1,6 +1,3 @@
 {
-  "recommendations": [
-    "tombi-toml.tombi",
-    "sumneko.lua"
-  ]
+  "recommendations": [ "tombi-toml.tombi", "sumneko.lua" ]
 }
