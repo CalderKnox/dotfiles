@@ -5,12 +5,7 @@
     "npm:pi-background-tasks",
     "npm:@quintinshaw/pi-dynamic-workflows",
     "npm:@czottmann/pi-automode",
-    {
-      "source": "npm:pi-web-access",
-      "extensions": [
-        "-index.ts"
-      ]
-    },
+    { "source": "npm:pi-web-access", "extensions": [ "-index.ts" ] },
     "npm:@narumitw/pi-goal",
     "npm:@narumitw/pi-btw",
     "npm:@narumitw/pi-statusline",
@@ -18,22 +13,11 @@
     "npm:@piotr-oles/pi-reflag",
     "npm:pi-permission-modes"
   ],
-  "defaultTools": [
-    "read",
-    "bash",
-    "edit",
-    "write",
-    "grep",
-    "find",
-    "ls"
-  ],
+  "defaultTools": [ "read", "bash", "edit", "write", "grep", "find", "ls" ],
   "defaultProvider": "openai",
   "defaultModel": "deepseek/deepseek-flash",
   "defaultThinkingLevel": "max",
   "steeringMode": "all",
   "hideThinkingBlock": true,
-  "pi-codex-fast": {
-    "enabled": true,
-    "mode": "ultrafast"
-  }
+  "pi-codex-fast": { "enabled": true, "mode": "ultrafast" }
 }

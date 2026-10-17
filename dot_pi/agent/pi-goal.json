@@ -1,9 +1,4 @@
 {
-  "continuationLimits": {
-    "automaticTurns": null,
-    "noProgressTurns": 3
-  },
-  "rpc": {
-    "enabled": true
-  }
+  "continuationLimits": { "automaticTurns": null, "noProgressTurns": 3 },
+  "rpc": { "enabled": true }
 }
