@@ -353,9 +353,14 @@ class SourceChecks(Fixture):
       self.assertIn(ghostty_command, (ROOT / relative).read_text())
     for relative in ("README.md", "docs/layout.md", "docs/terminals.md"):
       self.assertIn(ghostty_theme, (ROOT / relative).read_text())
-    for key in ("quick-terminal-animation-duration", "scrollback-limit", "image-storage-limit"):
+    for key in ("quick-terminal-animation-duration",):
       active_setting = next(line for line in ghostty.splitlines() if line.startswith(f"{key} ="))
       self.assertIn(active_setting, terminal_docs)
+    for key in ("scrollback-limit", "image-storage-limit"):
+      self.assertFalse(
+        any(line.startswith(f"{key} =") for line in ghostty.splitlines()),
+        f"{key} 已交回 Ghostty 默认，不应再显式赋值",
+      )
     alacritty_text = (ROOT / "dot_config/alacritty/alacritty.toml").read_text()
     alacritty = tomllib.loads(alacritty_text)
     self.assertIn(alacritty["font"]["normal"]["family"], terminal_docs)

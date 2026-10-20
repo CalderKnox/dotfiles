@@ -15,7 +15,7 @@
 - **键位**：基本沿用 Ghostty 默认，并叠加若干自定义绑定（标签 / 分屏 / 字号 / Quick Terminal 等）；完整 `keybind` 列表以源文件为准。
 - **安全与剪贴板**：允许系统剪贴板读写并启用粘贴保护；paste protection 与 bracketed-paste 安全处理均由源配置启用。
 - **Quick Terminal**：顶部下拉、失焦自动收起，并显式设置 `quick-terminal-animation-duration = 0.12`。
-- **性能与存储**：`window-save-state = always`；`scrollback-limit = 10000000`（每 surface 10,000,000 字节）与 `image-storage-limit = 268435456`（每屏幕 256 MiB）均为生效设置。
+- **性能与存储**：`window-save-state = always`；`scrollback-limit` 与 `image-storage-limit` 均不再显式赋值，改由 Ghostty 1.3.1 默认决定（每 surface 10,000,000 字节；图像每屏幕 320,000,000 字节，取消注释即回落旧的 256 MiB 上限）。
 
 > 历史上曾存在重复赋值的键，已按 Ghostty「末次赋值生效」语义去重为单次赋值，实际行为不变。
 
