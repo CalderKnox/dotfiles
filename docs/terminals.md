@@ -10,7 +10,7 @@
 
 部署到 `~/.config/ghostty/config`。查看最终生效值用 `ghostty +show-config`（`--default --docs` 可对照默认值）；CLI 默认不在 PATH，需在 Ghostty 菜单 → "Install CLI tool" 安装，或用全路径 `/Applications/Ghostty.app/Contents/MacOS/ghostty`。
 
-- **启动即 Fish 登录 shell**：`command = direct:/opt/homebrew/bin/fish -l`（direct 模式不经 shell 再解析；与 tmux `default-shell` 一致——tmux 侧含 Homebrew fish → `/usr/bin/fish` → `/bin/bash` 的 if-shell 回退链，无 fish 环境自动回退；`working-directory = ~/workspaces`）。
+- **启动即 Fish 登录 shell**：`command = direct:/opt/homebrew/bin/fish -l`（direct 模式不经 shell 再解析；与 tmux `default-shell` 一致——tmux 侧含 Homebrew fish → `/usr/bin/fish` → `/bin/bash` 的 if-shell 回退链，无 fish 环境自动回退；不显式设 `working-directory`，由 `window-inherit-working-directory = true` 继承当前目录）。
 - **外观与 macOS 集成**：Catppuccin Frappe 主题、JetBrainsMonoNL Nerd Font Mono、毛玻璃与窗口装饰策略；具体数值（透明度、字号、padding、光标样式等）见源文件。
 - **键位**：基本沿用 Ghostty 默认，并叠加若干自定义绑定（标签 / 分屏 / 字号 / Quick Terminal 等）；完整 `keybind` 列表以源文件为准。
 - **安全与剪贴板**：允许系统剪贴板读写并启用粘贴保护；paste protection 与 bracketed-paste 安全处理均由源配置启用。

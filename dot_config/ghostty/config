@@ -10,7 +10,7 @@ env = LANG=zh_CN.UTF-8
 command = direct:/opt/homebrew/bin/fish -l
 
 # 工作目录继承，保持上下文连贯
-working-directory = ~/workspaces
+# working-directory = ~/workspaces
 window-inherit-working-directory = true
 window-inherit-font-size = true
 
