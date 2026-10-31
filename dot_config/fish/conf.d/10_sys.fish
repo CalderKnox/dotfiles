@@ -1,14 +1,14 @@
 # =============================================================================
 # 10_sys.fish — Fish 系统增强别名与通用入口
 # =============================================================================
-# Description : 系统导航与 Unix 增强别名 + 轻量交互函数（lsd/bat/htop 导航、
+# Description : 系统导航与 Unix 增强别名 + 轻量交互函数（lsd/htop 导航、
 #               目录跳转、剪贴板、配置与 chezmoi 入口、时间戳、进程/端口查询）。
 #               由原 conf.d/00_aliases.fish 拆分而来：k8s 别名在 21_k8s.fish；
 #               可调用大函数（update-all/代理切换/y/serve/备份计时/磁盘分析等）
 #               迁至 functions/ 惰性加载目录，首次调用时才 source。
 # Usage       : 由 Fish 自动 source（conf.d 字典序，1x 为系统基础层，
 #               顺序无关）；行为改变型别名（top/df/du/ping/tmux/wget/ls 系/
-#               cat/mkdir）仅在交互 shell 定义——对齐 zsh 侧 .zshrc
+#               mkdir）仅在交互 shell 定义——对齐 zsh 侧 .zshrc
 #               只在交互 shell 加载的语义，非交互 fish -c 脚本拿到原生命令。
 #               rm/cp/mv 的 -i 确认别名在两侧均注释停用。
 # Guards      : 本文件无外部强依赖；别名未加 type -q 守卫，依赖缺失时
@@ -116,8 +116,8 @@ alias timestamp_seconds='date +%s'
 alias timestamp_millisecond='python3 -c "import time; print(int(time.time()*1000))"'
 alias timestamp_microsecond='python3 -c "import time; print(int(time.time()*1000*1000))"'
 
-# 行为改变型别名仅交互 shell 定义（见文件头 Usage）：非交互脚本中 top/du/cat
-# /cp/mv/mkdir 等保持原生命令语义，不被 lsd/bat 等别名包装劫持（等价 zsh 侧
+# 行为改变型别名仅交互 shell 定义（见文件头 Usage）：非交互脚本中 top/du
+# /cp/mv/mkdir 等保持原生命令语义，不被 lsd 等别名包装劫持（等价 zsh 侧
 # .zshrc 只在交互 shell 加载的语义；cdd/mkcd 等显式函数调用不受影响）。
 # rm/cp/mv 的 -i aliases 两侧均已禁用。
 if status is-interactive
@@ -134,7 +134,6 @@ if status is-interactive
     alias ls="l"
     alias lt="ls --tree"
     alias tree="lsd --tree --depth 3"
-    alias cat='bat --paging=never'
     # alias rm='rm -i'   # 删除前逐个确认（与 zsh 侧 / cp/mv 护栏一致）
     # alias cp='cp -ir'
     # alias mv='mv -i'
