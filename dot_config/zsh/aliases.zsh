@@ -103,7 +103,6 @@ alias mkdir='mkdir -p -v'                        # 自动创建父目录并显�
 alias l='lsd --group-directories-first'          # 目录排在前面
 alias ls='l'                                     # ls -> lsd
 alias tree='lsd --tree --depth 3'                # 树状显示 3 层
-alias cat='bat --paging=never'                   # bat 替代 cat（脚本中需要原生行为时用 command cat）
 
 # =============================================================================
 # Kubernetes (kubectl)

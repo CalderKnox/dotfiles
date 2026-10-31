@@ -141,7 +141,7 @@ brew install bat lsd htop fastfetch neovim yazi gh lazygit tldr coreutils kubeco
 
 - `coreutils` 提供 `nproc`（`makes` / `xargsp` 的半核并行优先使用它；缺失时回退 macOS 原生 `sysctl -n hw.ncpu`）
 - Fish 侧：Fish 已作为终端入口依赖安装；另需 `brew install fisher`——`~/.config/fish/` 的 13 个插件由 `fish_plugins` 清单管理（`fisher update` 安装/更新）；提示符复用 `starship`、fzf 键位复用 `fzf.fish`（均已在上方依赖中）
-- `bat` / `lsd` / `htop` 分别接管 `cat` / `ls` / `top`；脚本中需要原生行为时用 `command cat` 等
+- `lsd` / `htop` 分别接管 `ls` / `top`
 - `gh` 的可达性：SSH 侧由 `~/.ssh/config` 的 `Host github.com → ssh.github.com:443` 负责；`gh` 的 API 走 HTTPS（`api.github.com`），**不受** `dot_gitconfig` 那条 `[http "https://github.com"]` 影响（该前缀不匹配 `api.github.com`），而是依赖 shell 代理函数（`onproxy`）导出的 `https_proxy`。Git、SSH 与 shell 代理函数均使用端口 `7890`（详见 [dev-tools.md](dev-tools.md) 中的代理配置说明）。
 
 按需补装（别名 / 函数指向的目标，未装时对应功能退化）：
