@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | `aliases.zsh` | 通用别名与函数 | 详见文件头部 `Description/Usage` 与各节内联注释 |
 | `fzf.zsh` | fzf 与 fzf-tab 配置 | 详见文件头部与第 1–5 节注释；含 Ctrl-G 等键位 |
-| `sdk.zsh` | SDK 环境与补全 | 详见文件头部与各 SDK 小节注释；含 SDKMAN 惰性加载、补全缓存等 |
+| `sdk.zsh` | SDK 环境与补全 | 详见文件头部与各 SDK 小节注释；含补全缓存等 |
 
 > 具体别名、函数与选项以源码为准，不在此逐项展开，避免与源码重复。
 
@@ -71,7 +71,7 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.cache/zsh/fzf_prefix`
 
 ### 有守卫的可选组件（未安装时静默跳过）
 
-`pnpm`（tabtab 补全）、SDKMAN（惰性加载，详见 `sdk.zsh` 注释）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/`，按二进制 stat 身份失效并使用带锁的 zcompile，二进制替换自动重建；`k` 别名带守卫）、krew、`~/.cargo/bin`（存在时直接加入 PATH；不 source `~/.cargo/env`）。`update-all` 的 7 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`/`pi` 逐项 `command -v` 守卫，未安装跳过、失败汇总并返回非零；其中 `brew` 任务依赖 `brew tap buo/homebrew-cask-upgrade`（提供 `brew cu`），新机器上未 tap 时该任务会在 `brew cu` 处失败。详见 `sdk.zsh` 与 `aliases.zsh` 源码。
+`pnpm`（tabtab 补全）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/`，按二进制 stat 身份失效并使用带锁的 zcompile，二进制替换自动重建；`k` 别名带守卫）、krew、`~/.cargo/bin`（存在时直接加入 PATH；不 source `~/.cargo/env`）。`update-all` 的 6 目标 `brew`/`rustup`/`tldr`/`uv`/`mise`/`pi` 逐项 `command -v` 守卫，未安装跳过、失败汇总并返回非零；其中 `brew` 任务依赖 `brew tap buo/homebrew-cask-upgrade`（提供 `brew cu`），新机器上未 tap 时该任务会在 `brew cu` 处失败。详见 `sdk.zsh` 与 `aliases.zsh` 源码。
 
 ### 运行时工具（对应别名/函数调用时才需要）
 

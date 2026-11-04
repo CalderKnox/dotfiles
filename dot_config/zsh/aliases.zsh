@@ -232,7 +232,7 @@ y() {
 }
 
 # ---------------------------------------------------------------------------
-# update-all —— 声明式批量更新（7 目标：brew/sdk/rustup/tldr/uv/mise/pi）
+# update-all —— 声明式批量更新（6 目标：brew/rustup/tldr/uv/mise/pi）
 # 用法：update-all [targets...]  # 无参全量；有参按名过滤
 # 守卫与非直观逻辑：
 #   - tasks 为关联数组，声明式列出命令模板；targets 过滤时校验 Unknown target
@@ -247,7 +247,6 @@ update-all() {
         # && 链：未装该 tap 时 `brew cu` 报 Unknown command，整条链非零 → brew 被误判为失败。
         # 先探测再决定是否跑 cask 升级：不可用则跳过并在 stderr 提示；brew cu 真的失败仍传播非零。
         brew  "brew update -f && brew upgrade -f --greedy-latest -y && { if brew commands 2>/dev/null | grep -qx cu; then brew cu -y -a; else echo '⚠️  brew cu 不可用（缺 buo/homebrew-cask-upgrade tap），跳过 cask 升级' >&2; fi; } && brew cleanup --prune=all"
-        sdk   "sdk update && sdk upgrade && sdk selfupdate && sdk flush"
         rustup  "rustup update"
         tldr  "tldr --update"
         uv    "uv tool upgrade --all"

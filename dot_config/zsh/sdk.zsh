@@ -1,12 +1,12 @@
 # =============================================================================
 # sdk.zsh —— 多语言 SDK 环境与补全配置
 # =============================================================================
-# Description : pnpm 补全、SDKMAN（惰性加载）、Android NDK、Python(uv/pip)、
+# Description : pnpm 补全、Android NDK、Python(uv/pip)、
 #               Go、Rust(rustup)、Docker/Kubectl 补全缓存与 kubecolor 包装
 # Usage       : 由 ~/.zshrc source 加载；必须在 compinit 之后、aliases.zsh 之后
 #               且为三模块最后加载（内含 compdef 注册，需 compinit 已完成；
 #               顺序即语义）
-# Guards      : 单项工具均 command -v / 目录存在 + 去重守卫；SDKMAN 惰性桩；
+# Guards      : 单项工具均 command -v / 目录存在 + 去重守卫；
 #               补全缓存按可执行文件 stat 身份失效，锁内原子发布并 zcompile
 # Loading-order contract: aliases.zsh -> fzf.zsh -> sdk.zsh (sdk last)
 # Author      : Payne
@@ -28,24 +28,6 @@ if command -v pnpm &>/dev/null && command -v compdef &>/dev/null; then
         fi
     }
     compdef _pnpm_completion pnpm
-fi
-
-########## Java / SDKMAN ##########
-# SDKMAN 惰性加载：此处仅定义 sdk 占位函数，首次调用
-# 时才 source sdkman-init.sh——其内部重定义 sdk 为真实实现并注入
-# PATH/JAVA_HOME，后续调用即由真实实现接管。未安装 SDKMAN 时不定义任何内容。
-# 注意：JAVA_HOME 与各 candidate 的 PATH 注入也随之延迟到首次 sdk 调用。
-if [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && (( ! $+functions[sdk] )); then
-    sdk() {
-        # 先移除占位桩：失败或初始化未定义 sdk 时不得递归调用自己。
-        unfunction sdk
-        source "$HOME/.sdkman/bin/sdkman-init.sh" || return $?
-        if (( ! $+functions[sdk] )); then
-            print -u2 -- "SDKMAN initialization did not define sdk."
-            return 1
-        fi
-        sdk "$@"
-    }
 fi
 
 ########## Android ##########

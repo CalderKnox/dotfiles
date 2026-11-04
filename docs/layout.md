@@ -42,9 +42,9 @@
 | --- | --- | --- |
 | `dot_config/zsh/dot_zshrc` | `~/.config/zsh/.zshrc` | Zsh 入口：Zim 引导、PATH、工具 eval（zoxide/mise/starship/fzf/brew）、模块加载入口（aliases→fzf→sdk）—— 与 `symlink_dot_zshrc.tmpl` 配合 |
 | `dot_config/zsh/dot_zimrc` | `~/.config/zsh/.zimrc` | Zim 模块清单（仅供 zimfw 读取，非 shell 启动时 source）—— 与 `symlink_dot_zimrc.tmpl` 配合 |
-| `dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`update-all`、`auto-update`、`y`、`ruff_auto` 等）；`update-all` 为关联数组 7 目标 `brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`/`pi`，支持传参过滤、失败计数与耗时统计；`auto-update` 为兼容旧习惯的一键入口（可选 `onproxy` 切代理后直接委托 `update-all`，覆盖目标一致，均含 `mise`）；新增 `chezc/chezs/chezdf/chezap` 四别名 |
+| `dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`update-all`、`auto-update`、`y`、`ruff_auto` 等）；`update-all` 为关联数组 6 目标 `brew`/`rustup`/`tldr`/`uv`/`mise`/`pi`，支持传参过滤、失败计数与耗时统计；`auto-update` 为兼容旧习惯的一键入口（可选 `onproxy` 切代理后直接委托 `update-all`，覆盖目标一致，均含 `mise`）；新增 `chezc/chezs/chezdf/chezap` 四别名 |
 | `dot_config/zsh/fzf.zsh` | `~/.config/zsh/fzf.zsh` | fzf 前缀探测/缓存、全局选项、Ctrl-R/T/Alt-C 及 `frg`/`fkill`/`ftm`/`fl*` 函数 |
-| `dot_config/zsh/sdk.zsh` | `~/.config/zsh/sdk.zsh` | SDK 环境与补全（pnpm/SDKMAN(可选)/Android NDK/Python(uv)/Go/Rust/Docker/kubectl+kubecolor） |
+| `dot_config/zsh/sdk.zsh` | `~/.config/zsh/sdk.zsh` | SDK 环境与补全（pnpm/Android NDK/Python(uv)/Go/Rust/Docker/kubectl+kubecolor） |
 | `dot_config/zsh/README.md` | —（不部署） | 模块内部文档（加载顺序契约、函数速查）；由 `**/*.md` 排除，仅仓库内查阅 |
 
 ### 终端与提示符
@@ -78,7 +78,7 @@
 | `.../completions/symlink_kubectl.fish` | `~/.config/fish/completions/kubectl.fish` | 同上 |
 | `.../completions/symlink_orbctl.fish` | `~/.config/fish/completions/orbctl.fish` | 同上 |
 | `.../fish_plugins` | `~/.config/fish/fish_plugins` | Fisher 插件清单（13 个：fzf.fish、forgit、bass、done、autopair、sponge、puffer-fish 等） |
-| `.../conf.d/`（`00_env` / `01_activate` / `10_sys` / `20_dev` / `21_k8s` / `22_rev`） | `~/.config/fish/conf.d/` | 六文件分层：编号表达加载阶段（0x 环境/激活 → 1x 系统基础 → 2x 领域）。`00_env.fish`（PATH 收敛/LANG/EDITOR/HOMEBREW_*/GOPATH）+ `01_activate.fish`（`type -q mise` 守卫激活，与 zsh 侧 `dot_zshrc` 的 activate 对应；另含 SDKMAN 惰性桩——经 edc/bass 转发 bash init，与 zsh 侧 `sdk.zsh` 同契约，未安装不定义）+ `10_sys.fish`（系统增强别名/导航/时间戳）+ `20_dev.fish`（开发工具）+ `21_k8s.fish`（k8s 别名）+ `22_rev.fish`（逆向）；fish 侧 fzf 键位由 fisher 插件 patrickf1/fzf.fish 提供（安装于 `~/.config/fish/fisher` = fisher_path，退出 chezmoi 管理域，config.fish 注入其 functions/completions/conf.d，不入库） |
+| `.../conf.d/`（`00_env` / `01_activate` / `10_sys` / `20_dev` / `21_k8s` / `22_rev`） | `~/.config/fish/conf.d/` | 六文件分层：编号表达加载阶段（0x 环境/激活 → 1x 系统基础 → 2x 领域）。`00_env.fish`（PATH 收敛/LANG/EDITOR/HOMEBREW_*/GOPATH）+ `01_activate.fish`（`type -q mise` 守卫激活，与 zsh 侧 `dot_zshrc` 的 activate 对应）+ `10_sys.fish`（系统增强别名/导航/时间戳）+ `20_dev.fish`（开发工具）+ `21_k8s.fish`（k8s 别名）+ `22_rev.fish`（逆向）；fish 侧 fzf 键位由 fisher 插件 patrickf1/fzf.fish 提供（安装于 `~/.config/fish/fisher` = fisher_path，退出 chezmoi 管理域，config.fish 注入其 functions/completions/conf.d，不入库） |
 | `.../functions/*`、`.../completions/*` | `~/.config/fish/functions/`、`~/.config/fish/completions/` | `functions/` 18 个惰性加载函数（update-all/auto-update、onproxy/ofproxy、y、serve、netcheck、makes/xargsp/__half_cpu_count、bak/timer/decide、find-large/dus/filestats/recent/tree-size；首次调用才 source，`__` 前缀 helper 被补全隐藏）；`completions/` 含 `kubecolor.fish`（complete --wraps kubectl）与三条 OrbStack 符号链接；fisher 插件仍安装于 `~/.config/fish/fisher` = fisher_path，退出 chezmoi 管理域，不写入仓库 |
 | `.../.keep`（`themes/`、`conf.d/`、`functions/` 下） | —（点开头源名不参与 apply，不部署） | 空目录占位；`themes/` 仍为空，`conf.d/`、`functions/` 已有实体文件，`.keep` 为历史遗留占位 |
 | `.../fish_variables` | —（已加入 `.chezmoiignore`，不部署） | fish Universal Variables 机器本地状态 |

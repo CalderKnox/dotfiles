@@ -32,7 +32,7 @@ brew install tmux
 > `command -v` 守卫，rustup/cargo 的 PATH 注入为目录存在性 + 去重双守卫（静态路径，
 > 不再调用 `brew --prefix` 子进程），fzf 初始化统一收敛到 `fzf.zsh`（带守卫），
 > 缺装时全部**静默跳过、不再报 `command not found`**——因此其余体验增强类工具
-> （`bat` / `lsd` / `kubectl` / SDKMAN 等，见 §4）完全可以 `apply` 之后按需补装，
+> （`bat` / `lsd` / `kubectl` 等，见 §4）完全可以 `apply` 之后按需补装，
 > 静默退化不报错。
 
 ## 2. 应用配置
@@ -101,14 +101,13 @@ exec zsh   # 重启 shell 使全部配置生效（或重新打开终端）
 | Zim 框架 | `~/.config/zsh/.zshrc` 检测 `~/.zim/zimfw.zsh` 缺失时自动下载并 `zimfw init` 安装 `dot_zimrc` 中声明的全部模块（详见 `dot_config/zsh/dot_zimrc`） | 首次启动 `zsh` |
 | `PATH` / `brew` | 按 `dot_zshrc` 中守卫逻辑注入 Homebrew 与本地路径（前置 `~/bin` 等，cargo/rustup 按目录存在性守卫，详见 `dot_config/zsh/dot_zshrc`） | 每次启动 `zsh` |
 | `zoxide` / `mise` / `starship` / `fzf` | 按 `command -v` 守卫 `eval` 初始化，未安装静默跳过；`fzf` 键位绑定唯一收敛于 `fzf.zsh`（详见 `dot_zshrc` 与 `fzf.zsh`） | 每次启动 `zsh` |
-| `zsh` 三模块 | 按序 `source ~/.config/zsh/aliases.zsh` → `fzf.zsh`（含 `fzf` 前缀探测与 `~/.cache/zsh/fzf_prefix` 缓存）→ `sdk.zsh`（`pnpm` / `SDKMAN` **惰性加载** / `Go` / `Rust` / `Docker` / `kubectl`，补全走 `~/.cache/zsh/` 缓存 + `zcompile`，均有守卫） | 每次启动 `zsh` |
+| `zsh` 三模块 | 按序 `source ~/.config/zsh/aliases.zsh` → `fzf.zsh`（含 `fzf` 前缀探测与 `~/.cache/zsh/fzf_prefix` 缓存）→ `sdk.zsh`（`pnpm` / `Go` / `Rust` / `Docker` / `kubectl`，补全走 `~/.cache/zsh/` 缓存 + `zcompile`，均有守卫） | 每次启动 `zsh` |
 | Neovim | 首次运行 `nvim` 时 `lazy.nvim` 自动 `bootstrap` 并安装全部插件最新版（`lazy-lock.json` 已停止跟踪，需网络） | 首次运行 `nvim` |
 | `mise` 工具链 | `mise activate` 已挂接；按需执行 `mise install` 安装 `dot_config/mise/config.toml` 声明的工具（详见该文件） | 手动执行 |
 
 > `~/.config/zsh/.zshrc` 以显式逐文件 `source` 加载三模块（`aliases.zsh` → `fzf.zsh` → `sdk.zsh`），顺序即语义，不使用 glob（新掉 `.zsh` 文件不会静默改变加载集）；
 > 如需禁用 `sdk.zsh`，重命名/移除已部署文件（如 `mv ~/.config/zsh/sdk.zsh ~/.config/zsh/sdk.zsh.disabled`）
-> 或注释 `dot_zshrc` 中对应的 source 行。`SDKMAN` 为惰性加载——首次调用 `sdk` 时才真正 source init 并注入 PATH（Java 等
-> candidate 的可用性随之延迟到首次 `sdk` 调用）；`fzf` 键位绑定只在 `fzf.zsh` 内
+> 或注释 `dot_zshrc` 中对应的 source 行。`fzf` 键位绑定只在 `fzf.zsh` 内
 > `eval "$(fzf --zsh)"` 一次，`~/.zshrc` 不再重复。详见 [shell.md](shell.md)。
 
 ## 4. 依赖清单
@@ -159,7 +158,7 @@ brew install jadx scrcpy
 
 ### 可选组件（按 shell 守卫或调用时使用）
 
-SDKMAN（Java）、Android NDK（`/opt/homebrew/share/android-ndk`）、Docker、`kubectl` / `kubecolor`、`pnpm`、`onproxy` 函数。Zsh 在 `kubectl` 存在时才定义 `k`，并在可用时用 `kubecolor` 包装 `kubectl`；Fish 同样在 `kubecolor` 可用时以函数包装 `kubectl`（故 `kg`/`kl`/`kd` 等 k8s 别名输出带色，与 zsh 一致），且 Fish 无条件定义 `k=kubecolor`，直接调用 `k` 需要安装 `kubecolor`。Zsh/Fish 会在 Cargo bin 目录存在时直接加入 PATH，不会 source `~/.cargo/env`。
+Android NDK（`/opt/homebrew/share/android-ndk`）、Docker、`kubectl` / `kubecolor`、`pnpm`、`onproxy` 函数。Zsh 在 `kubectl` 存在时才定义 `k`，并在可用时用 `kubecolor` 包装 `kubectl`；Fish 同样在 `kubecolor` 可用时以函数包装 `kubectl`（故 `kg`/`kl`/`kd` 等 k8s 别名输出带色，与 zsh 一致），且 Fish 无条件定义 `k=kubecolor`，直接调用 `k` 需要安装 `kubecolor`。Zsh/Fish 会在 Cargo bin 目录存在时直接加入 PATH，不会 source `~/.cargo/env`。
 
 ### 终端模拟器（二选一即可，建议都装）
 

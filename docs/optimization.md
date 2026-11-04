@@ -20,7 +20,7 @@ thinking/budget 设置；不更改运行时版本选择、代理或用户插件�
 ## 经过核对的架构洞察
 
 1. **加载顺序有语义。** Zim/compinit → aliases → fzf → sdk；EDITOR 在 fzf options
-   生成时展开。SDKMAN 应继续惰性加载，补全生成应保持热缓存不调用二进制。
+   生成时展开。补全生成应保持热缓存不调用二进制。
 2. **相同“命令字符串”由不同解释器消费。** fzf 的 shell quoting 防止 shell 注入，
    不等于 Neovim `+Ex` 参数安全，也不等于应用的 leading-dash 参数安全。fzf-tab
    的初始化是 Zsh 代码，不能直接继承普通 fzf 的 `sh -c`。
@@ -43,7 +43,6 @@ thinking/budget 设置；不更改运行时版本选择、代理或用户插件�
 | 位置 | 已验证的问题 | 修复与效果 |
 | --- | --- | --- |
 | Zsh `sdk.zsh` completion loader | 同路径降级 stale cache、未来 mtime 反复生成、并发安装身份混用、临时 basename 字节码不消费 | 内建 stat 身份等值比较；每工具 flock（最多等 1 秒）覆盖检查/发布/source；最终 source 名编译、临时 .zwc 原子发布；失败保留旧数据但跳过错误版本 |
-| 同上 SDKMAN | 初始化失败递归；reload 将真实 sdk 覆盖为 lazy stub | 先移除 placeholder；保留初始化状态；未定义实现时明确失败；初始化成功后 reload 不重复 |
 | Zsh `aliases.zsh` | backup 混合结果吞失败；破坏性 uv_resync 未启用却与文档不一致 | bak 聚合错误且成功才打印；`uv_resync`（HOME reset）与 Fish 同名函数当前均以注释模板保留、未启用，文档与测试改为描述“禁用模板”而非运行时行为 |
 | Zsh `fzf.zsh` | colon 文件名字段可变成 Neovim +Ex；global file actions 缺 --；fzf-tab 预览误用 sh | editor/preview 行号正整数守卫；路径使用 --；普通 sh 与 tab Zsh shell 分离；Ctrl-Y 用 printf、Ctrl-G 使用 POSIX redirection |
 | 同上 fkill / ftm | PID 0 会向整个组发信号；提取依赖 sed/awk/xargs；attach 失败被 echo 掩盖 | 全选择校验正整数/去重/独立参数，移除提取 subprocess；保留 ftm attach/error 状态，取消作为无操作 |
@@ -252,4 +251,3 @@ FAIL: test_chezmoi_source_boundaries_without_apply
   generator/提取子进程调用数、真实 bytecode 消费和不再增长的 reload 状态。
 - **属"所有权决策"、记录但未改**：① `lazyvim.json` 混入 LazyVim 运行时键（`version`/`install_version`/`news`）而它同时是 chezmoi 管理目标——剥离 volatile 键并不能阻止 LazyVim 回写，而不管理则失去 extras 的跨机复现，需人工定夺哪一侧是唯一真源；② `fisher` 会覆写 chezmoi 管理的 `~/.config/fish/fish_plugins`（`fisher.fish:4,220` 证实清单路径为 `$__fish_config_dir`）——把清单迁到 `$fisher_path` 会失去"新机自带 13 插件"，保留则每次 `fisher update` 后需 `apply` 复原头部注释；③ fish 侧的 `k=kubecolor` 仍为**无条件**别名（与 zsh 的 `command -v kubecolor` 守卫不同），已在 getting-started 说明但未改为守卫式，以保留既有行为。
 - **需独立一轮的设计项（已复现，本轮不动）**：`.chezmoiroot` 结构化部署集（一次性搬移约 70 文件）；zsh/fish 单一真源 + 跨 shell 一致性测试（手工镜像的别名已漂移）；`sdk.zsh` 中并发敏感的补全缓存引擎与声明式 env 混居于每个交互启动路径；`mason` 的 19 个包名仅 2 个被断言、`lazyvim.json` extras 仅校验计数（需 opt-in 的 `neovim_inventory.py`）；harness 的能力分层（`--strict` 可移植 vs `--strict-runtime` 需 socket/PTY）；文档清单由生成器产出而非 grep 断言。
-- **zsh SDKMAN 桩在初始化失败后不可重试**（`unfunction sdk` 先于 `source`），与"失败不得递归"的守卫耦合；现测只断言不递归。改为"成功后解除、失败重装可重试"需同时保持递归守卫，留待独立改动。

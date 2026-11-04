@@ -9,14 +9,14 @@
 #               auto-update = onproxy + update-all 的薄包装定义在
 #               auto-update.fish（按名自动加载）。
 # Usage       : update-all [targets...]  无参全量；有参按名过滤（rustup≈rust）
-# 任务: brew / rust / tldr / uv / mise / pi / sdk（sdk 未安装时跳过）
+# 任务: brew / rust / tldr / uv / mise / pi
 # Guards      : type -q 逐项守卫，未装跳过并计入 skipped；失败计数与耗时统计；
 #               先验证全部目标名，避免 typo 时先更新一半再报错
 # Author      : Payne
 # =============================================================================
 function update-all --description "一键更新所有开发环境 (fish 版)"
-    # 任务名 fish 侧为 rust；sdk 仍按 type -q 守卫，未安装时跳过。
-    set -l tasks brew rust tldr uv mise pi sdk
+    # 任务名 fish 侧为 rust。
+    set -l tasks brew rust tldr uv mise pi
 
     set -l targets
     if test (count $argv) -eq 0
@@ -158,20 +158,6 @@ function update-all --description "一键更新所有开发环境 (fish 版)"
                     echo (set_color yellow)"⚠️  $name not found, skipped"(set_color normal)
                 end
 
-            case sdk
-                if type -q sdk
-                    set -a attempted_names $name
-                    if sdk update && sdk upgrade && sdk selfupdate && sdk flush
-                        echo (set_color green)"✓ $name done"(set_color normal)
-                    else
-                        set failed (math $failed + 1)
-                        set -a failed_names $name
-                        echo (set_color red)"✗ $name failed"(set_color normal)
-                    end
-                else
-                    set -a skipped_names $name
-                    echo (set_color yellow)"⚠️  $name not found, skipped"(set_color normal)
-                end
         end
         echo ""
     end

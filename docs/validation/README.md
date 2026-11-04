@@ -13,7 +13,7 @@
 CI（`.github/workflows/ci.yaml`，`macos-latest`）在 push/PR 上运行
 `actionlint`、`check.py --strict` 与 `fzf_runtime.py`；本文其余入口（negative
 controls、terminal parsers、tmux plugins、benchmark）需手动运行。
-因此 **CI 可复现的正向检查为 101 项**（check.py 99 + fzf_runtime 2）；terminal
+因此 **CI 可复现的正向检查为 96 项**（check.py 94 + fzf_runtime 2）；terminal
 parsers（2）与 tmux plugins（1）需 macOS GUI 应用与本机插件副本，只在本地运行。
 
 所有测试入口（`check.py` / `fzf_runtime.py` / `terminal_parsers.py` /
@@ -40,7 +40,6 @@ python3 docs/validation/check.py --strict
 - updater 全参数预检、混合失败、缺失依赖、临时文件失败与 stderr；全部目标缺失（`attempted==0`）时 zsh/fish 均须报“no runnable targets”而非“更新完成”；brew 目标的第三方 `brew cu`（tap `buo/homebrew-cask-upgrade`）不可用时须跳过并提示、不得把 brew 误报为 failed，同时真实 `cu` 失败仍须传播；
 - Zsh/Fish yazi 成功/失败/清理/导航（caller 变量哨兵仅 Fish 侧校验）；fish `cdd` 在无 lsd 别名时回退到可移植 `ls`；`uv_resync` 当前为注释模板（未启用），测试仅校验模板存在、启用后自动恢复行为断言；
 - fzf 正整数 PID、去重、多选、危险 Ex 行字段、路径选项终止与 ftm 状态；
-- SDKMAN 惰性加载、失败不递归、reload 不重复初始化（zsh）；fish 侧 SDKMAN 桩未安装不定义、惰性、经 bass 转发参数；
 - completion 冷/热缓存、未来 mtime、同路径降级、NO_CLOBBER、无效生成、编译失败、
   真实 bytecode 消费，以及同/不同二进制的并发加载（不同安装的 stress fixture
   仅把等锁上限延长到 10 秒；另一个检查验证 production 1 秒超时安全跳过）；

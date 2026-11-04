@@ -32,7 +32,7 @@ mise 工具链由 `dot_config/mise/config.toml` 声明（Bun、Deno、Go 与 pnp
 | 函数 | 位置 | 覆盖目标 | 核心机制 | 适用场景 |
 | --- | --- | --- | --- | --- |
 | `auto-update` | `aliases.zsh` | 与 `update-all` 相同 | 薄包装：打印横幅后委托 `update-all` 执行，详见源文件 | 兼容旧习惯的一键入口 |
-| `update-all` | `aliases.zsh` | 多项（`brew`/`sdk`/`rustup`/`tldr`/`uv`/`mise`/`pi` 等，详见源文件） | 关联数组声明任务，支持参数过滤、守卫、失败计数与彩色输出，详见 `aliases.zsh` | 需灵活选择目标、查看统计 |
+| `update-all` | `aliases.zsh` | 多项（`brew`/`rustup`/`tldr`/`uv`/`mise`/`pi` 等，详见源文件） | 关联数组声明任务，支持参数过滤、守卫、失败计数与彩色输出，详见 `aliases.zsh` | 需灵活选择目标、查看统计 |
 
 要点：
 
