@@ -6,11 +6,11 @@
 # --- Shell and Working Directory ---
 env = LANG=zh_CN.UTF-8
 
-# 直接启动 fish 登录 shell，省去 /bin/sh 的参数展开步骤。
-command = direct:/opt/homebrew/bin/fish -l
+# 直接启动 zsh 登录 shell，省去 /bin/sh 的参数展开步骤。
+command = direct:/bin/zsh -l
 
 # 工作目录继承，保持上下文连贯
-# working-directory = ~/workspaces
+working-directory = ~/workspaces
 window-inherit-working-directory = true
 window-inherit-font-size = true
 

@@ -15,7 +15,7 @@
 | 领域 | 方案 | 说明 |
 | --- | --- | --- |
 | Shell | Zsh + [Zim](https://zimfw.sh/) + 自有模块 | `aliases.zsh` / `fzf.zsh` / `sdk.zsh` 三模块化加载；`update-all` 批量更新（`brew`/`rustup`/`tldr`/`uv`/`mise`/`pi`，支持参数过滤与失败计数） |
-| Fish | Fish + [Fisher](https://github.com/jorgebucaran/fisher) + Starship | Ghostty 直接启动 `/opt/homebrew/bin/fish -l`（`direct:` 模式；tmux `default-shell` 同步）；`fish_plugins` 锁定 13 个插件（fzf.fish / forgit / autopair / done 等），`conf.d` 分层六文件（含 `01_activate.fish` 守卫激活 mise）设定 PATH/LANG/EDITOR 等环境，可调用大函数在 `functions/` 惰性加载，补全含 kubecolor 与 OrbStack docker/kubectl/orbctl 符号链接 |
+| Fish | Fish + [Fisher](https://github.com/jorgebucaran/fisher) + Starship | Ghostty 直接启动 `/bin/zsh -l`（`direct:` 模式）；tmux 使用 Fish；`fish_plugins` 锁定 13 个插件（fzf.fish / forgit / autopair / done 等），`conf.d` 分层六文件（含 `01_activate.fish` 守卫激活 mise）设定 PATH/LANG/EDITOR 等环境，可调用大函数在 `functions/` 惰性加载，补全含 kubecolor 与 OrbStack docker/kubectl/orbctl 符号链接 |
 | 提示符 | [Starship](https://starship.rs/) | Catppuccin Mocha powerline 风格（`starship.toml` 为机器本地文件，未入库） |
 | 模糊搜索 | fzf + fzf-tab + fd | Ctrl-R 历史、Ctrl-T 文件、Alt-C 目录、`frg`/`fkill`/`ftm`/`fl*` 交互函数 |
 | 终端 | Ghostty（主力）/ Alacritty（备用）/ kitty（本地配置） | Ghostty 与 Alacritty 使用 JetBrainsMonoNL；Ghostty 为 Catppuccin Frappe，Alacritty 与 kitty 为 Catppuccin Mocha（Alacritty 保留 Dracula 注释模板） |
@@ -86,7 +86,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 │   │   ├── fzf.zsh                    →  ~/.config/zsh/fzf.zsh
 │   │   ├── sdk.zsh                    →  ~/.config/zsh/sdk.zsh
 │   │   └── README.md                  →  (不部署) 模块文档，由 **/*.md 排除
-│   ├── ghostty/config                 →  ~/.config/ghostty/config     Ghostty 终端（command = direct:/opt/homebrew/bin/fish -l）
+│   ├── ghostty/config                 →  ~/.config/ghostty/config     Ghostty 终端（command = direct:/bin/zsh -l）
 │   ├── alacritty/alacritty.toml       →  ~/.config/alacritty/alacritty.toml Alacritty 备用
 │   ├── kitty/kitty.local.conf         →  (不部署) 仅入库作参考（.chezmoiignore 的 **/*.local.* 排除）；目标机 ~/.config/kitty/kitty.local.conf 机器本地维护，由本机 kitty.conf 末尾 include 引入（仓库不含 kitty.conf）
 │   ├── mise/config.toml               →  ~/.config/mise/config.toml   mise 工具链

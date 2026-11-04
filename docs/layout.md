@@ -51,7 +51,7 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `dot_config/ghostty/config` | `~/.config/ghostty/config` | Ghostty 主终端配置（JetBrainsMonoNL Nerd Font Mono，`command = direct:/opt/homebrew/bin/fish -l` 启动登录 Fish，Catppuccin Frappe 主题） |
+| `dot_config/ghostty/config` | `~/.config/ghostty/config` | Ghostty 主终端配置（JetBrainsMonoNL Nerd Font Mono，`command = direct:/bin/zsh -l` 启动登录 Zsh，Catppuccin Frappe 主题） |
 | `dot_config/alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` | Alacritty 备用配置（活跃配色为 Catppuccin Mocha，Dracula 调色板整块注释保留为模板；`[terminal.shell]` 经 Fish 进 tmux） |
 | `dot_config/kitty/kitty.local.conf` | —（不部署，机器本地维护） | kitty 增量个人配置（字体/光标/Catppuccin Mocha/快捷键，`shell = fish`）仅入库作参考，不随 apply 部署（被 `.chezmoiignore` 的 `**/*.local.*` 排除，`chezmoi ignored` 含 `.config/kitty/kitty.local.conf`）；目标机 `~/.config/kitty/kitty.local.conf` 各机本地维护，在 kitty 首次生成的 `~/.config/kitty/kitty.conf` 末尾手工添加 `include kitty.local.conf` 引入（仓库有意不含 kitty.conf） |
 | `dot_tmux.conf` | `~/.tmux.conf` | tmux 配置：`default-shell` 经 if-shell 回退链设定（Homebrew fish → `/usr/bin/fish` → `/bin/bash`，无 fish 环境自动回退；不设 default-command，保持登录语义）、tpm 插件（yank/sensible/open/cpu/battery）、Catppuccin Mocha 状态栏、鼠标与 100k 历史 |
@@ -83,7 +83,7 @@
 | `.../.keep`（`themes/`、`conf.d/`、`functions/` 下） | —（点开头源名不参与 apply，不部署） | 空目录占位；`themes/` 仍为空，`conf.d/`、`functions/` 已有实体文件，`.keep` 为历史遗留占位 |
 | `.../fish_variables` | —（已加入 `.chezmoiignore`，不部署） | fish Universal Variables 机器本地状态 |
 
-> Fish 是 Ghostty 的登录 shell（`command = direct:/opt/homebrew/bin/fish -l`）；Alacritty 经 `[terminal.shell]` 进入 tmux；tmux `default-shell` 同为 Fish（含 if-shell 回退链，无 fish 环境自动回退）。Zsh 栈（XDG 收敛 + Zim 三模块）完整保留为次选入口。Starship 提示符双侧复用；源部署 Fisher 的 13 插件**清单**与三条 OrbStack 补全链接，插件本体由 Fisher 在目标机安装。
+> Zsh 是 Ghostty 的登录 shell（`command = direct:/bin/zsh -l`）；Alacritty 经 `[terminal.shell]` 进入 tmux；tmux `default-shell` 同为 Fish（含 if-shell 回退链，无 fish 环境自动回退）。Zsh 栈（XDG 收敛 + Zim 三模块）用于 Ghostty 登录入口。Starship 提示符双侧复用；源部署 Fisher 的 13 插件**清单**与三条 OrbStack 补全链接，插件本体由 Fisher 在目标机安装。
 
 ### pi coding agent（四个已跟踪配置）
 

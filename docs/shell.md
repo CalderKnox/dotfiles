@@ -60,7 +60,7 @@ fzf 前缀按平台自适应探测（Apple Silicon `/opt/homebrew` → Intel `/u
 
 ## Fish 的角色
 
-Fish 是 Ghostty 的登录 shell：Ghostty 以 `command = direct:/opt/homebrew/bin/fish -l` 启动；Alacritty 经 `[terminal.shell]`（`/opt/homebrew/bin/fish -c "tmux new -A -s main"`）进入 tmux；kitty 以 `shell = /opt/homebrew/bin/fish --login --interactive` 固定（kitty 主配置为机器本地维护，仓库仅保留 kitty.local.conf 作参考、不参与部署）；tmux `default-shell` 亦为 Fish——四终端（Ghostty/Alacritty/kitty/tmux）均为 Fish。Zsh 栈（XDG 收敛 + Zim 三模块）完整保留为次选入口（`~/.zshrc` 经 symlink 指向 `~/.config/zsh/.zshrc`）。仓库中 `dot_config/fish/`（部署后为 `~/.config/fish/`）提供：`config.fish` 在 interactive 时初始化 Starship 与 zoxide，`fish_plugins`（13 插件）声明插件清单，fisher 将插件安装于 `~/.config/fish/fisher`（`fisher_path`，退出 chezmoi 管理域），`config.fish` 把其 functions/completions/conf.d 注入搜索路径；`conf.d` 六文件分层（00_env/01_activate/10_sys/20_dev/21_k8s/22_rev）承载环境与别名，可调用大函数（update-all、onproxy、y、serve 等 18 个）在仓库 `functions/` 惰性加载（首次调用才 source），`completions/` 含 kubecolor 补全与 OrbStack docker/kubectl/orbctl symlink 补全。Fish 侧已初始化 Starship、zoxide（`config.fish` 的 `zoxide init fish` 与 fzf_zoxide 插件）与 fzf 键位（fzf.fish 插件经 fisher_path 生效，不写入仓库 functions/）；mise 已双侧接入（zsh 侧 `dot_zshrc` 的 `eval "$(mise activate zsh)"` + fish 侧 `conf.d/01_activate.fish` 守卫激活），详见 `dot_config/fish/` 源目录与 [layout.md](layout.md)。
+Zsh 是 Ghostty 的登录 shell：Ghostty 以 `command = direct:/bin/zsh -l` 启动；Alacritty 经 `[terminal.shell]`（`/opt/homebrew/bin/fish -c "tmux new -A -s main"`）进入 tmux；kitty 以 `shell = /opt/homebrew/bin/fish --login --interactive` 固定（kitty 主配置为机器本地维护，仓库仅保留 kitty.local.conf 作参考、不参与部署）；tmux `default-shell` 亦为 Fish；Ghostty 使用 Zsh，其余入口使用 Fish。Zsh 栈（XDG 收敛 + Zim 三模块）用于 Ghostty 登录入口（`~/.zshrc` 经 symlink 指向 `~/.config/zsh/.zshrc`）。仓库中 `dot_config/fish/`（部署后为 `~/.config/fish/`）提供：`config.fish` 在 interactive 时初始化 Starship 与 zoxide，`fish_plugins`（13 插件）声明插件清单，fisher 将插件安装于 `~/.config/fish/fisher`（`fisher_path`，退出 chezmoi 管理域），`config.fish` 把其 functions/completions/conf.d 注入搜索路径；`conf.d` 六文件分层（00_env/01_activate/10_sys/20_dev/21_k8s/22_rev）承载环境与别名，可调用大函数（update-all、onproxy、y、serve 等 18 个）在仓库 `functions/` 惰性加载（首次调用才 source），`completions/` 含 kubecolor 补全与 OrbStack docker/kubectl/orbctl symlink 补全。Fish 侧已初始化 Starship、zoxide（`config.fish` 的 `zoxide init fish` 与 fzf_zoxide 插件）与 fzf 键位（fzf.fish 插件经 fisher_path 生效，不写入仓库 functions/）；mise 已双侧接入（zsh 侧 `dot_zshrc` 的 `eval "$(mise activate zsh)"` + fish 侧 `conf.d/01_activate.fish` 守卫激活），详见 `dot_config/fish/` 源目录与 [layout.md](layout.md)。
 
 ## 双侧对齐契约与已知不对称（有意保留）
 
@@ -70,7 +70,7 @@ Zsh 与 Fish 已对齐的环境契约包括：可移植时间戳别名、`LANG`/
 
 | 不对称项 | zsh 侧 | fish 侧 | 说明 |
 | --- | --- | --- | --- |
-| 工具快捷别名 | 无 | Go 6 个、Maven 5 个、pip 5 个、pnpm 5 个、Cargo 6 个、数据库 2 个（共 29 个） | fish 是四终端主力交互 shell，日常快捷别名集中在此；zsh 为维护中的次选入口 |
+| 工具快捷别名 | 无 | Go 6 个、Maven 5 个、pip 5 个、pnpm 5 个、Cargo 6 个、数据库 2 个（共 29 个） | fish 用于 Alacritty/kitty/tmux，日常快捷别名集中在此；zsh 用于 Ghostty |
 | AI 入口命名 | `cla_cfg` / `clp_cfg` | `claconfig` / `clpconfig` | 同义不同名，各自历史习惯 |
 | `lt` / `fishsource` / 剪贴板 `cbcopy`、`cbpaste` | 无 | 有 | Fish 侧专属；`finder` 与 `iterm*` 两侧均有 |
 | `k` 定义点 | 仅当 `kubectl` 存在时定义；`kubectl()` 在可用时调用 `kubecolor` | 无条件定义 `k=kubecolor`；另有 `type -q kubecolor` 守卫的 `kubectl` 包装函数 | 两侧均在 kubecolor 可用时把 `kubectl` 包装为 `kubecolor`（故 `kg`/`kl`/`kd` 皆带色）；差异仅在 `k`：Zsh 有命令存在性守卫，Fish 调 `k` 前必须安装 `kubecolor` |

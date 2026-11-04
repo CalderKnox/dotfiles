@@ -21,7 +21,7 @@ brew install git-lfs && git lfs install
 brew install fzf starship zoxide mise fd ripgrep
 
 # —— 终端入口必需 ——
-brew install fish  # Ghostty/Alacritty 配置直接使用 /opt/homebrew/bin/fish
+brew install fish  # Alacritty 配置直接使用 /opt/homebrew/bin/fish
 # 若使用 Alacritty 的既定入口（Fish -> tmux main）：
 brew install tmux
 ```
@@ -166,7 +166,7 @@ Android NDK（`/opt/homebrew/share/android-ndk`）、Docker、`kubectl` / `kubec
 brew install --cask ghostty alacritty
 ```
 
-两者需要字体与 `/opt/homebrew/bin/fish` 就绪；Alacritty 的配置入口还需 `tmux`。Ghostty 为主力，Alacritty 为备用。详见 [terminals.md](terminals.md)。
+两者需要字体就绪；Ghostty 使用 `/bin/zsh`，Alacritty 的配置入口需要 `/opt/homebrew/bin/fish` 与 `tmux`。Ghostty 为主力，Alacritty 为备用。详见 [terminals.md](terminals.md)。
 
 ## 5. 应用后验证清单
 
