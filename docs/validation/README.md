@@ -13,7 +13,7 @@
 CI（`.github/workflows/ci.yaml`，`macos-latest`）在 push/PR 上运行
 `actionlint`、`check.py --strict` 与 `fzf_runtime.py`；本文其余入口（negative
 controls、terminal parsers、tmux plugins、benchmark）需手动运行。
-因此 **CI 可复现的正向检查为 96 项**（check.py 94 + fzf_runtime 2）；terminal
+因此 **CI 可复现的正向检查为 100 项**（check.py 98 + fzf_runtime 2）；terminal
 parsers（2）与 tmux plugins（1）需 macOS GUI 应用与本机插件副本，只在本地运行。
 
 所有测试入口（`check.py` / `fzf_runtime.py` / `terminal_parsers.py` /
@@ -30,6 +30,7 @@ python3 docs/validation/check.py --strict
 
 覆盖：
 
+- Fish/Zsh 全部个人 alias 清单、参数转发、目录跳转、重载、Kubernetes 着色/回退与 ruff 失败传播；
 - 每个 Zsh/Fish/Lua 文件逐个语法检查（含 conf.d 六文件、functions/ 惰性函数与 completions/ 自有补全）；Lua 额外用 Neovim 自身的 LuaJIT（`loadfile`，只编译不执行）复核，因宿主 `luac` 版本高于 Neovim 的 Lua 5.1，5.3+ 专有语法只有该门能拦；Fish autoload/补全惰性加载的文件名契约
   （functions/<name>.fish 必须定义同名函数、completions/<cmd>.fish 必须
   complete --command <cmd>）；文档列出的 fish functions/conf.d/completions 清单与计数必须与源目录一致；受管配置清单的 JSON/TOML/Git 解析（显式列举的文件，不扫描全仓库）；Git LFS filter 只在 `.gitattributes` 匹配时调用；

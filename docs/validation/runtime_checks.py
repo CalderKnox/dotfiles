@@ -509,3 +509,92 @@ class TmuxRuntime(Fixture):
 
 if __name__ == "__main__":
   unittest.main(verbosity=2)
+
+class AliasRuntime(Fixture):
+  """Compare the user-defined aliases by executing both shells with stub commands."""
+
+  def sources(self, shell):
+    if shell == 'fish':
+      return ''.join(f'source {shlex.quote(str(FISH / name))}\n' for name in
+                     ('10_sys.fish', '20_dev.fish', '21_k8s.fish'))
+    return f'source {shlex.quote(str(ZSH / "aliases.zsh"))}\nsource {shlex.quote(str(ZSH / "sdk.zsh"))}\n'
+
+  def run_shell(self, shell, command):
+    flags = ['-df'] if shell == 'zsh' else ['--no-config', '--private', '-i']
+    return self.run_command([self.require(shell), *flags], script=self.sources(shell) + command + '\n')
+
+  def test_alias_inventory_and_argument_forwarding(self):
+    pattern = r'^\s*alias ([\w.-]+)='
+    fish = set().union(*(set(re.findall(pattern, (FISH / name).read_text(), re.M)) for name in
+                         ('10_sys.fish', '20_dev.fish', '21_k8s.fish')))
+    zsh = set(re.findall(pattern, (ZSH / 'aliases.zsh').read_text(), re.M))
+    self.assertEqual(fish, zsh)
+    for binary in ('open', 'code', 'chezmoi', 'nvim', 'fastfetch', 'date', 'python3', 'htop',
+                   'df', 'du', 'ping', 'tmux', 'wget', 'mkdir', 'lsd', 'pbcopy', 'pbpaste',
+                   'kubectl', 'biome', 'claude', 'opencode', 'gh', 'lazygit', 'pnpm', 'go',
+                   'cargo', 'mvn', 'pip', 'mongosh', 'redis-cli'):
+      self.stub(binary)
+    # cd and shell replacement mutate the caller; pws necessarily uses each shell's PID.
+    special = {'dl', 'dt', 'doc', 'wp', 'ws', 'fishsource', 'zshsource', 'pws'}
+    self.assertTrue(special <= fish)
+    for name in sorted(fish - special):
+      with self.subTest(alias=name):
+        outputs = []
+        for shell in ('zsh', 'fish'):
+          self.trace.unlink(missing_ok=True)
+          result = self.run_shell(shell, f'{name} "arg with spaces" --flag')
+          self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+          outputs.append(self.calls())
+        self.assertTrue(outputs[0], name)
+        self.assertEqual(outputs[0], outputs[1], name)
+
+  def test_kubectl_color_and_fallback(self):
+    self.stub('kubectl')
+    for color in (False, True):
+      if color:
+        self.stub('kubecolor')
+      for name in ('k', 'kk', 'kg', 'kl', 'kd', 'kdel', 'ka', 'kgp', 'kgn', 'kgs', 'kgd', 'ksys', 'kctx', 'kctxs'):
+        with self.subTest(color=color, alias=name):
+          calls = []
+          for shell in ('zsh', 'fish'):
+            self.trace.unlink(missing_ok=True)
+            result = self.run_shell(shell, f'{name} "arg with spaces"')
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            calls.append(self.calls())
+          self.assertEqual(calls[0], calls[1])
+          self.assertEqual(calls[0][0][0], 'kubecolor' if color else 'kubectl')
+
+  def test_ruff_target_and_failure(self):
+    for args in ('', '"path with spaces"'):
+      for fail in (False, True):
+        self.stub('ruff', 'sys.exit(17)' if fail else '')
+        for shell in ('zsh', 'fish'):
+          with self.subTest(args=args, fail=fail, shell=shell):
+            self.trace.unlink(missing_ok=True)
+            result = self.run_shell(shell, f'ruff_auto {args}')
+            self.assertEqual(result.returncode, 17 if fail else 0, result.stderr)
+            target = 'path with spaces' if args else '.'
+            expected = [['ruff', 'check', '--fix', '--exit-zero', target]]
+            if not fail:
+              expected.append(['ruff', 'format', target])
+            self.assertEqual(self.calls(), expected)
+
+  def test_navigation_and_shell_reload_contract(self):
+    for name, destination in [('dl', 'Downloads'), ('dt', 'Desktop'), ('doc', 'Documents'),
+                              ('wp', 'WorkSpaces'), ('ws', 'WisdomSpaces')]:
+      path = Path(self.env['HOME']) / destination
+      path.mkdir()
+      for shell in ('zsh', 'fish'):
+        result = self.run_shell(shell, f'{name}\npwd')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), str(path))
+    for shell, name, binary in [('zsh', 'fishsource', 'fish'), ('fish', 'fishsource', 'fish'),
+                                ('fish', 'zshsource', 'zsh')]:
+      self.stub(binary)
+      self.trace.unlink(missing_ok=True)
+      result = self.run_shell(shell, name)
+      self.assertEqual(result.returncode, 0, result.stderr)
+      self.assertEqual(self.calls(), [[binary]])
+    zshrc = Path(self.env['HOME']) / '.zshrc'
+    zshrc.write_text('print RELOADED\n')
+    self.assertIn('RELOADED', self.ok(self.run_shell('zsh', 'zshsource')))

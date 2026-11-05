@@ -69,7 +69,13 @@ alias pipid="pip install -e ."
 alias pipr="pip uninstall"
 alias pipl="pip list"
 alias pipu="pip install --upgrade pip"
-alias ruff_auto='ruff check --fix --exit-zero . && ruff format .'
+function ruff_auto --description 'Fix and format Python code'
+    set -l target .
+    if test (count $argv) -gt 0; and test -n "$argv[1]"
+        set target "$argv[1]"
+    end
+    ruff check --fix --exit-zero "$target"; and ruff format "$target"
+end
 alias format='biome format --write --files-max-size=10485760'   # 与 zsh 侧一致
 alias pip_tsinghua_mirror='python3 -m pip install -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple'
 # alias uv_resync='rm -rf .venv uv.lock && bass uv pip sync --allow-empty-requirements <(cat /dev/null) && uv sync --upgrade'
@@ -110,3 +116,6 @@ alias cla-unsafe="claude --dangerously-skip-permissions"
 alias clp="opencode"
 alias clpconfig="code ~/.config/opencode"
 alias claconfig="code ~/.claude"
+
+alias clp_cfg="code ~/.config/opencode"
+alias cla_cfg="code ~/.claude"

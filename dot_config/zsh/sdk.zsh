@@ -121,11 +121,9 @@ if command -v kubecolor &> /dev/null; then
     command -v compdef &>/dev/null && compdef kubecolor=kubectl
 fi
 
-# 3. 短别名 k -> kubectl（仅在 kubectl 可用时定义；补全一并关联。
-#    注意：本别名会覆盖 aliases.zsh 中可能存在的同名定义——这是有意设计）
-if command -v kubectl &> /dev/null; then
-    alias k='kubectl'
-    command -v compdef &>/dev/null && compdef k=kubectl
+# 3. k 由 aliases.zsh 定义；若可用则关联补全。
+if command -v kubectl &> /dev/null && command -v compdef &>/dev/null; then
+    compdef k=kubectl
 fi
 
 # 4. krew 二进制目录：同样目录存在 + 去重双守卫（冒号定界，与 GOBIN/dot_zshrc

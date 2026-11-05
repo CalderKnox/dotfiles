@@ -2,7 +2,7 @@
 
 ## 启动链路
 
-交互式 zsh 启动时按以下顺序执行（`~/.zshrc` 经 `symlink_dot_zshrc.tmpl` 指向 `~/.config/zsh/.zshrc`，源码为 `dot_config/zsh/dot_zshrc`）。顺序即语义——同名定义后加载者生效，例如 `k` 别名由 `sdk.zsh` 按需定义，因此 `aliases.zsh` 有意不定义 `k`。
+交互式 zsh 启动时按以下顺序执行（`~/.zshrc` 经 `symlink_dot_zshrc.tmpl` 指向 `~/.config/zsh/.zshrc`，源码为 `dot_config/zsh/dot_zshrc`）。顺序即语义——同名定义后加载者生效；`k` 在 `aliases.zsh` 定义，`sdk.zsh` 提供可选着色和补全。
 
 1. **Zim 引导**：缺失时下载 zimfw，随后 `zimfw init` 生成并加载 `~/.zim/init.zsh`（含补全、高亮、自动建议等）。
 2. **PATH 注入**：前置 `~/bin`、Homebrew、`/usr/local/bin`、`~/.local/bin` 等，并按目录存在性守卫注入 cargo/rustup 路径。
@@ -62,18 +62,10 @@ fzf 前缀按平台自适应探测（Apple Silicon `/opt/homebrew` → Intel `/u
 
 Zsh 是 Ghostty 的登录 shell：Ghostty 以 `command = direct:/bin/zsh -l` 启动；Alacritty 经 `[terminal.shell]`（`/opt/homebrew/bin/fish -c "tmux new -A -s main"`）进入 tmux；kitty 以 `shell = /opt/homebrew/bin/fish --login --interactive` 固定（kitty 主配置为机器本地维护，仓库仅保留 kitty.local.conf 作参考、不参与部署）；tmux `default-shell` 亦为 Fish；Ghostty 使用 Zsh，其余入口使用 Fish。Zsh 栈（XDG 收敛 + Zim 三模块）用于 Ghostty 登录入口（`~/.zshrc` 经 symlink 指向 `~/.config/zsh/.zshrc`）。仓库中 `dot_config/fish/`（部署后为 `~/.config/fish/`）提供：`config.fish` 在 interactive 时初始化 Starship 与 zoxide，`fish_plugins`（13 插件）声明插件清单，fisher 将插件安装于 `~/.config/fish/fisher`（`fisher_path`，退出 chezmoi 管理域），`config.fish` 把其 functions/completions/conf.d 注入搜索路径；`conf.d` 六文件分层（00_env/01_activate/10_sys/20_dev/21_k8s/22_rev）承载环境与别名，可调用大函数（update-all、onproxy、y、serve 等 18 个）在仓库 `functions/` 惰性加载（首次调用才 source），`completions/` 含 kubecolor 补全与 OrbStack docker/kubectl/orbctl symlink 补全。Fish 侧已初始化 Starship、zoxide（`config.fish` 的 `zoxide init fish` 与 fzf_zoxide 插件）与 fzf 键位（fzf.fish 插件经 fisher_path 生效，不写入仓库 functions/）；mise 已双侧接入（zsh 侧 `dot_zshrc` 的 `eval "$(mise activate zsh)"` + fish 侧 `conf.d/01_activate.fish` 守卫激活），详见 `dot_config/fish/` 源目录与 [layout.md](layout.md)。
 
-## 双侧对齐契约与已知不对称（有意保留）
+## 双侧别名与运行环境
 
-Zsh 与 Fish 已对齐的环境契约包括：可移植时间戳别名、`LANG`/`EDITOR`/`VISUAL` 非空值守卫、`HOMEBREW_NO_*` 静默标志、代理回环豁免（`no_proxy`/`NO_PROXY`）、k8s 快捷别名集、`ws`/`wp` 目录跳转、`du -h -d 2` profile、`wget -c`、编辑器别名（`v/vi/vim/nv/nvi`）、`format`（biome）、update-all 记账（attempted/skipped/failed）与 `rustup` 目标名互认（fish 侧接受 `rustup`≈`rust`）。两侧的 `rm`/`cp`/`mv` `-i` 别名都已注释停用；不要依赖它们提供覆盖/删除确认。Fish 仅将 `10_sys.fish` 中遮蔽常见系统命令的部分别名限制在交互 shell；`20_dev.fish` 与 `21_k8s.fish` 的应用别名在非交互 fish 中也定义。Zsh 则由交互式 `.zshrc` 加载整组别名。
+Fish 与 Zsh 共享全部个人 alias 名称和命令目标，包括 Go 6 个、Maven 5 个、pip 5 个、pnpm 5 个、Cargo 6 个、数据库 2 个（共 29 个），以及两套 AI 配置入口名称。`k` 和 `kk` 通过 `kubectl`，安装 `kubecolor` 时两侧均使用彩色包装；未安装时回退到原生 kubectl。`ruff_auto [dir]` 在两侧接受相同目标。
 
-以下不对称为有意保留（port 与否以使用场景为准，勿机械同步）：
+`fishsource` 执行 `exec fish`；`zshsource` 在 zsh 中重新加载配置，在 fish 中执行 `exec zsh`，因为 fish 不能解析 zsh 配置。两侧的 `rm`/`cp`/`mv` `-i` 别名都已注释停用。Fish 的应用别名在非交互 fish 中也定义，覆盖常见系统命令的别名仅在交互 shell 定义；Zsh 的个人别名由交互式 `.zshrc` 加载。两侧还共享代理回环豁免和编辑器默认值守卫。
 
-| 不对称项 | zsh 侧 | fish 侧 | 说明 |
-| --- | --- | --- | --- |
-| 工具快捷别名 | 无 | Go 6 个、Maven 5 个、pip 5 个、pnpm 5 个、Cargo 6 个、数据库 2 个（共 29 个） | fish 用于 Alacritty/kitty/tmux，日常快捷别名集中在此；zsh 用于 Ghostty |
-| AI 入口命名 | `cla_cfg` / `clp_cfg` | `claconfig` / `clpconfig` | 同义不同名，各自历史习惯 |
-| `lt` / `fishsource` / 剪贴板 `cbcopy`、`cbpaste` | 无 | 有 | Fish 侧专属；`finder` 与 `iterm*` 两侧均有 |
-| `k` 定义点 | 仅当 `kubectl` 存在时定义；`kubectl()` 在可用时调用 `kubecolor` | 无条件定义 `k=kubecolor`；另有 `type -q kubecolor` 守卫的 `kubectl` 包装函数 | 两侧均在 kubecolor 可用时把 `kubectl` 包装为 `kubecolor`（故 `kg`/`kl`/`kd` 皆带色）；差异仅在 `k`：Zsh 有命令存在性守卫，Fish 调 `k` 前必须安装 `kubecolor` |
-| update-all stderr | 捕获 + 失败末 5 行摘要（`2>!` mktemp） | 实时透传 | fish 无 NO_CLOBBER/mktemp 模板约束 |
-| Rust 目标名 | 仅 `rustup` | `rust`（另接受 `rustup`） | fish 保持短名，兼容 zsh 肌肉记忆 |
-| fzf 环境/键位 | `fzf.zsh` 前缀探测 + `fzf --zsh` | fisher 插件 `patrickf1/fzf.fish` | 各随生态惯例，`FZF_DEFAULT_*` 子集 fish 侧不设 |
+非 alias 的 update-all 输出细节、Rust 目标名和 fzf 生态集成仍有差异。可通过 `python3 docs/validation/check.py --strict` 在隔离环境检验别名清单及实际参数转发。

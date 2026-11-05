@@ -19,7 +19,7 @@
 `~/.config/zsh/.zshrc`（兼容路径 `~/.zshrc`）按 **compinit（Zim 框架）→ `aliases.zsh` → `fzf.zsh` → `sdk.zsh`** 的顺序 source 本仓库文件。**顺序即语义**，重排会静默改变行为：
 
 - `aliases.zsh` 必须先于 `fzf.zsh`（后者 Ctrl-G 绑定在 source 时展开 `$EDITOR`）；
-- `sdk.zsh` 必须在 compinit 之后且最后加载（内含 `compdef` 注册，需 compinit 已完成；`k` 别名仅在此定义，`aliases.zsh` 有意不重复）。
+- `sdk.zsh` 必须在 compinit 之后且最后加载（内含 `compdef` 注册，需 compinit 已完成；`k` 别名在 `aliases.zsh` 定义，补全在此关联）。
 
 精确的 `source` 语句与守卫说明见 `dot_config/zsh/dot_zshrc` 底部加载块与各文件头部的 `Usage` 注释，本文不复述代码清单。
 
@@ -71,7 +71,7 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.cache/zsh/fzf_prefix`
 
 ### 有守卫的可选组件（未安装时静默跳过）
 
-`pnpm`（tabtab 补全）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/`，按二进制 stat 身份失效并使用带锁的 zcompile，二进制替换自动重建；`k` 别名带守卫）、krew、`~/.cargo/bin`（存在时直接加入 PATH；不 source `~/.cargo/env`）。`update-all` 的 6 目标 `brew`/`rustup`/`tldr`/`uv`/`mise`/`pi` 逐项 `command -v` 守卫，未安装跳过、失败汇总并返回非零；其中 `brew` 任务依赖 `brew tap buo/homebrew-cask-upgrade`（提供 `brew cu`），新机器上未 tap 时该任务会在 `brew cu` 处失败。详见 `sdk.zsh` 与 `aliases.zsh` 源码。
+`pnpm`（tabtab 补全）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/`，按二进制 stat 身份失效并使用带锁的 zcompile，二进制替换自动重建；`k` 通过 kubectl 回退）、krew、`~/.cargo/bin`（存在时直接加入 PATH；不 source `~/.cargo/env`）。`update-all` 的 6 目标 `brew`/`rustup`/`tldr`/`uv`/`mise`/`pi` 逐项 `command -v` 守卫，未安装跳过、失败汇总并返回非零；其中 `brew` 任务依赖 `brew tap buo/homebrew-cask-upgrade`（提供 `brew cu`），新机器上未 tap 时该任务会在 `brew cu` 处失败。详见 `sdk.zsh` 与 `aliases.zsh` 源码。
 
 ### 运行时工具（对应别名/函数调用时才需要）
 

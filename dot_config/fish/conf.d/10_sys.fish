@@ -52,7 +52,7 @@ alias vi="nvim"
 alias vim="nvim"
 alias nv="nvim"
 alias nvi="nvim"
-alias zshsource="source ~/.zshrc"
+alias zshsource="exec zsh"
 
 # ---------------------------------------------------------------------------
 # 剪贴板

@@ -380,7 +380,7 @@ class SourceChecks(Fixture):
     fish_dev = (ROOT / "dot_config/fish/conf.d/20_dev.fish").read_text()
     non_shortcut_aliases = {
       "gopen", "lg", "ruff_auto", "format", "pip_tsinghua_mirror",
-      "cla", "cla-unsafe", "clp", "clpconfig", "claconfig",
+      "cla", "cla-unsafe", "clp", "clpconfig", "claconfig", "cla_cfg", "clp_cfg",
     }
     all_aliases = set(re.findall(r"^alias ([A-Za-z0-9_.-]+)=", fish_dev, re.MULTILINE))
     shortcut_count = len(all_aliases - non_shortcut_aliases)
@@ -396,8 +396,7 @@ class SourceChecks(Fixture):
     for alias in ("lt", "fishsource", "cbcopy", "cbpaste"):
       pattern = rf"^[ \t]*alias {re.escape(alias)}="
       self.assertIsNotNone(re.search(pattern, fish_sys, re.MULTILINE))
-      self.assertIsNone(re.search(pattern, zsh_aliases, re.MULTILINE))
-    self.assertIn("Fish 侧专属；`finder` 与 `iterm*` 两侧均有", shell_docs)
+      self.assertIsNotNone(re.search(pattern, zsh_aliases, re.MULTILINE))
     for source in (fish_sys, zsh_aliases):
       self.assertIsNone(re.search(r"^\s*alias\s+(?:rm|cp|mv)=", source, re.MULTILINE))
     self.assertIn("`-i` 别名都已注释停用", shell_docs)
@@ -468,8 +467,8 @@ class SourceChecks(Fixture):
     self.assertIsNone(re.search(r"^\s*source\s+.*\.cargo/env", fish_env_source, re.MULTILINE))
     zsh_sdk = (ROOT / "dot_config/zsh/sdk.zsh").read_text()
     fish_k8s = (ROOT / "dot_config/fish/conf.d/21_k8s.fish").read_text()
-    self.assertIsNotNone(re.search(r"if command -v kubectl[^\n]*; then\s+alias k='kubectl'", zsh_sdk, re.MULTILINE))
-    self.assertIn('alias k="kubecolor"', fish_k8s)
+    self.assertIn("alias k='kubectl'", zsh_aliases)
+    self.assertIn('alias k="kubectl"', fish_k8s)
     git_lfs = subprocess.check_output(
       [self.require("git"), "config", "--no-includes", "--file", ROOT / "dot_gitconfig", "--get", "filter.lfs.required"],
       text=True,
@@ -1543,7 +1542,6 @@ if __name__ == "__main__":
       print("Strict validation requires every parser/runtime; skipped tests are failures.", file=sys.stderr)
     sys.exit(0 if result.wasSuccessful() and not result.skipped else 1)
   # Named unittest selections remain supported; the default includes integration checks.
-  if len(sys.argv) == 1:
-    for name in ("FishRuntime", "ZshRuntime", "NeovimRuntime", "TmuxRuntime"):
-      globals()[name] = getattr(runtime_checks, name)
+  for name in ("FishRuntime", "ZshRuntime", "NeovimRuntime", "TmuxRuntime", "AliasRuntime"):
+    globals()[name] = getattr(runtime_checks, name)
   unittest.main(verbosity=2)

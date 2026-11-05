@@ -27,6 +27,7 @@ alias chezap='chezmoi apply -v'                  # 应用 chezmoi 变更 (verbos
 # --- 编辑器快捷入口 (按 XDG 路径分组) ---
 alias fishconfig='code ${HOME}/.config/fish'     # 编辑 fish 配置 (~/.config/fish)
 alias zshconfig='code ~/.zshrc'                  # 编辑 ~/.zshrc
+alias fishsource='exec fish'                     # 启动 fish
 alias zshsource='source ~/.zshrc'                # 重新加载配置
 
 
@@ -131,12 +132,16 @@ alias mkdir='mkdir -p -v'                        # 自动创建父目录并显�
 # ~~~ 列表与导航 (lsd) ~~~
 alias l='lsd --group-directories-first'          # 目录排在前面
 alias ls='l'                                     # ls -> lsd
+alias lt='ls --tree'
+alias cbcopy='pbcopy'
+alias cbpaste='pbpaste'
 alias tree='lsd --tree --depth 3'                # 树状显示 3 层
 
 # =============================================================================
 # Kubernetes (kubectl)
-# 注意：短别名 k 定义在 sdk.zsh（k -> kubectl，含 kubecolor 包装），此处不再重复定义。
+# k 经 kubectl 包装，kubecolor 可用时着色。
 # =============================================================================
+alias k='kubectl'
 alias kk='kubectl krew'
 alias kg='kubectl get'
 alias kl='kubectl logs'
@@ -177,6 +182,8 @@ alias cla='claude'
 alias cla-unsafe='claude --dangerously-skip-permissions'
 alias clp='opencode'
 alias clp_cfg='code ${HOME}/.config/opencode'
+alias clpconfig='code ${HOME}/.config/opencode'
+alias claconfig='code ${HOME}/.claude'
 alias cla_cfg='code ${HOME}/.claude'
 
 # =============================================================================
@@ -203,6 +210,37 @@ xargsp() { xargs -P "$(__half_cpu_count)" "$@"; }
 # ~~~ Git 相关 ~~~
 alias gopen='gh browse'                          # 浏览器打开当前仓库
 alias lg='lazygit'
+
+# 与 fish 共享的开发快捷入口
+alias pnpi='pnpm install'
+alias pnpa='pnpm add'
+alias pnpad='pnpm add -D'
+alias pnps='pnpm start'
+alias pnpt='pnpm test'
+alias gob='go build'
+alias gor='go run'
+alias got='go test'
+alias gom='go mod'
+alias gomt='go mod tidy'
+alias goi='go install'
+alias cb='cargo build'
+alias cr='cargo run'
+alias ct='cargo test'
+alias cc='cargo check'
+alias ccl='cargo clean'
+alias cu='cargo update'
+alias mvnc='mvn clean'
+alias mvni='mvn install'
+alias mvnp='mvn package'
+alias mvnt='mvn test'
+alias mvnci='mvn clean install'
+alias pipi='pip install'
+alias pipid='pip install -e .'
+alias pipr='pip uninstall'
+alias pipl='pip list'
+alias pipu='pip install --upgrade pip'
+alias mongo-local='mongosh mongodb://localhost:27017'
+alias redis-cli='redis-cli -h localhost'
 
 # ~~~ Python 工具 ~~~
 ruff_auto() {
