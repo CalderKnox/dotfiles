@@ -70,8 +70,31 @@ function cdd --wraps='builtin cd' --description 'cd with automatic listing'
     ls -la --group-directories-first 2>/dev/null; or command ls -la
 end
 
-function mkcd --description 'Create directory and cd into it'
-    mkdir -p $argv[1]; and builtin cd $argv[1]
+function mkcd --description 'Create a directory and cd into it'
+    if test (count $argv) -ne 1; or test -z "$argv[1]"
+        printf '用法: mkcd <目录>\n' >&2
+        return 1
+    end
+    set -l dir "$argv[1]"
+    string match -q '/*' -- "$dir"; or set dir "./$dir"
+    command mkdir -p -- "$dir"; and builtin cd -- "$dir"
+end
+
+function mkcode --description 'Create a directory and open it in VS Code'
+    if test (count $argv) -ne 1; or test -z "$argv[1]"
+        printf '用法: mkcode <目录>\n' >&2
+        return 1
+    end
+    command mkdir -p -- "$argv[1]"; and code -- "$argv[1]"
+end
+
+function mktd --description 'Create a temporary directory and cd into it'
+    if test (count $argv) -ne 0
+        printf '用法: mktd\n' >&2
+        return 1
+    end
+    set -l dir (command mktemp -d); or return
+    builtin cd -- "$dir"
 end
 
 # ---------------------------------------------------------------------------

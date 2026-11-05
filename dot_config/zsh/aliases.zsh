@@ -72,6 +72,35 @@ alias doc='cd ${HOME}/Documents'
 alias wp='cd ${HOME}/WorkSpaces'
 alias ws='cd ${HOME}/WisdomSpaces'
 
+# 创建单个目录（包括父目录）并进入。
+mkcd() {
+    if (( $# != 1 )) || [[ -z "$1" ]]; then
+        printf '用法: mkcd <目录>\n' >&2
+        return 1
+    fi
+    local dir="$1"
+    [[ "$dir" = /* ]] || dir="./$dir"
+    command mkdir -p -- "$dir" && builtin cd -- "$dir"
+}
+
+mkcode() {
+    if (( $# != 1 )) || [[ -z "$1" ]]; then
+        printf '用法: mkcode <目录>\n' >&2
+        return 1
+    fi
+    command mkdir -p -- "$1" && code -- "$1"
+}
+
+mktd() {
+    if (( $# != 0 )); then
+        printf '用法: mktd\n' >&2
+        return 1
+    fi
+    local dir
+    dir=$(command mktemp -d) || return
+    builtin cd -- "$dir"
+}
+
 # ~~~ 系统信息 ~~~
 alias ff='fastfetch'
 alias nowdatetime='date "+%Y%m%d_%H%M%S"'

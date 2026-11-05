@@ -61,6 +61,18 @@ chezmoi apply    # 确认无误后应用
 日常修改配置请走「编辑源 → diff → apply → commit」流程，
 详见 [docs/maintenance.md](docs/maintenance.md)。
 
+### 目录创建快捷命令
+
+zsh 和 fish 均支持以下命令：
+
+| 命令 | 用途 |
+| --- | --- |
+| `mkcd <目录>` | 创建目录及父目录并进入 |
+| `mkcode <目录>` | 创建目录及父目录并用 `code` 打开 |
+| `mktd` | 创建唯一临时目录并进入 |
+
+`mkcode` 需要安装 VS Code 的 `code` 命令；已有目录也可使用 `mkcd` 和 `mkcode`。
+
 ## 📁 仓库结构与目标映射
 
 chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private_` → 权限收紧（目录 `0700` / 文件 `0600`），
