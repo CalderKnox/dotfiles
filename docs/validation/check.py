@@ -49,6 +49,60 @@ def function_source_optional(path, name, shell="zsh"):
     return None
 
 
+ALIAS_LINE = re.compile(r"^[ \t]*alias[ \t]+([A-Za-z0-9_.-]+)=(.*)$", re.MULTILINE)
+
+# 显式登记“同名但刻意不同值”的别名；未登记的共享别名必须归一化后完全相同。
+# fish 无法解析 zsh 配置，因此 `zshsource` 在 zsh 中重载 ~/.zshrc、在 fish 中执行
+# `exec zsh`（docs/shell.md「双侧别名与运行环境」已说明）。新增条目必须写清原因。
+ALIAS_DIVERGENCES = {
+  "zshsource": "fish cannot source zsh config, so it execs a new zsh instead of reloading ~/.zshrc",
+}
+
+
+def alias_value(raw):
+  """Return an `alias name=<value>` value with any trailing `# ...` comment outside quotes removed."""
+  raw = raw.strip()
+  quote = raw[:1] if raw[:1] in {"'", '"'} else ""
+  end = raw.find(quote, 1) if quote else -1
+  if end != -1:
+    return raw[1:end]
+  return re.split(r"\s+#", raw, maxsplit=1)[0].strip()
+
+
+def normalize_alias_value(value):
+  """Fold quoting style and shell-specific spelling so equivalent alias targets compare equal."""
+  value = " ".join(value.split())
+  # 完整包裹单个 token 的引号只是引用风格差异（fish `$PWD` vs zsh `"$PWD"`），
+  # 剥离后两侧按同一文本比较；`$fish_pid`/`$$`、`${HOME}`/`~` 等写法差异同理归一。
+  value = re.sub(r"""(?<!\S)(['"])(.*?)\1(?!\S)""", r"\2", value)
+  return value.replace("${HOME}", "~").replace("$HOME", "~").replace("$fish_pid", "$$")
+
+
+def alias_inventory(paths):
+  """Map every `alias name=value` found in paths to its normalized value."""
+  inventory = {}
+  for path in paths:
+    for name, raw in ALIAS_LINE.findall(Path(path).read_text()):
+      inventory[name] = normalize_alias_value(alias_value(raw))
+  return inventory
+
+
+def alias_parity_drifts(fish_aliases, zsh_aliases, divergences=None):
+  """Describe every alias-name or alias-value drift the fish-vs-zsh parity contract forbids."""
+  divergences = divergences or {}
+  drifts = []
+  only_fish = sorted(set(fish_aliases) - set(zsh_aliases))
+  only_zsh = sorted(set(zsh_aliases) - set(fish_aliases))
+  if only_fish or only_zsh:
+    drifts.append(f"alias sets differ: only in fish {only_fish}; only in zsh {only_zsh}")
+  for name in sorted(set(fish_aliases) & set(zsh_aliases)):
+    if name in divergences:
+      continue
+    if fish_aliases[name] != zsh_aliases[name]:
+      drifts.append(f"{name}: fish {fish_aliases[name]!r} != zsh {zsh_aliases[name]!r}")
+  return drifts
+
+
 class Fixture(unittest.TestCase):
   def setUp(self):
     self.temp = tempfile.TemporaryDirectory(prefix="dotfiles-validation-")
@@ -237,6 +291,44 @@ class SourceChecks(Fixture):
           re.search(pattern, (ROOT / relative).read_text()),
           f"{relative} 未声明 {count} 个 fish 插件",
         )
+
+  def test_shell_alias_inventory_parity(self):
+    """fish and zsh must expose the same personal aliases with equivalent targets.
+
+    docs/shell.md claims both shells share every personal alias name and target, but until now
+    only a handful of names were pinned: a fish-only alias or a divergent target on one side
+    could drift silently. Derive both inventories from the sources and compare normalized
+    values, allowing only the documented divergences. The synthetic mutation at the end keeps
+    the comparison honest — a parser that silently matches nothing would make it vacuous.
+    """
+    fish_paths = sorted(FISH.glob("*.fish")) + sorted(FUNCS.glob("*.fish"))
+    fish_aliases = alias_inventory(fish_paths)
+    zsh_aliases = alias_inventory([ZSH / "aliases.zsh"])
+    self.assertTrue(fish_aliases, "未能从 fish 源文件解析出任何别名")
+    self.assertTrue(zsh_aliases, "未能从 aliases.zsh 解析出任何别名")
+    for name, reason in ALIAS_DIVERGENCES.items():
+      with self.subTest(divergence=name):
+        self.assertTrue(reason.strip(), f"{name} 必须写明 fish 与 zsh 刻意不同的原因")
+        self.assertIn(name, fish_aliases)
+        self.assertIn(name, zsh_aliases)
+    self.assertEqual(alias_parity_drifts(fish_aliases, zsh_aliases, ALIAS_DIVERGENCES), [])
+
+    # 反证：合成一对清单，分别制造“单侧多出别名”和“同名异值”，比较器必须报出两种漂移。
+    fish_fixture = self.cwd / "fixture_aliases.fish"
+    zsh_fixture = self.cwd / "fixture_aliases.zsh"
+    fish_fixture.write_text('alias shared="same target"\n')
+    zsh_fixture.write_text("alias shared='same target'   # 仅注释与引用风格不同\n")
+    self.assertEqual(
+      alias_parity_drifts(alias_inventory([fish_fixture]), alias_inventory([zsh_fixture])),
+      [],
+      "引用风格差异不应被判为漂移",
+    )
+    fish_fixture.write_text('alias shared="same target"\nalias fish_only="extra"\n')
+    missing = alias_parity_drifts(alias_inventory([fish_fixture]), alias_inventory([zsh_fixture]))
+    self.assertTrue(any("fish_only" in drift for drift in missing), missing)
+    fish_fixture.write_text('alias shared="other target"\n')
+    drifted = alias_parity_drifts(alias_inventory([fish_fixture]), alias_inventory([zsh_fixture]))
+    self.assertTrue(any(drift.startswith("shared:") for drift in drifted), drifted)
 
   def test_lua_syntax_per_file(self):
     tool = self.require("luac")
@@ -694,6 +786,44 @@ class SourceChecks(Fixture):
     self.assertNotIn(".config/kitty/kitty.local.conf", targets)
     self.assertIn(".zshrc", targets)
     self.assertIn(".zimrc", targets)
+
+  def test_root_repository_docs_are_tracked_and_not_deployed(self):
+    """Root-level repository docs must be git-tracked, indexed by README.md, and kept out of $HOME.
+
+    AGENTS.md sat untracked beside README.md until f44259d: root docs are neither deployed
+    (`**/*.md` in .chezmoiignore) nor claimed by any test, so a new one could stay uncommitted
+    while the repository looked complete. Discover the root set instead of hardcoding it, and
+    stay tolerant of a dirty working tree (tracking membership, not clean status).
+    """
+    git = self.require("git")
+    documents = sorted(path.name for path in ROOT.glob("*.md"))
+    self.assertTrue(documents, "仓库根目录没有发现任何 *.md 文档")
+    readme = (ROOT / "README.md").read_text()
+    config = self.cwd / "empty.toml"
+    config.write_text("")
+    managed = set(
+      self.ok(
+        self.run_command(
+          [
+            self.require("chezmoi"),
+            "--source",
+            ROOT,
+            "--destination",
+            self.env["HOME"],
+            "--config",
+            config,
+            "--persistent-state",
+            self.cwd / "state.boltdb",
+            "managed",
+          ]
+        )
+      ).splitlines()
+    )
+    for name in documents:
+      with self.subTest(document=name):
+        self.ok(self.run_command([git, "ls-files", "--error-unmatch", name], cwd=ROOT))
+        self.assertNotIn(name, managed, f"{name} 由 .chezmoiignore 的 **/*.md 排除，不得部署到 $HOME")
+        self.assertIn(name, readme, f"README.md 索引未列出根级文档 {name}")
 
   def test_synthetic_pi_runtime_data_is_excluded_and_rules_are_necessary(self):
     source = self.cwd / "source"
