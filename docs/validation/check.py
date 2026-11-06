@@ -557,7 +557,6 @@ class SourceChecks(Fixture):
     self.assertIn("test -d ~/.cargo/bin; and fish_add_path -g ~/.cargo/bin", fish_env_source)
     self.assertIsNone(re.search(r"^\s*(?:source|\.)\s+.*\.cargo/env", zsh_rc_source, re.MULTILINE))
     self.assertIsNone(re.search(r"^\s*source\s+.*\.cargo/env", fish_env_source, re.MULTILINE))
-    zsh_sdk = (ROOT / "dot_config/zsh/sdk.zsh").read_text()
     fish_k8s = (ROOT / "dot_config/fish/conf.d/21_k8s.fish").read_text()
     self.assertIn("alias k='kubectl'", zsh_aliases)
     self.assertIn('alias k="kubectl"', fish_k8s)
