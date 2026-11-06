@@ -83,6 +83,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 ~/.local/share/chezmoi                    应用到 $HOME
 ├── .chezmoiignore                     →  (不部署) 过滤根级与嵌套 README.md / LICENSE、docs/ 与 *.local / *.bak / *token* 等，避免污染家目录
 ├── .gitignore                         →  (git 侧) 忽略 .git / node_modules / **/.DS_Store / *.log 等；根级 `.vscode/{extensions,settings}.json` 已跟踪
+├── AGENTS.md                          →  (不部署) 仓库协作约定（结构/命令/风格/安全边界），由 `**/*.md` 排除
 ├── symlink_dot_zshrc.tmpl             →  ~/.zshrc  (→ ~/.config/zsh/.zshrc)  模板符号链接，内容为 {{ .chezmoi.homeDir }}/.config/zsh/.zshrc
 ├── symlink_dot_zimrc.tmpl             →  ~/.zimrc  (→ ~/.config/zsh/.zimrc)  同上（XDG 收敛，兼容 ~/.zshrc 路径）
 ├── dot_gitconfig                      →  ~/.gitconfig                 用户信息 / 代理 / LFS / push 行为
@@ -138,6 +139,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 | [docs/optimization.md](docs/optimization.md) | UltraCode 审查结论、优化证据与保留事项 |
 | [dot_config/zsh/README.md](dot_config/zsh/README.md) | zsh 三模块内部契约（加载顺序、依赖、函数速查） |
 | [dot_config/nvim/README.md](dot_config/nvim/README.md) | Neovim/LazyVim 使用说明 |
+| [AGENTS.md](AGENTS.md) | 仓库协作约定：目录结构、验证命令、命名风格、提交与安全边界 |
 
 > 新增配置请同步更新 [docs/layout.md](docs/layout.md)；新文档请更新此索引。
 
