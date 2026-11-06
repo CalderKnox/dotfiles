@@ -13,7 +13,7 @@
 CI（`.github/workflows/ci.yaml`，`macos-latest`）在 push/PR 上运行
 `actionlint`、`check.py --strict` 与 `fzf_runtime.py`；本文其余入口（negative
 controls、terminal parsers、tmux plugins、benchmark）需手动运行。
-因此 **CI 可复现的正向检查为 100 项**（check.py 98 + fzf_runtime 2）；terminal
+因此 **CI 可复现的正向检查为 102 项**（check.py 100 + fzf_runtime 2）；terminal
 parsers（2）与 tmux plugins（1）需 macOS GUI 应用与本机插件副本，只在本地运行。
 
 所有测试入口（`check.py` / `fzf_runtime.py` / `terminal_parsers.py` /
@@ -31,12 +31,14 @@ python3 docs/validation/check.py --strict
 覆盖：
 
 - Fish/Zsh 全部个人 alias 清单、参数转发、目录跳转、重载、Kubernetes 着色/回退与 ruff 失败传播；
+- Fish/Zsh 个人 alias **清单对等**：两侧 alias 名集合必须完全一致，规范化后 alias 值必须相等，唯一登记例外为 `zshsource`（fish 无法 source zsh 配置）；门内自带 mutation 自检，确认单侧缺失与值漂移都会被该比较捕获（`test_shell_alias_inventory_parity`）；
 - 每个 Zsh/Fish/Lua 文件逐个语法检查（含 conf.d 六文件、functions/ 惰性函数与 completions/ 自有补全）；Lua 额外用 Neovim 自身的 LuaJIT（`loadfile`，只编译不执行）复核，因宿主 `luac` 版本高于 Neovim 的 Lua 5.1，5.3+ 专有语法只有该门能拦；Fish autoload/补全惰性加载的文件名契约
   （functions/<name>.fish 必须定义同名函数、completions/<cmd>.fish 必须
   complete --command <cmd>）；文档列出的 fish functions/conf.d/completions 清单与计数必须与源目录一致；受管配置清单的 JSON/TOML/Git 解析（显式列举的文件，不扫描全仓库）；Git LFS filter 只在 `.gitattributes` 匹配时调用；
 - Git 的 Pi 源名 allowlist；`.chezmoiignore` 的 Pi runtime blacklist 覆盖 permission-mode、sessions、npm、missions、tasks、models-store 与 workflows/state fixture，并逐项 mutation-check；`auth.json` 与 credentials 路径由通用敏感路径规则保护。
 - `.chezmoiignore` 的**非 Pi 卫生规则**（`**/*.local*`/`**/*.bak`/`**/*.log*`/`**/*.md`/`**/LICENSE`/敏感名/`**/node_modules/`/`**/.pnpm-store/`/`**/.DS_Store` 等）以**嵌套** fixture 逐条断言：规则生效、删除后目标暴露（mutation control）、且普通配置仍部署（正向对照）。模式锚定源根，缺 `**/` 前缀的规则只匹配仓库根——该类静默失效历史上已发生三次；除上述枚举外，另有**不变式**测试断言任何新的、不带 `**/` 前缀且不在显式白名单内的模式一律失败，使该类**无法再次静默复发**。
 - 部署边界不变式：固定 depth-1 受管目标集合（9 项），使"新增根级源文件静默渲染进 `$HOME`"失败；并断言 `.github` 不部署（此前仅依赖"源名以点开头"的隐式规则）。
+- 仓库根级文档门：每个根级 `*.md` 必须被 Git 跟踪、不出现在 `chezmoi managed`（`.chezmoiignore` 的 `**/*.md` 保证不落进 `$HOME`），且从 `README.md` 建立链接（`test_root_repository_docs_are_tracked_and_not_deployed`）。
 - 实际渲染的 Zsh/Zim symlink 目标与 private/default 权限契约（不 apply）；`.keep` 占位文件不产生部署目标；
 - updater 全参数预检、混合失败、缺失依赖、临时文件失败与 stderr；全部目标缺失（`attempted==0`）时 zsh/fish 均须报“no runnable targets”而非“更新完成”；brew 目标的第三方 `brew cu`（tap `buo/homebrew-cask-upgrade`）不可用时须跳过并提示、不得把 brew 误报为 failed，同时真实 `cu` 失败仍须传播；
 - Zsh/Fish yazi 成功/失败/清理/导航（caller 变量哨兵仅 Fish 侧校验）；fish `cdd` 在无 lsd 别名时回退到可移植 `ls`；`uv_resync` 当前为注释模板（未启用），测试仅校验模板存在、启用后自动恢复行为断言；
