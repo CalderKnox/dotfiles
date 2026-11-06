@@ -68,4 +68,6 @@ Fish 与 Zsh 共享全部个人 alias 名称和命令目标，包括 Go 6 个、
 
 `fishsource` 执行 `exec fish`；`zshsource` 在 zsh 中重新加载配置，在 fish 中执行 `exec zsh`，因为 fish 不能解析 zsh 配置。两侧的 `rm`/`cp`/`mv` `-i` 别名都已注释停用。Fish 的应用别名在非交互 fish 中也定义，覆盖常见系统命令的别名仅在交互 shell 定义；Zsh 的个人别名由交互式 `.zshrc` 加载。两侧还共享代理回环豁免和编辑器默认值守卫。
 
+这种共享不是约定俗成而是硬约束：两侧必须暴露相同的个人 alias 名称，且归一化后取值等价——引号风格、`${HOME}` 与 `~`、`$PWD` 的引用方式、`$fish_pid` 与 `$$` 的写法差异都落在归一化范围内。唯一有意保留的例外是 `zshsource`（原因见上）；该契约由 `docs/validation/check.py` 中的 `test_shell_alias_inventory_parity` 校验，两侧清单或取值漂移都会让严格校验失败。
+
 非 alias 的 update-all 输出细节、Rust 目标名和 fzf 生态集成仍有差异。可通过 `python3 docs/validation/check.py --strict` 在隔离环境检验别名清单及实际参数转发。
