@@ -23,7 +23,7 @@
 
 ## mise — `dot_config/mise/config.toml`
 
-mise 工具链由 `dot_config/mise/config.toml` 声明（Bun、Deno、Go 与 pnpm 使用 `latest` 浮动选择器，Node.js 固定为 `24.19.0`；以源文件为准），由 `dot_config/zsh/dot_zshrc` 中的 `eval "$(mise activate zsh)"` 接管 zsh 环境（fish 侧由 `conf.d/01_activate.fish` 守卫激活）；实际声明以源文件为准。常用操作见 `mise` 文档与 `aliases.zsh` 的 `update-all` 复用。
+mise 工具链由 `dot_config/mise/config.toml` 声明（Bun、Deno、Go 与 pnpm 使用 `latest` 浮动选择器，Node.js 固定为 `24.19.0`，Java 使用 Temurin 21（`temurin-21`）；以源文件为准），由 `dot_config/zsh/dot_zshrc` 中的 `eval "$(mise activate zsh)"` 接管 zsh 环境（fish 侧由 `conf.d/01_activate.fish` 守卫激活）；实际声明以源文件为准。常用操作见 `mise` 文档与 `aliases.zsh` 的 `update-all` 复用。
 
 ### 包管理器更新：`aliases.zsh` 的 `auto-update` 与 `update-all`
 

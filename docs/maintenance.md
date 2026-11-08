@@ -114,7 +114,7 @@ rm -f ~/.config/fish/conf.d/{00_aliases,01_dev,01_rev,02_mise}.fish
 
 # mise 环境体检
 mise doctor
-mise ls                                     # Bun/Deno/Go/pnpm 使用 latest；Node.js 固定为 24.19.0
+mise ls                                     # Bun/Deno/Go/pnpm 使用 latest；Node.js 固定为 24.19.0；Java 使用 temurin-21
 
 # alacritty：CLI 无 --print-config 子命令（0.17 实测报错），配置解析在启动时进行，
 # 冒烟启动（瞬间退出）即可验证配置可解析

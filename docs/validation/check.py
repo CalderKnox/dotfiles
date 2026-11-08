@@ -457,7 +457,7 @@ class SourceChecks(Fixture):
 
   def test_tool_and_shell_documentation_matches_sources(self):
     mise = tomllib.loads((ROOT / "dot_config/mise/config.toml").read_text())["tools"]
-    labels = {"bun": "Bun", "deno": "Deno", "go": "Go", "node": "Node.js", "pnpm": "pnpm"}
+    labels = {"bun": "Bun", "deno": "Deno", "go": "Go", "java": "Java", "node": "Node.js", "pnpm": "pnpm"}
     for relative in ("docs/dev-tools.md", "docs/maintenance.md"):
       document = (ROOT / relative).read_text()
       for tool, version in mise.items():
