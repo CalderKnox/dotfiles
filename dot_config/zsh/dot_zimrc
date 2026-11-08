@@ -27,6 +27,9 @@ zmodule wfxr/forgit
 zmodule unixorn/git-extra-commands
 zmodule joke/zim-mise --if-command mise
 
+zmodule fzf --if-command fzf
+zmodule wfxr/forgit --source forgit.plugin.zsh --if-command fzf
+
 # Applies correct bindkeys for input events. Add one of the following to the
 # beginning of your ~/.zshrc to set your preferred editor keymap to emacs or vi
 # respectively: bindkey -e or bindkey -v
@@ -69,7 +72,8 @@ zmodule completion
 
 # <!-- zmodule fzf -->  # disabled: replaced by Aloxaf/fzf-tab + fzf.zsh
 # fzf-tab: replace Zsh's default completion menu with fzf-powered fuzzy search.
-zmodule Aloxaf/fzf-tab
+# zmodule Aloxaf/fzf-tab
+zmodule Aloxaf/fzf-tab --source fzf-tab.plugin.zsh --if-command fzf
 
 #
 # Modules that must be initialized last
