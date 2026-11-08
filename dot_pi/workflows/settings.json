@@ -5,7 +5,7 @@
   "defaultAgentTimeoutMs": 900000,
   "defaultTokenBudget": 100000000,
 
-  "progressPanelMode": "compact",
+  "progressPanelMode": "detailed",
   "persistAgentSessions": false,
 
   "providerMiddlewareExtensions": [ ],
