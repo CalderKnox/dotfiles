@@ -218,7 +218,7 @@ FAIL: test_chezmoi_source_boundaries_without_apply
 - 修复 concurrent completion 测试：生产锁等待超时后允许安全跳过；随后仍要求新进程加载完整发布缓存。
 - 修复基准脚本对旧 `private_dot_config/zsh/sdk.zsh` 路径的探测，并在所有 Python 验证入口导入项目模块前禁止写 `.pyc`；negative controls 默认改用兼容旧布局的历史提交。新增 bytecode-hygiene 测试，断言每个入口在导入项目模块前关闭写字节码且 `docs/validation/` 无 `__pycache__`；并新增 fish 清单一致性测试，断言文档中的 functions/conf.d/completions 清单、名称与计数与源目录一致（据此发现并修正 maintenance.md 函数枚举漏项）；新增 CI 一致性测试，断言 `.github/workflows/ci.yaml` 与 validation README 声明的入口一致。
 
-当前验证结果（以下计数是本次审查的时点快照；实时计数以 [validation/README.md](validation/README.md) 为准，现为 `check.py` 100 + `fzf_runtime.py` 2 = 102）：
+当前验证结果（以下计数是本次审查的时点快照；当前 CI 验证入口见 [validation/README.md](validation/README.md)，测试数以运行结果为准）：
 
 - `python3 docs/validation/check.py --strict`：**99 passed，0 skipped**。
 - `python3 docs/validation/negative_controls.py`：**20/20 reproduced，0 invalid controls**；默认 baseline 为 `b4e8bac`。

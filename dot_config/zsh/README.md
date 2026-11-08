@@ -71,7 +71,7 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.cache/zsh/fzf_prefix`
 
 ### 有守卫的可选组件（未安装时静默跳过）
 
-`pnpm`（tabtab 补全）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/`，按二进制 stat 身份失效并使用带锁的 zcompile，二进制替换自动重建；`k` 通过 kubectl 回退）、krew、`~/.cargo/bin`（存在时直接加入 PATH；不 source `~/.cargo/env`）。`update-all` 的 6 目标 `brew`/`rustup`/`tldr`/`uv`/`mise`/`pi` 逐项 `command -v` 守卫，未安装跳过、失败汇总并返回非零；其中 `brew cu` 由 `buo/homebrew-cask-upgrade` tap 提供，缺失时跳过该步骤。详见 `sdk.zsh` 与 `aliases.zsh` 源码。
+`pnpm`（tabtab 补全）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/`，按二进制 stat 身份失效并使用带锁的 zcompile，二进制替换自动重建；`k` 通过 kubectl 回退）、krew、`~/.cargo/bin`（存在时直接加入 PATH；不 source `~/.cargo/env`）。`update-all` 的 7 目标 `brew`/`rustup`/`tldr`/`uv`/`mise`/`pi`/`zimfw` 逐项 `command -v` 守卫，未安装跳过、失败汇总并返回非零；其中 `brew cu` 由 `buo/homebrew-cask-upgrade` tap 提供，缺失时跳过该步骤。详见 `sdk.zsh` 与 `aliases.zsh` 源码。
 
 ### 运行时工具（对应别名/函数调用时才需要）
 

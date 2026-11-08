@@ -299,7 +299,7 @@ y() {
 }
 
 # ---------------------------------------------------------------------------
-# update-all —— 声明式批量更新（6 目标：brew/rustup/tldr/uv/mise/pi）
+# update-all —— 声明式批量更新（7 目标：brew/rustup/tldr/uv/mise/pi/zimfw）
 # 用法：update-all [targets...]  # 无参全量；有参按名过滤
 # 守卫与非直观逻辑：
 #   - tasks 为关联数组，声明式列出命令模板；targets 过滤时校验 Unknown target
@@ -319,6 +319,7 @@ update-all() {
         uv    "uv tool upgrade --all"
         mise  "mise upgrade"
         pi  "pi update --all"
+        zimfw "zimfw update"
     )
 
     local -a targets

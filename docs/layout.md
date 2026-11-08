@@ -42,7 +42,7 @@
 | --- | --- | --- |
 | `dot_config/zsh/dot_zshrc` | `~/.config/zsh/.zshrc` | Zsh 入口：Zim 引导、PATH、工具 eval（zoxide/mise/starship/fzf/brew）、模块加载入口（aliases→fzf→sdk）—— 与 `symlink_dot_zshrc.tmpl` 配合 |
 | `dot_config/zsh/dot_zimrc` | `~/.config/zsh/.zimrc` | Zim 模块清单（仅供 zimfw 读取，非 shell 启动时 source）—— 与 `symlink_dot_zimrc.tmpl` 配合 |
-| `dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`update-all`、`auto-update`、`y`、`ruff_auto` 等）；`update-all` 为关联数组 6 目标 `brew`/`rustup`/`tldr`/`uv`/`mise`/`pi`，支持传参过滤、失败计数与耗时统计；`auto-update` 为兼容旧习惯的一键入口（可选 `onproxy` 切代理后直接委托 `update-all`，覆盖目标一致，均含 `mise`）；新增 `chezc/chezs/chezdf/chezap` 四别名 |
+| `dot_config/zsh/aliases.zsh` | `~/.config/zsh/aliases.zsh` | 别名与通用函数（`update-all`、`auto-update`、`y`、`ruff_auto` 等）；`update-all` 为关联数组 7 目标 `brew`/`rustup`/`tldr`/`uv`/`mise`/`pi`/`zimfw`，支持传参过滤、失败计数与耗时统计；`auto-update` 为兼容旧习惯的一键入口（可选 `onproxy` 切代理后直接委托 `update-all`，覆盖目标一致）；新增 `chezc/chezs/chezdf/chezap` 四别名 |
 | `dot_config/zsh/fzf.zsh` | `~/.config/zsh/fzf.zsh` | fzf 前缀探测/缓存、全局选项、Ctrl-R/T/Alt-C 及 `frg`/`fkill`/`ftm`/`fl*` 函数 |
 | `dot_config/zsh/sdk.zsh` | `~/.config/zsh/sdk.zsh` | SDK 环境与补全（pnpm/Android NDK/Python(uv)/Go/Rust/Docker/kubectl+kubecolor） |
 | `dot_config/zsh/README.md` | —（不部署） | 模块内部文档（加载顺序契约、函数速查）；由 `**/*.md` 排除，仅仓库内查阅 |

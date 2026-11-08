@@ -9,14 +9,15 @@
 #               auto-update = onproxy + update-all 的薄包装定义在
 #               auto-update.fish（按名自动加载）。
 # Usage       : update-all [targets...]  无参全量；有参按名过滤（rustup≈rust）
-# 任务: brew / rust / tldr / uv / mise / pi
-# Guards      : type -q 逐项守卫，未装跳过并计入 skipped；失败计数与耗时统计；
+# 任务: brew / rust / tldr / uv / mise / pi / zimfw
+# Guards      : type -q 守卫命令，zimfw 检查 zsh 与脚本；未装跳过并计入 skipped；
+#               失败计数与耗时统计；
 #               先验证全部目标名，避免 typo 时先更新一半再报错
 # Author      : Payne
 # =============================================================================
 function update-all --description "一键更新所有开发环境 (fish 版)"
     # 任务名 fish 侧为 rust。
-    set -l tasks brew rust tldr uv mise pi
+    set -l tasks brew rust tldr uv mise pi zimfw
 
     set -l targets
     if test (count $argv) -eq 0
@@ -147,6 +148,27 @@ function update-all --description "一键更新所有开发环境 (fish 版)"
                 if type -q pi
                     set -a attempted_names $name
                     if pi update --all
+                        echo (set_color green)"✓ $name done"(set_color normal)
+                    else
+                        set failed (math $failed + 1)
+                        set -a failed_names $name
+                        echo (set_color red)"✗ $name failed"(set_color normal)
+                    end
+                else
+                    set -a skipped_names $name
+                    echo (set_color yellow)"⚠️  $name not found, skipped"(set_color normal)
+                end
+
+            case zimfw
+                # zimfw 是 zsh 函数：直接运行其脚本，避免启动交互 shell 或自动安装插件。
+                set -l zim_dir "$HOME"
+                if set -q ZDOTDIR; and test -n "$ZDOTDIR"
+                    set zim_dir "$ZDOTDIR"
+                end
+                set -l zim_home "$zim_dir/.zim"
+                if command -sq zsh; and test -s "$zim_home/zimfw.zsh"
+                    set -a attempted_names $name
+                    if command zsh -f -c 'ZIM_HOME=$1; ZDOTDIR=$2; source "$ZIM_HOME/zimfw.zsh" update' -- "$zim_home" "$zim_dir"
                         echo (set_color green)"✓ $name done"(set_color normal)
                     else
                         set failed (math $failed + 1)

@@ -14,7 +14,7 @@
 
 | 领域 | 方案 | 说明 |
 | --- | --- | --- |
-| Shell | Zsh + [Zim](https://zimfw.sh/) + 自有模块 | `aliases.zsh` / `fzf.zsh` / `sdk.zsh` 三模块化加载；`update-all` 批量更新（`brew`/`rustup`/`tldr`/`uv`/`mise`/`pi`，支持参数过滤与失败计数） |
+| Shell | Zsh + [Zim](https://zimfw.sh/) + 自有模块 | `aliases.zsh` / `fzf.zsh` / `sdk.zsh` 三模块化加载；`update-all` 批量更新（`brew`/`rustup`/`tldr`/`uv`/`mise`/`pi`/`zimfw`，支持参数过滤与失败计数） |
 | Fish | Fish + [Fisher](https://github.com/jorgebucaran/fisher) + Starship | Ghostty 直接启动 `/bin/zsh -l`（`direct:` 模式）；tmux 使用 Fish；`fish_plugins` 锁定 13 个插件（fzf.fish / forgit / autopair / done 等），`conf.d` 分层六文件（含 `01_activate.fish` 守卫激活 mise）设定 PATH/LANG/EDITOR 等环境，可调用大函数在 `functions/` 惰性加载，补全含 kubecolor 与 OrbStack docker/kubectl/orbctl 符号链接 |
 | 提示符 | [Starship](https://starship.rs/) | Catppuccin Mocha powerline 风格（`starship.toml` 为机器本地文件，未入库） |
 | 模糊搜索 | fzf + fzf-tab + fd | Ctrl-R 历史、Ctrl-T 文件、Alt-C 目录、`frg`/`fkill`/`ftm`/`fl*` 交互函数 |

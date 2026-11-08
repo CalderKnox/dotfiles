@@ -131,6 +131,48 @@ class FishRuntime(Fixture):
     self.assertEqual(self.calls("rustup"), [["rustup", "update"]])
     self.assertIn("✓ rust done", result.stdout)
 
+  def test_update_all_zimfw_selected_and_included_by_default(self):
+    definition = function_source(FUNCS / "update-all.fish", "update-all", "fish")
+    self.stub("uv")
+    custom_config = str(self.cwd / "zsh config with spaces")
+    for args, zdotdir, unexported in (("zimfw", "", False), ("", custom_config, False), ("zimfw", custom_config, True)):
+      with self.subTest(args=args, zdotdir=zdotdir, unexported=unexported):
+        config = Path(zdotdir or self.env["HOME"])
+        zim_home = config / ".zim"
+        zim_home.mkdir(parents=True, exist_ok=True)
+        (zim_home / "zimfw.zsh").write_text('print -r -- "$ZIM_HOME|$ZDOTDIR|$*" >> "$ZIM_TRACE"\n')
+        (config / ".zshrc").write_text('print -r -- loaded >> "$STARTUP_TRACE"\n')
+        trace = self.cwd / "zimfw-calls"
+        trace.unlink(missing_ok=True)
+        startup_trace = self.cwd / "startup-calls"
+        env = {"ZDOTDIR": zdotdir, "ZIM_TRACE": str(trace), "STARTUP_TRACE": str(startup_trace), "TERM": "xterm-256color"}
+        setup = f"set -gu ZDOTDIR {shlex.quote(zdotdir)}\n" if unexported else ""
+        result = self.shell(definition, f"{setup}update-all {args}\n", "fish", env)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(trace.read_text().splitlines(), [f"{zim_home}|{config}|update"])
+        self.assertFalse(startup_trace.exists())
+        self.assertIn("✓ zimfw done", result.stdout)
+    self.assertEqual(self.calls("uv"), [["uv", "tool", "upgrade", "--all"]])
+
+  def test_update_all_zimfw_missing_skips_and_failure_continues(self):
+    definition = function_source(FUNCS / "update-all.fish", "update-all", "fish")
+    zim_home = Path(self.env["HOME"]) / ".zim"
+    zim_home.mkdir()
+    (zim_home / "zimfw.zsh").touch()
+    missing = self.shell(definition, "update-all zimfw\n", "fish", {"TERM": "xterm-256color"})
+    self.assertEqual(missing.returncode, 0, missing.stdout + missing.stderr)
+    self.assertIn("zimfw not found, skipped", missing.stdout)
+    self.assertIn("no runnable targets", missing.stdout)
+
+    (zim_home / "zimfw.zsh").write_text('print -u2 -- "zimfw failed"\nreturn 23\n')
+    self.stub("uv")
+    result = self.shell(definition, "update-all zimfw uv\n", "fish", {"TERM": "xterm-256color"})
+    self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+    self.assertIn("✗ zimfw failed", result.stdout)
+    self.assertIn("failed: zimfw", result.stdout)
+    self.assertIn("✓ uv done", result.stdout)
+    self.assertEqual(self.calls("uv"), [["uv", "tool", "upgrade", "--all"]])
+
   def test_update_all_with_no_runnable_target_matches_zsh(self):
     # tldr 是合法目标名，但不在 harness 的 PATH（仅 /usr/bin:/bin + stub）中，因此会被
     # 跳过而成 attempted==0。zsh 侧有 `attempted == 0` 分支且不得声称“更新完成”；

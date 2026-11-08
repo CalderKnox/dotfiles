@@ -40,12 +40,12 @@ git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi commit -m 
 | `chezmoi doctor` | 环境体检 |
 | `chezmoi status` | 简要漂移概览（等价 `git status` 视角） |
 | `chezmoi ignored` | 查看被 `.chezmoiignore` 排除的文件 |
-| `zimfw update` | 更新 Zim 插件（`zsh`，改动 `dot_config/zsh/dot_zimrc` 后按需执行） |
+| `zimfw update` | 更新 Zim 插件（`zsh`；也可在 Zsh 或 Fish 中运行 `update-all zimfw`） |
 | `zimfw upgrade` | 升级 `zimfw` 自身（`zsh`） |
 | `zimfw init` | 重建 `${ZIM_HOME}/init.zsh`（改动 `~/.config/zsh/.zimrc` 后需要，`dot_zshrc` 会按 `-nt` 时间戳自动重建） |
 | `zimfw info` | 查看 `zimfw` 版本与模块信息 |
 | `auto-update` | 一键全量更新入口：若定义了 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行（覆盖目标一致）；定义于 `dot_config/zsh/aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
-| `update-all [targets...]` | 关联数组驱动的批量更新，支持参数选择目标（如 `update-all brew mise`）、带失败计数与耗时统计；覆盖 `brew` / `rustup` / `tldr` / `uv` / `mise` / `pi` 共 6 项；定义于 `aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
+| `update-all [targets...]` | 关联数组驱动的批量更新，支持参数选择目标（如 `update-all brew zimfw`）、带失败计数与耗时统计；覆盖 `brew` / `rustup` / `tldr` / `uv` / `mise` / `pi` / `zimfw` 共 7 项；定义于 `aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
 
 > `auto-update` 与 `update-all` 均定义于 `dot_config/zsh/aliases.zsh`；`auto-update` 为兼容旧习惯的一键入口（内部委托 `update-all`），`update-all` 为支持参数过滤、失败计数与耗时统计的实际实现，二者覆盖目标一致（均含 `mise`）；详见 [dev-tools.md](dev-tools.md) 对比表。
 
@@ -156,7 +156,7 @@ HTTP/HTTPS 远程均生效），与 `private_dot_ssh/private_config` 的 `ProxyC
 | 维度 | `auto-update` | `update-all` |
 | --- | --- | --- |
 | 定义位置 | `aliases.zsh` 的 `auto-update` | `aliases.zsh` 的 `update-all` |
-| 覆盖目标 | 6 项（同 `update-all`，经委托实现） | 6 项：`brew` / `rustup` / `tldr` / `uv` / `mise` / `pi`（含 `mise upgrade`、`pi update --all`） |
+| 覆盖目标 | 7 项（同 `update-all`，经委托实现） | 7 项：`brew` / `rustup` / `tldr` / `uv` / `mise` / `pi` / `zimfw`（含 `zimfw update`） |
 | 参数 | 无参数，固定调用 `update-all` 全量 | 支持 `update-all brew mise` 参数过滤，未传参则全量；未知目标报错并提示可用列表 |
 | 守卫与容错 | 由 `update-all` 实现 | 循环内 `command -v $name` 守卫 + `eval` 失败则 `failed++` |
 | 统计与输出 | 由 `update-all` 提供（另加 🚀 横幅与可选 `onproxy`） | 失败计数 `failed`、耗时 `mins` / `secs`、`print -P` 彩色输出（蓝标题/绿成功/黄跳过/红失败） |

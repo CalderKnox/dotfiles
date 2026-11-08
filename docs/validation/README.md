@@ -13,8 +13,7 @@
 CI（`.github/workflows/ci.yaml`，`macos-latest`）在 push/PR 上运行
 `actionlint`、`check.py --strict` 与 `fzf_runtime.py`；本文其余入口（negative
 controls、terminal parsers、tmux plugins、benchmark）需手动运行。
-因此 **CI 可复现的正向检查为 102 项**（check.py 100 + fzf_runtime 2）；terminal
-parsers（2）与 tmux plugins（1）需 macOS GUI 应用与本机插件副本，只在本地运行。
+terminal parsers 与 tmux plugins 需 macOS GUI 应用与本机插件副本，只在本地运行。
 
 所有测试入口（`check.py` / `fzf_runtime.py` / `terminal_parsers.py` /
 `tmux_plugins.py`）在**任何 skip 时都返回非零**——缺依赖会显式失败而不是让门变绿。
@@ -40,7 +39,7 @@ python3 docs/validation/check.py --strict
 - 部署边界不变式：固定 depth-1 受管目标集合（9 项），使"新增根级源文件静默渲染进 `$HOME`"失败；并断言 `.github` 不部署（此前仅依赖"源名以点开头"的隐式规则）。
 - 仓库根级文档门：每个根级 `*.md` 必须被 Git 跟踪、不出现在 `chezmoi managed`（`.chezmoiignore` 的 `**/*.md` 保证不落进 `$HOME`），且从 `README.md` 建立链接（`test_root_repository_docs_are_tracked_and_not_deployed`）。
 - 实际渲染的 Zsh/Zim symlink 目标与 private/default 权限契约（不 apply）；`.keep` 占位文件不产生部署目标；
-- updater 全参数预检、混合失败、缺失依赖、临时文件失败与 stderr；全部目标缺失（`attempted==0`）时 zsh/fish 均须报“no runnable targets”而非“更新完成”；brew 目标的第三方 `brew cu`（tap `buo/homebrew-cask-upgrade`）不可用时须跳过并提示、不得把 brew 误报为 failed，同时真实 `cu` 失败仍须传播；
+- updater 全参数预检、混合失败、缺失依赖、临时文件失败与 stderr；Zsh/Fish 的 `zimfw` 目标覆盖默认及显式选择、缺失与失败，Fish 还验证自定义 `ZDOTDIR` 和非交互启动；全部目标缺失（`attempted==0`）时 zsh/fish 均须报“no runnable targets”而非“更新完成”；brew 目标的第三方 `brew cu`（tap `buo/homebrew-cask-upgrade`）不可用时须跳过并提示、不得把 brew 误报为 failed，同时真实 `cu` 失败仍须传播；
 - Zsh/Fish yazi 成功/失败/清理/导航（caller 变量哨兵仅 Fish 侧校验）；fish `cdd` 在无 lsd 别名时回退到可移植 `ls`；`uv_resync` 当前为注释模板（未启用），测试仅校验模板存在、启用后自动恢复行为断言；
 - fzf 正整数 PID、去重、多选、危险 Ex 行字段、路径选项终止与 ftm 状态；
 - completion 冷/热缓存、未来 mtime、同路径降级、NO_CLOBBER、无效生成、编译失败、

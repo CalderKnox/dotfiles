@@ -32,12 +32,13 @@ mise 工具链由 `dot_config/mise/config.toml` 声明（Bun、Deno、Go 与 pnp
 | 函数 | 位置 | 覆盖目标 | 核心机制 | 适用场景 |
 | --- | --- | --- | --- | --- |
 | `auto-update` | `aliases.zsh` | 与 `update-all` 相同 | 薄包装：打印横幅后委托 `update-all` 执行，详见源文件 | 兼容旧习惯的一键入口 |
-| `update-all` | `aliases.zsh` | 多项（`brew`/`rustup`/`tldr`/`uv`/`mise`/`pi` 等，详见源文件） | 关联数组声明任务，支持参数过滤、守卫、失败计数与彩色输出，详见 `aliases.zsh` | 需灵活选择目标、查看统计 |
+| `update-all` | `aliases.zsh` | `brew`/`rustup`/`tldr`/`uv`/`mise`/`pi`/`zimfw` | 关联数组声明任务，支持参数过滤、守卫、失败计数与彩色输出，详见 `aliases.zsh` | 需灵活选择目标、查看统计 |
 
 要点：
 
 - 旧版 `auto_update` 曾顺序守卫调用五个 `*_update` 辅助函数（`uv_update` / `sdk_update` / `rust_update` / `tldr_update` / `brew_update`），它们已在提交 `0af1f61` 中删除；现 `auto-update` 委托 `update-all`，二者覆盖目标完全一致（均含 `mise`）。
 - `update-all` 的 `brew` 任务为激进的全量升级流程（含 `brew cu`），历史上的 `brew_update` 别名已删除，详见 `aliases.zsh` 中 `tasks` 定义。
+- Zsh 与 Fish 均支持 `update-all zimfw` 更新 Zim 模块；Fish 通过非交互 Zsh 运行已安装的 `zimfw.zsh`，缺失时跳过。`zimfw upgrade` 升级框架自身，需另行运行。
 
 > 验证：`zsh -n ~/.config/zsh/aliases.zsh` 可覆盖两函数语法；`zsh -ic 'type update-all auto-update'` 确认已加载。
 

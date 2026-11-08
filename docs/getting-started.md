@@ -206,6 +206,6 @@ git config --get-regexp proxy        # 应为 socks5h://127.0.0.1:7890（与 SSH
                                      # git config --file ~/.local/share/chezmoi/dot_gitconfig --get-regexp proxy
 ```
 
-> **日常更新速览**：`dot_config/zsh/aliases.zsh` 提供 `auto-update`（若定义了 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行，覆盖目标一致）与更细粒度的 `update-all [brew|mise|rustup|tldr|uv|pi]`（关联数组 6 项，支持参数过滤、失败计数与耗时统计，**含 `mise` 与 `pi`**；**失败即红**——失败目标打印红色 `✗` 与错误摘要、结尾汇总 `N/M 目标失败` 并返回非零，成功目标保持绿色 `✓`）；验证通过后可按需执行 `zsh -ic 'auto-update'` 或 `zsh -ic 'update-all'`，详见 [maintenance.md](maintenance.md) 与 [dev-tools.md](dev-tools.md) 的对比表及 `aliases.zsh` 源码。
+> **日常更新速览**：`dot_config/zsh/aliases.zsh` 提供 `auto-update`（若定义了 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行，覆盖目标一致）与更细粒度的 `update-all [brew|mise|rustup|tldr|uv|pi|zimfw]`（关联数组 7 项，支持参数过滤、失败计数与耗时统计；**失败即红**——失败目标打印红色 `✗` 与错误摘要、结尾汇总 `N/M 目标失败` 并返回非零，成功目标保持绿色 `✓`）；验证通过后可按需执行 `zsh -ic 'auto-update'` 或 `zsh -ic 'update-all'`，详见 [maintenance.md](maintenance.md) 与 [dev-tools.md](dev-tools.md) 的对比表及 `aliases.zsh` 源码。
 
 全部通过后即可进入日常使用；更多维护流程见 [maintenance.md](maintenance.md)，完整映射见 [layout.md](layout.md)。

@@ -1171,6 +1171,34 @@ class ZshHelpers(Fixture):
     self.assertIn("pi not found", result.stdout)
     self.assertEqual(list(self.cwd.glob("update-all.*")), [])
 
+  def test_update_zimfw_function_selected_and_included_by_default(self):
+    trace = self.cwd / "zimfw-calls"
+    definition = 'zimfw() { print -r -- "$*" >> "$ZIM_TRACE"; }\n' + self.updater()
+    self.stub("uv")
+    for args in ("zimfw", ""):
+      with self.subTest(args=args):
+        trace.unlink(missing_ok=True)
+        result = self.shell(definition, f"update-all {args}\n", env={"ZIM_TRACE": str(trace)})
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(trace.read_text().splitlines(), ["update"])
+        self.assertIn("✓ zimfw done", result.stdout)
+    self.assertEqual(self.calls("uv"), [["uv", "tool", "upgrade", "--all"]])
+
+  def test_update_zimfw_missing_skips_and_failure_continues(self):
+    missing = self.shell(self.updater(), "update-all zimfw\n")
+    self.assertEqual(missing.returncode, 0, missing.stdout + missing.stderr)
+    self.assertIn("zimfw not found, skipped", missing.stdout)
+    self.assertIn("no runnable targets", missing.stdout)
+
+    self.stub("uv")
+    definition = 'zimfw() { print -u2 -- "zimfw failed"; return 23; }\n' + self.updater()
+    result = self.shell(definition, "update-all zimfw uv\n")
+    self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+    self.assertIn("✗ zimfw failed (exit=23)", result.stdout)
+    self.assertIn("zimfw failed", result.stdout)
+    self.assertIn("✓ uv done", result.stdout)
+    self.assertEqual(self.calls("uv"), [["uv", "tool", "upgrade", "--all"]])
+
   def test_update_allocation_failure_does_not_run_target(self):
     self.stub("uv")
     self.stub("mktemp", "sys.exit(23)")
