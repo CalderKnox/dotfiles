@@ -1,20 +1,14 @@
 {
-  "lastChangelogVersion": "1.4.0",
+  "lastChangelogVersion": "1.5.0",
   "packages": [
-    "npm:pi-subagents",
     "npm:pi-background-tasks",
+    "npm:pi-web-access",
+    "npm:pi-subagents",
     "npm:@czottmann/pi-automode",
-    {
-      "source": "npm:pi-web-access",
-      "extensions": [
-        "-index.ts"
-      ]
-    },
     "npm:@narumitw/pi-goal",
     "npm:@narumitw/pi-btw",
     "npm:@narumitw/pi-plan-mode",
-    "npm:@calesennett/pi-codex-fast",
-    "npm:@piotr-oles/pi-reflag"
+    "npm:@quintinshaw/pi-dynamic-workflows"
   ],
   "git-attribution": {
     "enabled": false
@@ -27,5 +21,13 @@
   "pi-codex-fast": {
     "enabled": true,
     "mode": "ultrafast"
+  },
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.47.0",
+    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.87.0",
+    "{\"source\":\"npm:@czottmann/pi-automode\",\"scope\":\"user\"}": "1.17.0",
+    "{\"source\":\"npm:@narumitw/pi-goal\",\"scope\":\"user\"}": "0.54.17",
+    "{\"source\":\"npm:@narumitw/pi-btw\",\"scope\":\"user\"}": "0.63.5",
+    "{\"source\":\"npm:@narumitw/pi-plan-mode\",\"scope\":\"user\"}": "0.60.0"
   }
 }
