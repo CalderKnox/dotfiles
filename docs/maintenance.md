@@ -45,7 +45,7 @@ git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi commit -m 
 | `zimfw init` | 重建 `${ZIM_HOME}/init.zsh`（改动 `~/.config/zsh/.zimrc` 后需要，`dot_zshrc` 会按 `-nt` 时间戳自动重建） |
 | `zimfw info` | 查看 `zimfw` 版本与模块信息 |
 | `auto-update` | 一键全量更新入口：若定义了 `onproxy` 函数则先切代理，随后直接委托 `update-all` 执行（覆盖目标一致）；定义于 `dot_config/zsh/aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
-| `update-all [targets...]` | 关联数组驱动的批量更新，支持参数选择目标（如 `update-all brew mise`）、带失败计数与耗时统计；覆盖 `brew` / `rustup` / `tldr` / `uv` / `mise` / `pi` 共 6 项（**已覆盖 `mise`**，与 `auto-update` 的核心差异）；定义于 `aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
+| `update-all [targets...]` | 关联数组驱动的批量更新，支持参数选择目标（如 `update-all brew mise`）、带失败计数与耗时统计；覆盖 `brew` / `rustup` / `tldr` / `uv` / `mise` / `pi` 共 6 项；定义于 `aliases.zsh`，详见 [dev-tools.md](dev-tools.md) |
 
 > `auto-update` 与 `update-all` 均定义于 `dot_config/zsh/aliases.zsh`；`auto-update` 为兼容旧习惯的一键入口（内部委托 `update-all`），`update-all` 为支持参数过滤、失败计数与耗时统计的实际实现，二者覆盖目标一致（均含 `mise`）；详见 [dev-tools.md](dev-tools.md) 对比表。
 

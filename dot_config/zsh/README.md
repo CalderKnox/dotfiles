@@ -71,11 +71,11 @@ fzf 安装前缀的探测顺序、缓存文件位置（`~/.cache/zsh/fzf_prefix`
 
 ### 有守卫的可选组件（未安装时静默跳过）
 
-`pnpm`（tabtab 补全）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/`，按二进制 stat 身份失效并使用带锁的 zcompile，二进制替换自动重建；`k` 通过 kubectl 回退）、krew、`~/.cargo/bin`（存在时直接加入 PATH；不 source `~/.cargo/env`）。`update-all` 的 6 目标 `brew`/`rustup`/`tldr`/`uv`/`mise`/`pi` 逐项 `command -v` 守卫，未安装跳过、失败汇总并返回非零；其中 `brew` 任务依赖 `brew tap buo/homebrew-cask-upgrade`（提供 `brew cu`），新机器上未 tap 时该任务会在 `brew cu` 处失败。详见 `sdk.zsh` 与 `aliases.zsh` 源码。
+`pnpm`（tabtab 补全）、`docker`/`kubectl`+`kubecolor`（补全缓存于 `~/.cache/zsh/`，按二进制 stat 身份失效并使用带锁的 zcompile，二进制替换自动重建；`k` 通过 kubectl 回退）、krew、`~/.cargo/bin`（存在时直接加入 PATH；不 source `~/.cargo/env`）。`update-all` 的 6 目标 `brew`/`rustup`/`tldr`/`uv`/`mise`/`pi` 逐项 `command -v` 守卫，未安装跳过、失败汇总并返回非零；其中 `brew cu` 由 `buo/homebrew-cask-upgrade` tap 提供，缺失时跳过该步骤。详见 `sdk.zsh` 与 `aliases.zsh` 源码。
 
 ### 运行时工具（对应别名/函数调用时才需要）
 
-`fd`（主力；FZF 的 `FZF_DEFAULT_COMMAND`/`FZF_ALT_C_COMMAND` 缺省回退 `rg`，`find_large_files` 缺省回退 `find`）、`bat`、`lsd`、`nvim`、`code`、`htop`、`fastfetch`、`tmux`、`yazi`、`gh`、`lazygit`、`claude`、`opencode`、`ruff`、`uv`、`rustup`、`tldr`、`mise`、`nproc`（coreutils）、`wget`、`jadx-gui`、`scrcpy`。`java` 仅经 `update-all` 的 `sdk` 任务间接使用。已移除的死引用可从更早的独立 `zsh-config` 仓库历史找回；本仓库从未有过 `baseline` 标签，勿凭空创建。
+`fd`（主力；FZF 的 `FZF_DEFAULT_COMMAND`/`FZF_ALT_C_COMMAND` 缺省回退 `rg`，`find_large_files` 缺省回退 `find`）、`bat`、`lsd`、`nvim`、`code`、`htop`、`fastfetch`、`tmux`、`yazi`、`gh`、`lazygit`、`claude`、`opencode`、`ruff`、`uv`、`rustup`、`tldr`、`mise`、`nproc`（coreutils）、`wget`、`jadx-gui`、`scrcpy`。已移除的死引用可从更早的独立 `zsh-config` 仓库历史找回；本仓库从未有过 `baseline` 标签，勿凭空创建。
 
 ## 注意事项
 
