@@ -59,6 +59,7 @@ zmodule duration-info
 zmodule git-info
 zmodule prompt-pwd
 zmodule asciiship
+zmodule magic-enter
 
 #
 # Completion
