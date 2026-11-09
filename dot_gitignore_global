@@ -24,6 +24,7 @@ Thumbs.db
 *.tmp
 *.orig
 *.db
+*.serena
 
 # --- 编辑器 / IDE（目录锚定，只忽略目录本身） ---
 .vscode/
