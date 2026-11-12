@@ -1,6 +1,7 @@
 """Isolated app integration tests. No user config, plugin download, or network."""
 
 import json
+import os
 import re
 import shlex
 import unittest
@@ -569,7 +570,13 @@ class TmuxRuntime(Fixture):
     self.load_config()
     self.assertEqual(self.option("mouse"), "on")
     self.assertEqual(self.option("history-limit"), "100000")
-    self.assertTrue(self.option("default-shell").endswith(("fish", "bash")))
+    expected_shell = next(
+      path
+      for path in ("/opt/homebrew/bin/fish", "/usr/bin/fish", "/bin/bash")
+      if Path(path).is_file() and os.access(path, os.X_OK)
+    )
+    self.assertEqual(self.option("default-shell"), expected_shell)
+    self.assertEqual(self.option("default-command"), "")
     bindings = self.ok(self.run_tmux("list-keys", "-T", "prefix"))
     self.assertTrue(any(re.search(r"prefix\s+r\s+source-file", line) for line in bindings.splitlines()))
 
