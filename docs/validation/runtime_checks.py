@@ -507,6 +507,10 @@ class TmuxRuntime(Fixture):
     self.assertEqual(self.option("terminal-features").splitlines().count("xterm*:extkeys"), 1)
     self.assertIn("linux*:AX@", self.option("terminal-overrides"))
 
+  def test_status_bar_is_at_bottom(self):
+    self.load_config()
+    self.assertEqual(self.option("status-position"), "bottom")
+
   def test_new_panes_and_windows_use_current_path(self):
     self.load_config()
     bindings = self.ok(self.run_tmux("list-keys", "-T", "prefix"))
