@@ -1,6 +1,6 @@
 # 终端：Ghostty（主力）、Alacritty（备用）与 kitty
 
-三套配置可独立安装、互不依赖；Ghostty 与 Alacritty 使用 `JetBrainsMonoNL Nerd Font Mono`，kitty 使用 `JetBrainsMono Nerd Font Mono`。Ghostty 为日常主力（支持热重载、Quick Terminal），Alacritty 为轻量备用，kitty 仅以增量个人配置 `kitty.local.conf` 入库作参考、不部署（目标机文件机器本地维护，在新机生成的默认 `kitty.conf` 末尾 `include` 引入即可，见下文）。各入口的 shell 配置为：Ghostty `command = direct:/bin/zsh -l`、Alacritty 经 Zsh 启动 `tmux`、kitty `shell = fish`；tmux 会话内使用的 shell 由 tmux 的 `default-shell` 决定（终端模拟器使用固定路径）。
+三套配置可独立安装、互不依赖；Ghostty 与 Alacritty 使用 `JetBrainsMonoNL Nerd Font Mono`，kitty 使用 `JetBrainsMono Nerd Font Mono`。Ghostty 为日常主力（支持热重载、Quick Terminal），Alacritty 为轻量备用，kitty 仅以增量个人配置 `kitty.local.conf` 入库作参考、不部署（目标机文件机器本地维护，在新机生成的默认 `kitty.conf` 末尾 `include` 引入即可，见下文）。各入口的 shell 配置为：Ghostty `command = direct:/bin/zsh -l`、Alacritty 经 Zsh 启动 `tmux`、kitty `shell = fish`；tmux 不覆盖 `default-shell` / `default-command`，由 tmux 根据启动环境选择默认登录 shell（终端模拟器使用固定路径）。
 
 > **分工**：本文件只解释终端模拟器自身的配置思路与日常使用，不重复具体数值。提示符与配色方案的完整定义（Starship `catppuccin_mocha`、powerline 格式与各段样式）见 [shell.md — Starship 提示符](shell.md#starship-提示符机器本地-starshiptoml)。所有实际配置值（字体、透明度、键位、配色等）一律以源文件为唯一权威：Ghostty 见 `dot_config/ghostty/config`，Alacritty 见 `dot_config/alacritty/alacritty.toml`，kitty 见 `dot_config/kitty/kitty.local.conf`。
 
@@ -42,7 +42,7 @@
 
 仓库中的 `kitty.local.conf` 仅入库作参考、**不部署**：`.chezmoiignore` 的 `**/*.local.*` 已将其排除（`chezmoi ignored` 含 `.config/kitty/kitty.local.conf`，`chezmoi managed` 不含该文件）。目标机的 `~/.config/kitty/kitty.local.conf` 为机器本地维护文件，新机需从仓库版本手工拷贝或自建，并在 kitty 首次启动生成的 `~/.config/kitty/kitty.conf` 末尾手工添加一行 `include kitty.local.conf` 引入（kitty 不会自动读取该文件名；仓库有意不含 `kitty.conf`，避免整份覆盖上游默认值，此操作一次即可）。之后可用 `Cmd+,`（`edit_config_file`）编辑、`Ctrl+Cmd+,`（`load_config_file`）热重载。
 
-- **启动即 Fish**：`shell = /opt/homebrew/bin/fish --login --interactive`（默认取自 `$SHELL`/passwd，本机为 zsh，故显式固定为 Fish，与 tmux 的 `default-shell` 一致；tmux 侧无 fish 时经 if-shell 自动回退 `/bin/bash`）。
+- **启动即 Fish**：`shell = /opt/homebrew/bin/fish --login --interactive`（默认取自 `$SHELL`/passwd，本机为 zsh，故显式固定为 Fish，kitty 单独固定为 Fish；tmux 保留默认登录 shell）。
 - **字体与外观**：JetBrainsMono Nerd Font Mono、Catppuccin Mocha 配色、powerline 标签栏与 minimal 边框；具体数值见源文件。
 - **布局**：`enabled_layouts splits:split_axis=horizontal,*` 让方向分屏快捷键在新标签默认的 splits 布局中生效，并保留其他布局。
 - **键位**：`Cmd+T` 在 `~/workspaces` 开新标签页、`Cmd+D` / `Cmd+Shift+D` 横纵分屏、`Cmd+Shift+Enter` 在相邻位置开窗、`Cmd+1`–`Cmd+9` 标签跳转等；完整 `map` 列表以源文件为准。

@@ -567,14 +567,10 @@ class TmuxRuntime(Fixture):
     self.assertIn("[CPU]", self.option("status-right"))
 
   def test_missing_plugins_leave_core_tmux_configuration_usable(self):
+    expected_shell = self.option("default-shell")
     self.load_config()
     self.assertEqual(self.option("mouse"), "on")
     self.assertEqual(self.option("history-limit"), "100000")
-    expected_shell = next(
-      path
-      for path in ("/opt/homebrew/bin/fish", "/usr/bin/fish", "/bin/bash")
-      if Path(path).is_file() and os.access(path, os.X_OK)
-    )
     self.assertEqual(self.option("default-shell"), expected_shell)
     self.assertEqual(self.option("default-command"), "")
     bindings = self.ok(self.run_tmux("list-keys", "-T", "prefix"))

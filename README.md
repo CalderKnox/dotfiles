@@ -15,7 +15,7 @@
 | 领域 | 方案 | 说明 |
 | --- | --- | --- |
 | Shell | Zsh + [Zim](https://zimfw.sh/) + 自有模块 | `aliases.zsh` / `fzf.zsh` / `sdk.zsh` 三模块化加载；`update-all` 批量更新（`brew`/`rustup`/`tldr`/`uv`/`mise`/`pi`/`zimfw`，支持参数过滤与失败计数） |
-| Fish | Fish + [Fisher](https://github.com/jorgebucaran/fisher) + Starship | Ghostty 直接启动 `/bin/zsh -l`（`direct:` 模式）；tmux 使用 Fish；`fish_plugins` 锁定 13 个插件（fzf.fish / forgit / autopair / done 等），`conf.d` 分层六文件（含 `01_activate.fish` 守卫激活 mise）设定 PATH/LANG/EDITOR 等环境，可调用大函数在 `functions/` 惰性加载，补全含 kubecolor 与 OrbStack docker/kubectl/orbctl 符号链接 |
+| Fish | Fish + [Fisher](https://github.com/jorgebucaran/fisher) + Starship | Ghostty 直接启动 `/bin/zsh -l`（`direct:` 模式）；tmux 继承默认登录 shell；`fish_plugins` 锁定 13 个插件（fzf.fish / forgit / autopair / done 等），`conf.d` 分层六文件（含 `01_activate.fish` 守卫激活 mise）设定 PATH/LANG/EDITOR 等环境，可调用大函数在 `functions/` 惰性加载，补全含 kubecolor 与 OrbStack docker/kubectl/orbctl 符号链接 |
 | 提示符 | [Starship](https://starship.rs/) | Catppuccin Mocha powerline 风格（`starship.toml` 为机器本地文件，未入库） |
 | 模糊搜索 | fzf + fzf-tab + fd | Ctrl-R 历史、Ctrl-T 文件、Alt-C 目录、`frg`/`fkill`/`ftm`/`fl*` 交互函数 |
 | 终端 | Ghostty（主力）/ Alacritty（备用）/ kitty（本地配置） | Ghostty 与 Alacritty 使用 JetBrainsMonoNL；Ghostty 为 Catppuccin Frappe，Alacritty 与 kitty 为 Catppuccin Mocha（Alacritty 保留 Dracula 注释模板） |
@@ -88,7 +88,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 ├── symlink_dot_zimrc.tmpl             →  ~/.zimrc  (→ ~/.config/zsh/.zimrc)  同上（XDG 收敛，兼容 ~/.zshrc 路径）
 ├── dot_gitconfig                      →  ~/.gitconfig                 用户信息 / 代理 / LFS / push 行为
 ├── dot_gitignore_global               →  ~/.gitignore_global          全局忽略规则（构建产物根锚定，无 bin/）
-├── dot_tmux.conf                      →  ~/.tmux.conf                  tmux 配置（Fish 登录 shell、tpm 插件、Catppuccin Mocha 状态栏）
+├── dot_tmux.conf                      →  ~/.tmux.conf                  tmux 配置（继承默认登录 shell、tpm 插件、Catppuccin Mocha 状态栏）
 ├── dot_codex/
 │   └── config.toml                    →  (不部署) ~/.codex/config.toml   cc-switch 机器本地配置参考快照（被 .chezmoiignore 的 .codex/config.toml 排除；~/.claude/settings.json 同此模式：源已移出仓库，各机本地维护）
 ├── dot_config/
