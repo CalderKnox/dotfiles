@@ -22,7 +22,7 @@ brew install fzf starship zoxide mise fd ripgrep
 
 # —— 终端入口必需 ——
 brew install fish  # tmux 默认 shell 优先使用 /opt/homebrew/bin/fish
-# Alacritty 直接启动 tmux main 会话：
+# Alacritty 经交互式 Zsh 启动 tmux main 会话：
 brew install tmux
 ```
 
@@ -166,7 +166,7 @@ Android NDK（`/opt/homebrew/share/android-ndk`）、Docker、`kubectl` / `kubec
 brew install --cask ghostty alacritty
 ```
 
-两者需要字体就绪；Ghostty 使用 `/bin/zsh`，Alacritty 直接启动 `/opt/homebrew/bin/tmux`，会话不存在时新建、存在时 attach。Ghostty 为主力，Alacritty 为备用。详见 [terminals.md](terminals.md)。
+两者需要字体就绪；Ghostty 使用 `/bin/zsh`，Alacritty 经交互式 Zsh 以绝对路径启动 tmux，会话不存在时新建、存在时 attach，且不覆盖 `[env] PATH`。Ghostty 为主力，Alacritty 为备用。详见 [terminals.md](terminals.md)。
 
 ## 5. 应用后验证清单
 

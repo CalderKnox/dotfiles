@@ -451,14 +451,14 @@ class SourceChecks(Fixture):
     alacritty_text = (ROOT / "dot_config/alacritty/alacritty.toml").read_text()
     alacritty = tomllib.loads(alacritty_text)
     self.assertIn(alacritty["font"]["normal"]["family"], terminal_docs)
-    self.assertEqual(alacritty["terminal"]["shell"]["program"], "/opt/homebrew/bin/tmux")
-    self.assertEqual(alacritty["terminal"]["shell"]["args"], ["new", "-A", "-s", "main"])
+    self.assertEqual(alacritty["terminal"]["shell"]["program"], "/bin/zsh")
     self.assertEqual(
-      alacritty["env"]["PATH"].split(":")[:2],
-      ["/opt/homebrew/bin", "/opt/homebrew/sbin"],
+      alacritty["terminal"]["shell"]["args"],
+      ["-ic", "exec /opt/homebrew/bin/tmux new -A -s main"],
     )
-    self.assertIn('program = "/opt/homebrew/bin/tmux"', terminal_docs)
-    self.assertIn('args = ["new", "-A", "-s", "main"]', terminal_docs)
+    self.assertNotIn("PATH", alacritty["env"])
+    self.assertIn('program = "/bin/zsh"', terminal_docs)
+    self.assertIn('args = ["-ic", "exec /opt/homebrew/bin/tmux new -A -s main"]', terminal_docs)
     self.assertIn("无则新建", terminal_docs)
     self.assertIn("有则 attach", terminal_docs)
     self.assertNotIn("[[schemas]]", alacritty_text)

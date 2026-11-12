@@ -1,6 +1,6 @@
 # 终端：Ghostty（主力）、Alacritty（备用）与 kitty
 
-三套配置可独立安装、互不依赖；Ghostty 与 Alacritty 使用 `JetBrainsMonoNL Nerd Font Mono`，kitty 使用 `JetBrainsMono Nerd Font Mono`。Ghostty 为日常主力（支持热重载、Quick Terminal），Alacritty 为轻量备用，kitty 仅以增量个人配置 `kitty.local.conf` 入库作参考、不部署（目标机文件机器本地维护，在新机生成的默认 `kitty.conf` 末尾 `include` 引入即可，见下文）。各入口的 shell 配置为：Ghostty `command = direct:/bin/zsh -l`、Alacritty 直接启动 `tmux`、kitty `shell = fish`；tmux 会话内使用的 shell 由 tmux 的 `default-shell` 决定（终端模拟器使用固定路径）。
+三套配置可独立安装、互不依赖；Ghostty 与 Alacritty 使用 `JetBrainsMonoNL Nerd Font Mono`，kitty 使用 `JetBrainsMono Nerd Font Mono`。Ghostty 为日常主力（支持热重载、Quick Terminal），Alacritty 为轻量备用，kitty 仅以增量个人配置 `kitty.local.conf` 入库作参考、不部署（目标机文件机器本地维护，在新机生成的默认 `kitty.conf` 末尾 `include` 引入即可，见下文）。各入口的 shell 配置为：Ghostty `command = direct:/bin/zsh -l`、Alacritty 经 Zsh 启动 `tmux`、kitty `shell = fish`；tmux 会话内使用的 shell 由 tmux 的 `default-shell` 决定（终端模拟器使用固定路径）。
 
 > **分工**：本文件只解释终端模拟器自身的配置思路与日常使用，不重复具体数值。提示符与配色方案的完整定义（Starship `catppuccin_mocha`、powerline 格式与各段样式）见 [shell.md — Starship 提示符](shell.md#starship-提示符机器本地-starshiptoml)。所有实际配置值（字体、透明度、键位、配色等）一律以源文件为唯一权威：Ghostty 见 `dot_config/ghostty/config`，Alacritty 见 `dot_config/alacritty/alacritty.toml`，kitty 见 `dot_config/kitty/kitty.local.conf`。
 
@@ -23,16 +23,16 @@
 
 轻量备用，使用 Catppuccin Mocha 配色（Ghostty 使用 Catppuccin Frappe；Dracula 调色板整块注释保留为模板），与 Ghostty 互为独立配置，切换无需改另一文件。
 
-- **启动即 tmux（无则新建，有则 attach）**：`alacritty.toml` 顶部配置如下；`-A` 会在 `main` 会话不存在时新建，存在时直接 attach。使用 tmux 的绝对路径可避免从 Dock/Finder 启动时因 LaunchServices 不继承 Homebrew `PATH` 而立即退出。
+- **启动即 tmux（无则新建，有则 attach）**：`alacritty.toml` 顶部配置如下；`-A` 会在 `main` 会话不存在时新建，存在时直接 attach。使用 tmux 的绝对路径可避免从 Dock/Finder 启动时因 GUI 启动环境尚未经过交互式 Zsh 的 Homebrew `PATH` 收敛而立即退出。
 
   ```toml
   [terminal.shell]
-  program = "/opt/homebrew/bin/tmux"
-  args = ["new", "-A", "-s", "main"]
+  program = "/bin/zsh"
+  args = ["-ic", "exec /opt/homebrew/bin/tmux new -A -s main"]
   ```
 
   仅右 Option 作 Alt 等键盘策略与 Ghostty 一致。
-- **插件 PATH**：Alacritty 的 `[env] PATH` 显式包含 Homebrew 目录，确保 tmux 内 Catppuccin 与 TPM 脚本能调用 `/opt/homebrew/bin/tmux`，不会出现 `returned 127` / `returned 1`。
+- **PATH**：Alacritty 不覆盖 `[env] PATH`；启动命令使用 tmux 的绝对路径，避免 GUI 启动环境尚未包含 Homebrew 目录时连 tmux 本身都找不到。`-ic` 让 Zsh 读取 `~/.zshrc`、完成 PATH 收敛后再以绝对路径 `exec` tmux，使 tmux server 与 TPM/Catppuccin 脚本继承 Homebrew `PATH`。
 - **字体**为 JetBrainsMonoNL Nerd Font Mono、`size = 16`；Ghostty 使用相同字体族。
 - **配色**：活跃调色板为 Catppuccin Mocha（`colors.primary / normal / bright` 的 `#1e1e2e` / `#f38ba8` 系列）；Dracula 块整体注释保留，需要时取消注释切换。实际 hex 值以源文件 `alacritty.toml` 的 `[colors]` 为准。
 - **键位**：复用交给 tmux，故屏蔽 `Cmd+T` / `Cmd+N`、保留 `Cmd+Enter` 切换全屏；其余自定义绑定见源文件。
