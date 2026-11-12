@@ -11,10 +11,11 @@
 # schema: https://raw.githubusercontent.com/distinction-dev/alacritty-schema/main/alacritty/reference.json
 
 [terminal.shell]
-program = "/opt/homebrew/bin/fish"
-args = ["-c", "tmux new -A -s main"]
+program = "/opt/homebrew/bin/tmux"
+args = ["new", "-A", "-s", "main"]
 
 [env]
+PATH = "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 TERM = "xterm-256color"  # ensure 256-color + truecolor in tmux/ssh
 COLORTERM = "truecolor"
 LANG = "zh_CN.UTF-8"
