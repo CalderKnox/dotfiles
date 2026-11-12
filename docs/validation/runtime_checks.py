@@ -507,6 +507,17 @@ class TmuxRuntime(Fixture):
     self.assertEqual(self.option("terminal-features").splitlines().count("xterm*:extkeys"), 1)
     self.assertIn("linux*:AX@", self.option("terminal-overrides"))
 
+  def test_new_panes_and_windows_use_current_path(self):
+    self.load_config()
+    bindings = self.ok(self.run_tmux("list-keys", "-T", "prefix"))
+    self.assertTrue(
+      any("split-window -h -c" in line and "#{pane_current_path}" in line for line in bindings.splitlines())
+    )
+    self.assertTrue(
+      any("split-window -v -c" in line and "#{pane_current_path}" in line for line in bindings.splitlines())
+    )
+    self.assertTrue(any("new-window -c" in line and "#{pane_current_path}" in line for line in bindings.splitlines()))
+
   def test_cold_status_expansion_and_xdg_plugin_path(self):
     self.install_plugin_contract_stubs()
     self.load_config()
