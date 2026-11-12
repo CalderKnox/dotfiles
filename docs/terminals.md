@@ -51,7 +51,7 @@
 
 新分屏和窗口使用 `%`、`"`、`c` 绑定从当前 pane 目录打开，避免回落到启动目录。
 
-`dot_tmux.conf` 先选择 TPM 根目录并在可用时加载 Catppuccin，再构造 status-right，最后运行 TPM 以让 tmux-cpu/tmux-battery 替换占位符。CPU/RAM/battery 不是全部由 Catppuccin 独立提供：RAM 使用已安装 `tmux-cpu` 的 `ram_percentage`。首次使用时，TPM 本身必须先通过上游说明安装到 `~/.config/tmux/plugins/tpm` 或 `~/.tmux/plugins/tpm`；配置里的 `prefix+I` 只能在 TPM 已存在时安装插件，不能安装 TPM 自身。重载会去重 terminal-overrides/features，不会不断追加相同能力。
+`dot_tmux.conf` 先选择 TPM 根目录并在可用时加载 Catppuccin，再构造 status-right，最后运行 TPM 以让 tmux-cpu/tmux-battery 替换占位符。选择规则避免只有 TPM 的目录覆盖包含 Catppuccin 的插件根：若 XDG 目录只有 TPM，而 `~/.tmux/plugins` 同时具备 TPM 与 Catppuccin，则使用传统目录；两个位置都具备这两者时仍优先 XDG。CPU/RAM/battery 不是全部由 Catppuccin 独立提供：RAM 使用已安装 `tmux-cpu` 的 `ram_percentage`。首次使用时，TPM 本身必须先通过上游说明安装到 `~/.config/tmux/plugins/tpm` 或 `~/.tmux/plugins/tpm`；配置里的 `prefix+I` 只能在 TPM 已存在时安装插件，不能安装 TPM 自身。重载会去重 terminal-overrides/features，不会不断追加相同能力。
 
 ## 字体安装与校验
 

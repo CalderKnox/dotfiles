@@ -45,7 +45,7 @@ python3 docs/validation/check.py --strict
 - completion 冷/热缓存、未来 mtime、同路径降级、NO_CLOBBER、无效生成、编译失败、
   真实 bytecode 消费，以及同/不同二进制的并发加载（不同安装的 stress fixture
   仅把等锁上限延长到 10 秒；另一个检查验证 production 1 秒超时安全跳过）；
-- tmux contract stubs 的 cold/reload/能力去重与 XDG/传统/显式路径选择；
+- tmux contract stubs 的 cold/reload/能力去重、XDG/传统/显式路径选择，以及仅含 TPM 的 XDG 目录不得遮蔽含 Catppuccin 的传统插件根；
 - 真实 Neovim 输入的 Insert/Escape/Ctrl-C/Replace/Ctrl-O/Visual、窗口切换、
   augroup 重载及本地 overrides；
 - 文档相对链接和 Neovim 架构关键事实；配置文档与实际 proxy、terminal、mise、Pi、Fish shortcut 来源的一致性；`dot_zshrc` 三模块 source **顺序**（aliases→fzf→sdk，仅断言存在是顺序无关的空断言）；`fish_plugins` 插件计数与文档声明一致；bytecode hygiene（每个入口导入项目模块前关闭写字节码，`docs/validation/` 无 `__pycache__`）。

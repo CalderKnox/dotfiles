@@ -473,25 +473,26 @@ class TmuxRuntime(Fixture):
     config.write_text((ROOT / "dot_tmux.conf").read_text())
     self.ok(self.run_tmux("source-file", config))
 
-  def install_plugin_contract_stubs(self):
+  def install_plugin_contract_stubs(self, plugins=None, *, install_theme=True):
     # Model only documented init contracts, not arbitrary external plugin code.
-    plugins = Path(self.env["HOME"]) / ".config/tmux/plugins"
-    theme = plugins / "tmux/catppuccin.tmux"  # TPM uses repo basename "tmux".
-    theme.parent.mkdir(parents=True)
+    plugins = plugins or Path(self.env["HOME"]) / ".config/tmux/plugins"
     options = self.cwd / "theme.conf"
-    options.write_text(
-      "\n".join(
-        f'set -g @catppuccin_status_{name} "[{name.upper()}]"'
-        for name in ("application", "cpu", "ram", "session", "uptime", "battery")
-      )
-      + "\n"
-    )
     command = f"{shlex.quote(self.tmux)} -S {shlex.quote(str(self.socket))} source-file {shlex.quote(str(options))}"
-    theme.write_text("#!/bin/sh\n" + command + "\n")
-    theme.chmod(0o700)
+    if install_theme:
+      theme = plugins / "tmux/catppuccin.tmux"  # TPM uses repo basename "tmux".
+      theme.parent.mkdir(parents=True)
+      options.write_text(
+        "\n".join(
+          f'set -g @catppuccin_status_{name} "[{name.upper()}]"'
+          for name in ("application", "cpu", "ram", "session", "uptime", "battery")
+        )
+        + "\n"
+      )
+      theme.write_text("#!/bin/sh\n" + command + "\n")
+      theme.chmod(0o700)
     tpm = plugins / "tpm/tpm"
     tpm.parent.mkdir(parents=True)
-    # The supported source list must include the XDG install directory.
+    # Record the selected root so tests can assert path arbitration.
     tpm.write_text(
       "#!/bin/sh\n"
       + f'{shlex.quote(self.tmux)} -S {shlex.quote(str(self.socket))} show-environment -g TMUX_PLUGIN_MANAGER_PATH > "$HOME/plugin-path"\n'
@@ -540,6 +541,15 @@ class TmuxRuntime(Fixture):
     home = Path(self.env["HOME"])
     (home / ".tmux").mkdir()
     (home / ".config/tmux/plugins").rename(home / ".tmux/plugins")
+    self.load_config()
+    path = (home / "plugin-path").read_text().strip()
+    self.assertEqual(path, f"TMUX_PLUGIN_MANAGER_PATH={home}/.tmux/plugins/")
+    self.assertIn("[CPU]", self.option("status-right"))
+
+  def test_tpm_only_xdg_install_does_not_shadow_traditional_theme_install(self):
+    home = Path(self.env["HOME"])
+    self.install_plugin_contract_stubs(home / ".config/tmux/plugins", install_theme=False)
+    self.install_plugin_contract_stubs(home / ".tmux/plugins")
     self.load_config()
     path = (home / "plugin-path").read_text().strip()
     self.assertEqual(path, f"TMUX_PLUGIN_MANAGER_PATH={home}/.tmux/plugins/")
