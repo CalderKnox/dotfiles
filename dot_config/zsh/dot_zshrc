@@ -169,3 +169,6 @@ unset _init
 [[ -f "$HOME/.config/zsh/aliases.zsh" ]] && source "$HOME/.config/zsh/aliases.zsh"
 [[ -f "$HOME/.config/zsh/fzf.zsh" ]] && source "$HOME/.config/zsh/fzf.zsh"
 [[ -f "$HOME/.config/zsh/sdk.zsh" ]] && source "$HOME/.config/zsh/sdk.zsh"
+
+# cmux history: allow >> to create files while retaining NO_CLOBBER.
+setopt APPEND_CREATE

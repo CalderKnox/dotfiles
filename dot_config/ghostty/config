@@ -10,7 +10,7 @@ env = LANG=zh_CN.UTF-8
 command = direct:/bin/zsh -l
 
 # 工作目录继承，保持上下文连贯
-working-directory = ~/workspaces
+working-directory = ~/projects
 window-inherit-working-directory = true
 window-inherit-font-size = true
 
