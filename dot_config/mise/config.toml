@@ -8,7 +8,7 @@
 [tools]
 bun = "latest"  # JS 运行时与包管理 (Bun)
 deno = "latest"  # JS/TS 运行时 (Deno)
-node = "24.19.0"  # Node.js pinned version (pnpm depends on Node; change this pin deliberately).
+node = "24"  # Node.js pinned version (pnpm depends on Node; change this pin deliberately).
 pnpm = "latest"  # JS 包管理器 (高效磁盘利用)
 go = "latest"  # Go 工具链 (GOPATH 统一为 ~/.local/share/go，见 zsh/sdk.zsh 与 fish/00_env.fish)
 java = "temurin-21"
