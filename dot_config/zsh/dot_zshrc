@@ -172,3 +172,11 @@ unset _init
 
 # cmux history: allow >> to create files while retaining NO_CLOBBER.
 setopt APPEND_CREATE
+
+# pnpm
+export PNPM_HOME="$HOME/Library/pnpm"
+case ":$PATH:" in
+  ":$PNPM_HOME/bin:"*) ;;
+  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
+esac
+# pnpm end
