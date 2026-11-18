@@ -7,8 +7,7 @@
     "npm:@czottmann/pi-automode",
     "npm:@narumitw/pi-goal",
     "npm:@narumitw/pi-btw",
-    "npm:@narumitw/pi-plan-mode",
-    "npm:@quintinshaw/pi-dynamic-workflows"
+    "npm:@narumitw/pi-plan-mode"
   ],
   "git-attribution": {
     "enabled": false
