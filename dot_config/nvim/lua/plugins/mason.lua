@@ -27,10 +27,8 @@ return {
         "pyrefly", -- Python 类型检查（备用；LSP 选型见 lazyvim_python_lsp）
         "debugpy", -- Python DAP（提供 debugpy-adapter，供 nvim-dap-python 使用）
         -- JavaScript / TypeScript / JSON / YAML
-        "oxfmt", -- JavaScript/TypeScript 格式化（LazyVim lang.ts 使用 prettier）
-        "oxlint", -- JavaScript/TypeScript 静态检查（LazyVim lang.ts 使用 eslint）
         "typescript-language-server", -- TypeScript 语言服务器
-        "json-lsp", -- JSON/JSONC 语言服务器（LazyVim lang.json 使用 jsonls）
+        -- "json-lsp", -- JSON/JSONC 语言服务器（LazyVim lang.json 使用 jsonls）
         "yaml-language-server", -- YAML 语言服务器
         "yamlfmt", -- YAML 格式化
         "yamllint", -- YAML 静态检查
