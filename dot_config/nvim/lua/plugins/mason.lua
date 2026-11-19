@@ -13,6 +13,8 @@
   已由 LazyVim / extras 覆盖、故不在此重复：
   - stylua / shfmt（LazyVim core mason ensure）
   - shellcheck / bashls（util.dot extra）
+  - ruff / pyrefly / json-lsp / yaml-language-server（语言 extras 的 LSP）
+  - Go 工具及 codelldb（对应语言 extras）
 ]]
 
 return {
@@ -21,28 +23,15 @@ return {
     opts = {
       ensure_installed = {
         -- Lua
-        "luacheck", -- Lua 静态检查（core 只保 stylua）
+        "luacheck",                   -- Lua 静态检查（core 只保 stylua）
         -- Python
-        "ruff", -- Python 静态检查
-        "pyrefly", -- Python 类型检查（备用；LSP 选型见 lazyvim_python_lsp）
-        "debugpy", -- Python DAP（提供 debugpy-adapter，供 nvim-dap-python 使用）
+        "debugpy",                    -- Python DAP（提供 debugpy-adapter，供 nvim-dap-python 使用）
         -- JavaScript / TypeScript / JSON / YAML
         "typescript-language-server", -- TypeScript 语言服务器
-        -- "json-lsp", -- JSON/JSONC 语言服务器（LazyVim lang.json 使用 jsonls）
-        "yaml-language-server", -- YAML 语言服务器
-        "yamlfmt", -- YAML 格式化
-        "yamllint", -- YAML 静态检查
-        -- Golang
-        "golangci-lint", -- Golang 静态检查
-        "gopls", -- Golang 语言服务器
-        "delve", -- Golang 调试器
-        "goimports", -- Golang 导入排序
-        "gofumpt", -- Golang 格式化
-        "gomodifytags", -- Golang 修改标签
-        "impl", -- Golang 实现接口
+        "yamlfmt",                    -- YAML 格式化
+        "yamllint",                   -- YAML 静态检查
         -- Rust（rustfmt 不在 mason registry，用 rustup component）
-        "rust-analyzer", -- Rust 语言服务器
-        "codelldb", -- Rust 调试器
+        "rust-analyzer",              -- Rust 语言服务器
       },
     },
   },

@@ -15,13 +15,6 @@ local group = vim.api.nvim_create_augroup("HighlightCursorLine", { clear = true 
 local function update_cursorline()
   vim.wo.cursorline = vim.fn.mode(1) == "n"
 end
-vim.api.nvim_create_autocmd("ModeChanged", {
-  group = group,
-  pattern = "*:*",
-  callback = update_cursorline,
-})
-vim.api.nvim_create_autocmd("WinEnter", {
-  group = group,
-  callback = update_cursorline,
-})
+vim.api.nvim_create_autocmd("ModeChanged", { group = group, pattern = "*:*", callback = update_cursorline, })
+vim.api.nvim_create_autocmd("WinEnter", { group = group, callback = update_cursorline, })
 update_cursorline()

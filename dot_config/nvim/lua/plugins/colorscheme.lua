@@ -9,11 +9,6 @@
 ]]
 
 return {
-  {
-    "LazyVim/LazyVim",
-    opts = {
-      -- 全局默认主题名；启动后 LazyVim 会据此调用 colorscheme
-      colorscheme = "catppuccin",
-    },
-  },
+  { "ellisonleao/gruvbox.nvim" }, -- Configure LazyVim to load gruvbox
+  { "LazyVim/LazyVim",         opts = { colorscheme = "gruvbox" } },
 }
