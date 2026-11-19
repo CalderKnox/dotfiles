@@ -146,7 +146,7 @@ Lua assert 后需要 cquit。已纠正这些假设再验证，不把测试设施
 ### 已复现但**未**修改（保留待决）
 
 - **`luac` 版本门与实际解释器不符（已补门）**：`check.py` 用宿主 `luac`（本机 5.5.1）做语法门，而 Neovim 用 LuaJIT（Lua 5.1）；5.3+ 专有语法（如 `//` 整除）可过门而在 Neovim 加载时崩溃。且 `init.lua` / `lua/config/lazy.lua` **仅**有此语法检查，从不被 `-u NONE` 运行时测试加载。已新增 `test_lua_syntax_under_neovim_luajit`：用 Neovim 自身的 LuaJIT 经 `loadfile` 编译每个配置（只编译不执行），使语法门与真实运行时解释器一致；宿主 `luac -p` 保留为快速前置门。负向对照：向 `options.lua` 注入 `local _ = 7 // 2` 后 `luac -p` 仍通过、新门按预期失败。
-- **CI 工具不锁版本**：`ci.yaml:45` `brew install actionlint chezmoi fish fzf lua neovim tmux` 全不锁版本，且 dependabot 仅覆盖 `github-actions`，无任何机制跟踪这些 formula——门禁二进制可因上游发布而无仓库改动变红。
+- **CI 工具不锁版本**：`ci.yaml` 各阶段的 `brew install`（`actionlint chezmoi fish fzf lua neovim tmux`）全不锁版本，且 dependabot 仅覆盖 `github-actions`，无任何机制跟踪这些 formula——门禁二进制可因上游发布而无仓库改动变红。
 - **代理只开不关**：zsh `auto-update` 与 fish `auto-update.fish` 均调用 `onproxy` 而从不 `ofproxy`，更新后代理变量持续生效至手动清除（属设计取向，需人工确认是否改为“用完还原”）。
 - **`find_large_files` 无 fd 回退**：`fzf.zsh` 中 `fd` 无守卫（`fd` 缺失即报“command not found”），而 `dot_config/zsh/README.md:78` 称“`fd`（缺省回退 `rg`）”——该回退实际只接在 `FZF_DEFAULT_COMMAND` / `FZF_ALT_C_COMMAND`，与函数无关。
 - **其它已复现条目**：`.codex/` 与 `.config/kitty/` 空目录仍被 `managed` 创建（文档称“不部署”）；`ProxyCommand` 探活无 `-w` 超时；`gitconfig` 的 `[http "https://github.com"]` 不覆盖 `api.github.com`（文档称 `gh` 依赖它）；全局 `[user]` 身份写入每个 commit；Neovim 侧 `mason.lua` 装 `typescript-language-server` 而 LazyVim 用 `vtsls`、`pyrefly` 依赖浮动 lspconfig、`~/.config/nvim` 同时是独立 git 仓库、`lazyvim.json` 混入 LazyVim 运行时记账；`fish_plugins` 的“13”无测试；终端硬编码 `/opt/homebrew/bin/fish` 无回退（tmux 独有回退链）、`tmux` truecolor 覆写仅命中 `xterm-256color`；`ControlPath` 手工前缀无自动校验。均已在审计记录中留证，未改动行为。
