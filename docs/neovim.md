@@ -11,12 +11,12 @@ bootstrap。当前验证使用 Neovim 0.12.6；本机 LazyVim 16.0.1 要求 Neov
 | --- | --- |
 | `init.lua` | `require("config.lazy")` |
 | `lua/config/lazy.lua` | bootstrap lazy.nvim，导入 `lazyvim.plugins` 与本地 `plugins` |
-| `lazyvim.json` | 22 个 extras 声明，包括语言、DAP、测试、编辑器与 Sidekick；完整列表以此文件为准 |
+| `lazyvim.json` | 21 个 extras 声明，包括语言、DAP、测试、编辑器与 Sidekick；完整列表以此文件为准 |
 | `lua/config/options.lua` | `lazyvim_python_lsp=pyrefly`、scrolloff 8、120 列标线、showmatch、禁用 modeline |
 | `lua/config/keymaps.lua` | 唯一的本地映射：Insert 模式 `jk` → Escape；其他映射沿用上游 |
 | `lua/config/autocmds.lua` | `HighlightCursorLine` 组；仅完整 Normal 模式显示 cursorline |
 | `lua/plugins/colorscheme.lua` | LazyVim 主题覆盖为 Catppuccin |
-| `lua/plugins/mason.lua` | Mason 工具列表，含 pyrefly、ruff、debugpy、Biome、Go/Rust 等工具 |
+| `lua/plugins/mason.lua` | Mason 工具列表，含 pyrefly、ruff、debugpy、oxfmt、oxlint、Go/Rust 等工具 |
 | `lua/plugins/sidekick.lua` | CLI-only：`nes.enabled=false`，不启用 Copilot NES LSP |
 | `stylua.toml` | 2 空格，120 列 |
 | `README.md` | 仓库内安装概览；不部署 |
