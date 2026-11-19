@@ -34,8 +34,8 @@ CONTROLS = (
   (check.FishHelpers, "test_cd_failure_does_not_list_or_mask_status"),
   (runtime_checks.FishRuntime, "test_yazi_allocation_failure_does_not_launch"),
   (runtime_checks.FishRuntime, "test_yazi_failure_preserves_status_directory_and_caller_variable"),
-  (runtime_checks.ZshRuntime, "test_sdk_failed_init_never_recurses"),
-  (runtime_checks.ZshRuntime, "test_sdk_is_lazy_and_not_reset_by_repeated_source"),
+  # SDKMAN 集成已在 2fd40cf 整体移除；旧 sdk 控制项随被测行为一起删除，
+  # 不再保留指向已不存在测试的条目（缺失方法会让评估入口直接崩溃）。
   (runtime_checks.ZshRuntime, "test_uv_missing_dependency_preserves_home_scope"),
   (runtime_checks.ZshRuntime, "test_frg_rejects_filename_controlled_ex_commands"),
   (runtime_checks.TmuxRuntime, "test_capability_arrays_remain_unique_after_reloads"),
