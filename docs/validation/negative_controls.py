@@ -99,6 +99,11 @@ def main():
     reproduced = 0
     invalid = 0
     for cls, name in CONTROLS:
+      if not hasattr(cls, name):
+        # A control bound to a renamed/removed test silently stops proving anything.
+        invalid += 1
+        print(f"INVALID CONTROL {cls.__name__}.{name}: test method no longer exists")
+        continue
       test = cls(name)
       stream = io.StringIO()
       with contextlib.redirect_stdout(stream), contextlib.redirect_stderr(stream):
