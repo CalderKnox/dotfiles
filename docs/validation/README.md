@@ -10,13 +10,27 @@
 
 ## 主要验收入口
 
-CI（`.github/workflows/ci.yaml`，`macos-latest`）在 push/PR 上运行
-`actionlint`、`check.py --strict` 与 `fzf_runtime.py`；本文其余入口（negative
-controls、terminal parsers、tmux plugins、benchmark）需手动运行。
-terminal parsers 与 tmux plugins 需 macOS GUI 应用与本机插件副本，只在本地运行。
+CI（`.github/workflows/ci.yaml`，`macos-latest`）在 push/PR 上运行一条五阶段流水线，
+每个阶段都把日志与 `result.json` 上传为 artifact，下一阶段只读上游证据：
 
-所有测试入口（`check.py` / `fzf_runtime.py` / `terminal_parsers.py` /
+| 阶段 | 作业 | 内容 |
+| --- | --- | --- |
+| 测试 | `test` | `python3 docs/validation/check.py --strict`（源码契约 + 隔离运行时回归） |
+| 验证 | `verify` | `actionlint -color`、`python3 docs/validation/fzf_runtime.py`、入口文档一致性 |
+| 评估 | `evaluate` | 复核上游证据，并用历史基线运行 negative controls 证明门禁会失败 |
+| 确认 | `confirm` | 独立复核证据链（存在、同提交、状态、日志非空）并重跑部署边界不变式 |
+| 验收 | `accept` | 聚合四阶段，全部 success 才打印 `ACCEPTED`；分支保护只需要求该作业 |
+
+阶段依赖为 `test`/`verify` → `evaluate` → `confirm` → `accept`；`test` 与 `verify`
+并行，`accept` 使用 `if: always()`，任一上游失败也会给出「哪个阶段没过」的结论。
+本文其余入口（terminal parsers、tmux plugins、benchmark）需手动运行；
+terminal parsers 与 tmux plugins 需 macOS GUI 应用与本机插件副本，只在本地运行。
+negative controls 既在 CI 评估阶段运行，也可用下文命令对任意历史 revision 手动运行。
+
+所有测试入口（`check.py` / `fzf_runtime.py` / `negative_controls.py` / `terminal_parsers.py` /
 `tmux_plugins.py`）在**任何 skip 时都返回非零**——缺依赖会显式失败而不是让门变绿。
+`negative_controls.py` 还会把失效控制项（绑定的测试被重命名/删除）计为 `INVALID CONTROL`
+并以非零退出，评估阶段因此不会静默退化成空断言。
 测试需要 unix socket 绑定（tmux）与 PTY（fzf）；在受限容器/沙箱中会以
 `Operation not permitted` / `out of pty devices` 失败，这是环境能力限制而非用例缺陷。
 
