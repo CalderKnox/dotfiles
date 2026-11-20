@@ -1181,6 +1181,15 @@ class ZshHelpers(Fixture):
     self.assertIn("pi not found", result.stdout)
     self.assertEqual(list(self.cwd.glob("update-all.*")), [])
 
+  def test_update_pnpm_explicit_and_default(self):
+    self.stub("pnpm")
+    for args in ("pnpm", ""):
+      with self.subTest(args=args):
+        result = self.shell(self.updater(), f"update-all {args}\n")
+        self.ok(result)
+        self.assertIn("✓ pnpm done", result.stdout)
+    self.assertEqual(self.calls("pnpm"), [["pnpm", "update", "-g"], ["pnpm", "update", "-g"]])
+
   def test_update_zimfw_function_selected_and_included_by_default(self):
     trace = self.cwd / "zimfw-calls"
     definition = 'zimfw() { print -r -- "$*" >> "$ZIM_TRACE"; }\n' + self.updater()
