@@ -16,7 +16,7 @@ bootstrap。当前验证使用 Neovim 0.12.6；本机 LazyVim 16.0.1 要求 Neov
 | `lua/config/keymaps.lua` | 唯一的本地映射：Insert 模式 `jk` → Escape；其他映射沿用上游 |
 | `lua/config/autocmds.lua` | `HighlightCursorLine` 组；仅完整 Normal 模式显示 cursorline |
 | `lua/plugins/colorscheme.lua` | LazyVim 主题覆盖为 Gruvbox |
-| `lua/plugins/mason.lua` | Mason 工具列表，含 pyrefly、ruff、debugpy、oxfmt、oxlint、Go/Rust 等工具 |
+| `lua/plugins/mason.lua` | Mason 工具列表，含 debugpy、typescript-language-server、yamlfmt、yamllint 和 rust-analyzer；其他工具由 extras 管理 |
 | `lua/plugins/sidekick.lua` | CLI-only：`nes.enabled=false`，不启用 Copilot NES LSP |
 | `stylua.toml` | 2 空格，120 列 |
 | `README.md` | 仓库内安装概览；不部署 |

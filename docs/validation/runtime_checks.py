@@ -449,7 +449,7 @@ assert(themes[1][1] == "ellisonleao/gruvbox.nvim")
 assert(themes[2][1] == "LazyVim/LazyVim" and themes[2].opts.colorscheme == "gruvbox")
 assert(dofile(config .. "/lua/plugins/sidekick.lua")[1].opts.nes.enabled == false)
 local tools = dofile(config .. "/lua/plugins/mason.lua")[1].opts.ensure_installed
-assert(vim.tbl_contains(tools, "pyrefly"))
+assert(vim.tbl_contains(tools, "debugpy"))
 assert(vim.tbl_contains(tools, "rust-analyzer"))
 vim.cmd("qa!")
 """.replace("CONFIG", json.dumps(str(config)))
