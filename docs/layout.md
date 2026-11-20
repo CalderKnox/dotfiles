@@ -51,7 +51,7 @@
 
 | 源文件 | 目标路径 | 说明 |
 | --- | --- | --- |
-| `dot_config/ghostty/config` | `~/.config/ghostty/config` | Ghostty 主终端配置（JetBrainsMonoNL Nerd Font Mono，`command = direct:/bin/zsh -l` 启动登录 Zsh，Catppuccin Frappe 主题） |
+| `dot_config/ghostty/config` | `~/.config/ghostty/config` | Ghostty 主终端配置（JetBrainsMonoNL Nerd Font Mono，`command = direct:/bin/zsh -l` 启动登录 Zsh，Gruvbox Dark 主题） |
 | `dot_config/alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` | Alacritty 备用配置（活跃配色为 Catppuccin Mocha，Dracula 调色板整块注释保留为模板；`[terminal.shell]` 经 Zsh 以绝对路径启动 tmux，`new -A -s main` 实现无则新建、有则 attach，且不覆盖 `[env] PATH`） |
 | `dot_config/kitty/kitty.local.conf` | —（不部署，机器本地维护） | kitty 增量个人配置（字体/光标/Catppuccin Mocha/快捷键，`shell = fish`）仅入库作参考，不随 apply 部署（被 `.chezmoiignore` 的 `**/*.local.*` 排除，`chezmoi ignored` 含 `.config/kitty/kitty.local.conf`）；目标机 `~/.config/kitty/kitty.local.conf` 各机本地维护，在 kitty 首次生成的 `~/.config/kitty/kitty.conf` 末尾手工添加 `include kitty.local.conf` 引入（仓库有意不含 kitty.conf） |
 | `dot_tmux.conf` | `~/.tmux.conf` | tmux 配置：不覆盖 `default-shell` / `default-command`（继承 tmux 默认登录 shell）、tpm 插件（yank/sensible/open/cpu/battery）、Catppuccin Mocha 顶部状态栏、鼠标与 100k 历史 |

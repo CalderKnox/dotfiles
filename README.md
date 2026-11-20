@@ -18,7 +18,7 @@
 | Fish | Fish + [Fisher](https://github.com/jorgebucaran/fisher) + Starship | Ghostty 直接启动 `/bin/zsh -l`（`direct:` 模式）；tmux 继承默认登录 shell；`fish_plugins` 锁定 13 个插件（fzf.fish / forgit / autopair / done 等），`conf.d` 分层六文件（含 `01_activate.fish` 守卫激活 mise）设定 PATH/LANG/EDITOR 等环境，可调用大函数在 `functions/` 惰性加载，补全含 kubecolor 与 OrbStack docker/kubectl/orbctl 符号链接 |
 | 提示符 | [Starship](https://starship.rs/) | Catppuccin Mocha powerline 风格（`starship.toml` 为机器本地文件，未入库） |
 | 模糊搜索 | fzf + fzf-tab + fd | Ctrl-R 历史、Ctrl-T 文件、Alt-C 目录、`frg`/`fkill`/`ftm`/`fl*` 交互函数 |
-| 终端 | Ghostty（主力）/ Alacritty（备用）/ kitty（本地配置） | Ghostty 与 Alacritty 使用 JetBrainsMonoNL；Ghostty 为 Catppuccin Frappe，Alacritty 与 kitty 为 Catppuccin Mocha（Alacritty 保留 Dracula 注释模板） |
+| 终端 | Ghostty（主力）/ Alacritty（备用）/ kitty（本地配置） | Ghostty 与 Alacritty 使用 JetBrainsMonoNL；Ghostty 为 Gruvbox Dark，Alacritty 与 kitty 为 Catppuccin Mocha（Alacritty 保留 Dracula 注释模板） |
 | 编辑器 | Neovim + [LazyVim](https://www.lazyvim.org/) | extras 由 `dot_config/nvim/lazyvim.json` 声明，本地插件见 `lua/plugins/`；插件由 lazy.nvim 自动安装（`lazy-lock.json` 未入库） |
 | 运行时管理 | mise | 多运行时一键切换（工具清单见 `dot_config/mise/config.toml`） |
 | Git 工作流 | git + gh (CLI) | LFS、GitHub 走本地 SOCKS5 代理、`push.default=current` + `autoSetupRemote` |

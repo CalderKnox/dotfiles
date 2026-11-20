@@ -11,7 +11,7 @@
 部署到 `~/.config/ghostty/config`。查看最终生效值用 `ghostty +show-config`（`--default --docs` 可对照默认值）；CLI 默认不在 PATH，需在 Ghostty 菜单 → "Install CLI tool" 安装，或用全路径 `/Applications/Ghostty.app/Contents/MacOS/ghostty`。
 
 - **启动即 Zsh 登录 shell**：`command = direct:/bin/zsh -l`（direct 模式不经 shell 再解析；`working-directory = ~/workspaces` 设置初始目录，`window-inherit-working-directory = true` 使新窗口继承当前目录）。
-- **外观与 macOS 集成**：Catppuccin Frappe 主题、JetBrainsMonoNL Nerd Font Mono、毛玻璃与窗口装饰策略；具体数值（透明度、字号、padding、光标样式等）见源文件。
+- **外观与 macOS 集成**：Gruvbox Dark 主题、JetBrainsMonoNL Nerd Font Mono、毛玻璃与窗口装饰策略；具体数值（透明度、字号、padding、光标样式等）见源文件。
 - **键位**：基本沿用 Ghostty 默认，并叠加若干自定义绑定（标签 / 分屏 / 字号 / Quick Terminal 等）；完整 `keybind` 列表以源文件为准。
 - **安全与剪贴板**：允许系统剪贴板读写并启用粘贴保护；paste protection 与 bracketed-paste 安全处理均由源配置启用。
 - **Quick Terminal**：顶部下拉、失焦自动收起，并显式设置 `quick-terminal-animation-duration = 0.12`。
@@ -21,7 +21,7 @@
 
 ## Alacritty — `dot_config/alacritty/alacritty.toml`
 
-轻量备用，使用 Catppuccin Mocha 配色（Ghostty 使用 Catppuccin Frappe；Dracula 调色板整块注释保留为模板），与 Ghostty 互为独立配置，切换无需改另一文件。
+轻量备用，使用 Catppuccin Mocha 配色（Ghostty 使用 Gruvbox Dark；Dracula 调色板整块注释保留为模板），与 Ghostty 互为独立配置，切换无需改另一文件。
 
 - **启动即 tmux（无则新建，有则 attach）**：`alacritty.toml` 顶部配置如下；`-A` 会在 `main` 会话不存在时新建，存在时直接 attach。使用 tmux 的绝对路径可避免从 Dock/Finder 启动时因 GUI 启动环境尚未经过交互式 Zsh 的 Homebrew `PATH` 收敛而立即退出。
 
