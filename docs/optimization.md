@@ -181,7 +181,7 @@ Lua assert 后需要 cquit。已纠正这些假设再验证，不把测试设施
 ### 新增守卫（负向对照均已验证）
 
 - **`test_ignore_patterns_are_globstar_prefixed_or_intentionally_rooted`**：把"根锚定陷阱"从**枚举**升级为**不变式**——任何新的不带 `**/` 前缀的 `.chezmoiignore` 模式都会失败，除非显式加入 `ROOT_ANCHORED` 白名单（当前 11 条，均为刻意固定路径）。负向对照：追加 `*.tmp` 后按预期失败。这是该缺陷类（已发生三次）**首次具备结构性守卫**，而非"把已修的四条写进清单"。
-- **`test_no_unexpected_top_level_deploy_target`**：固定 depth-1 部署目标集（9 项），使"新增根级源文件静默渲染进 `$HOME`"失败。负向对照：加入 `root_probe.conf` 后按预期失败。同时首次断言了 `.github` 不部署这一此前只靠"源名以点开头"的隐式不变式。
+- **部署目标审阅**：当时的根级检查以 `root_probe.conf` 为负向对照，并验证 `.github` 不部署。当前的 `test_managed_targets_match_reviewed_manifest` 将 `chezmoi managed` 的完整目标集合与[审阅清单](validation/managed-targets.txt)比较，覆盖根级和嵌套路径。对照用例验证未登记的嵌套目标会失败、登记后通过，移除已登记目标会失败，机器本地配置继续按忽略规则排除。
 - 新增的 5 个 brew 回归测试与上文 hygiene/不变式测试**均已加入 `negative_controls.py`**（现 **20/20**），即它们对历史基线 `b4e8bac` 确实失败——覆盖上一轮"新测试无对照"的缺口。
 
 ### CI 自 `e429be9` 起持续失败：定位与修复

@@ -381,7 +381,7 @@ jobs:
           set -o pipefail
           python3 docs/validation/check.py \
             SourceChecks.test_ci_workflow_runs_documented_entrypoints \
-            SourceChecks.test_no_unexpected_top_level_deploy_target \
+            SourceChecks.test_managed_targets_match_reviewed_manifest \
             SourceChecks.test_chezmoi_source_boundaries_without_apply \
             SourceChecks.test_relative_documentation_links_exist \
             SourceChecks.test_validation_modules_suppress_bytecode_and_stay_clean \

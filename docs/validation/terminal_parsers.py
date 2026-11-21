@@ -25,14 +25,27 @@ print('kitty configuration parsed; splits layout selected')
 """.replace("PATH", json.dumps(str(path)))
     self.ok(self.run_command([self.require("kitty"), "+runpy", script]))
 
-  def test_ghostty_native_configuration_parser(self):
+  def validate_ghostty_config(self, config):
     tool = Path("/Applications/Ghostty.app/Contents/MacOS/ghostty")
     if not tool.is_file():
       self.skipTest("Ghostty application not installed at standard macOS path")
-    config = ROOT / "dot_config/ghostty/config"
-    result = self.run_command([tool, "+validate-config", f"--config-file={config}"])
+    return self.run_command([tool, "+validate-config", f"--config-file={config}"])
+
+  def assert_ghostty_config_valid(self, result):
     self.ok(result)
-    self.assertNotIn("error:", result.stderr.lower())
+    # Ghostty 1.4.0 emits this startup diagnostic for both valid and invalid configs.
+    errors = "\n".join(line for line in result.stderr.splitlines() if line != "error: SentryInitFailed")
+    self.assertNotIn("error:", errors.lower())
+
+  def test_ghostty_native_configuration_parser(self):
+    self.assert_ghostty_config_valid(self.validate_ghostty_config(ROOT / "dot_config/ghostty/config"))
+
+  def test_ghostty_parser_rejects_invalid_configuration(self):
+    config = self.cwd / "invalid.ghostty"
+    config.write_text("font-size = invalid\n")
+    result = self.validate_ghostty_config(config)
+    with self.assertRaisesRegex(AssertionError, "font-size"):
+      self.assert_ghostty_config_valid(result)
 
 
 if __name__ == "__main__":

@@ -937,21 +937,13 @@ class SourceChecks(Fixture):
         without_rule = set(self.ok(self.run_command(argv)).splitlines())
         self.assertIn(target, without_rule)
 
-  def test_no_unexpected_top_level_deploy_target(self):
-    """Adding a root-level source that renders into $HOME must be a conscious change.
-
-    The deploy boundary is a name blacklist (see .chezmoiignore's own comment), so today
-    nothing fails if a maintainer adds a root `scripts/` or `pyproject.toml`: chezmoi matches
-    by TARGET name and a non-dot source name renders straight into $HOME. Pin the exact set of
-    depth-1 managed targets so such an addition fails until reviewed. Note `.github/` is absent
-    only because its source name starts with a dot — an implicit invariant no other test states.
-    """
+  def assert_managed_targets_match_manifest(self, source, manifest):
     config = self.cwd / "empty.toml"
     config.write_text("")
     argv = [
       self.require("chezmoi"),
       "--source",
-      ROOT,
+      source,
       "--destination",
       self.env["HOME"],
       "--config",
@@ -960,23 +952,38 @@ class SourceChecks(Fixture):
       self.cwd / "state.boltdb",
       "managed",
     ]
-    top_level = {line.split("/", 1)[0] for line in self.ok(self.run_command(argv)).splitlines()}
-    self.assertEqual(
-      top_level,
-      {
-        ".codex",
-        ".config",
-        ".gitconfig",
-        ".gitignore_global",
-        ".pi",
-        ".ssh",
-        ".tmux.conf",
-        ".zimrc",
-        ".zshrc",
-      },
-      "根级部署目标集变了：请确认新条目确实应渲染进 $HOME（否则加入 .chezmoiignore 或改为 dot_ 源名）",
+    actual = set(self.ok(self.run_command(argv)).splitlines())
+    expected = set(manifest.read_text().splitlines())
+    self.assertSetEqual(
+      actual, expected,
+      "部署目标集变了：请审阅 docs/validation/managed-targets.txt 与 .chezmoiignore",
     )
-    self.assertNotIn(".github", top_level)
+
+  def test_managed_targets_match_reviewed_manifest(self):
+    self.assert_managed_targets_match_manifest(ROOT, ROOT / "docs/validation/managed-targets.txt")
+
+  def test_managed_target_manifest_requires_review_of_nested_changes(self):
+    source = self.cwd / "source"
+    nested = source / "dot_config" / "example"
+    nested.mkdir(parents=True)
+    shutil.copyfile(ROOT / ".chezmoiignore", source / ".chezmoiignore")
+    (nested / "known.conf").touch()
+    (nested / "machine.local.conf").touch()
+    manifest = self.cwd / "managed-targets.txt"
+    baseline = ".config\n.config/example\n.config/example/known.conf\n"
+    manifest.write_text(baseline)
+    self.assert_managed_targets_match_manifest(source, manifest)
+
+    new_target = ".config/example/new.conf"
+    (nested / "new.conf").touch()
+    with self.assertRaisesRegex(AssertionError, re.escape(new_target)):
+      self.assert_managed_targets_match_manifest(source, manifest)
+    manifest.write_text(baseline + new_target + "\n")
+    self.assert_managed_targets_match_manifest(source, manifest)
+
+    (nested / "known.conf").unlink()
+    with self.assertRaisesRegex(AssertionError, re.escape(".config/example/known.conf")):
+      self.assert_managed_targets_match_manifest(source, manifest)
 
   def test_hygiene_rules_exclude_nested_targets(self):
     """.chezmoiignore patterns are anchored to the source root.

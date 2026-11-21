@@ -81,5 +81,3 @@ bindings = [
   { mods = "Command", key = "t", action = "None" },  # disable: let shell/tmux handle new tab
   { mods = "Command", key = "n", action = "None" },  # disable: let shell/tmux handle new window
 ]
-
-
