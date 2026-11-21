@@ -136,6 +136,7 @@ chezmoi 命名约定：`dot_` → 隐藏目录/文件（`.` 开头），`private
 | [docs/dev-tools.md](docs/dev-tools.md) | git / gh / mise / codex / pi agent 配置说明 |
 | [docs/maintenance.md](docs/maintenance.md) | 日常维护流程、常用命令、验收清单、常见问题 |
 | [docs/validation/README.md](docs/validation/README.md) | 离线语法/部署边界/隔离回归检查 |
+| [docs/validation/managed-targets.txt](docs/validation/managed-targets.txt) | 经过审阅的完整 chezmoi 部署目标清单 |
 | [docs/optimization.md](docs/optimization.md) | UltraCode 审查结论、优化证据与保留事项 |
 | [dot_config/zsh/README.md](dot_config/zsh/README.md) | zsh 三模块内部契约（加载顺序、依赖、函数速查） |
 | [dot_config/nvim/README.md](dot_config/nvim/README.md) | Neovim/LazyVim 使用说明 |
