@@ -50,7 +50,7 @@ python3 docs/validation/check.py --strict
   complete --command <cmd>）；文档列出的 fish functions/conf.d/completions 清单与计数必须与源目录一致；受管配置清单的 JSON/TOML/Git 解析（显式列举的文件，不扫描全仓库）；Git LFS filter 只在 `.gitattributes` 匹配时调用；
 - Git 的 Pi 源名 allowlist；`.chezmoiignore` 的 Pi runtime blacklist 覆盖 permission-mode、sessions、npm、missions、tasks、models-store 与 workflows/state fixture，并逐项 mutation-check；`auth.json` 与 credentials 路径由通用敏感路径规则保护。
 - `.chezmoiignore` 的**非 Pi 卫生规则**（`**/*.local*`/`**/*.bak`/`**/*.log*`/`**/*.md`/`**/LICENSE`/敏感名/`**/node_modules/`/`**/.pnpm-store/`/`**/.DS_Store` 等）以**嵌套** fixture 逐条断言：规则生效、删除后目标暴露（mutation control）、且普通配置仍部署（正向对照）。模式锚定源根，缺 `**/` 前缀的规则只匹配仓库根——该类静默失效历史上已发生三次；除上述枚举外，另有**不变式**测试断言任何新的、不带 `**/` 前缀且不在显式白名单内的模式一律失败，使该类**无法再次静默复发**。
-- 部署边界不变式：固定 depth-1 受管目标集合（9 项），使"新增根级源文件静默渲染进 `$HOME`"失败；并断言 `.github` 不部署（此前仅依赖"源名以点开头"的隐式规则）。
+- 部署边界：将隔离运行的 `chezmoi managed` 输出与 [审阅清单](managed-targets.txt) 比较，覆盖目录、文件和链接在内的完整目标集合。新增或移除根级与嵌套目标都需要同步清单。应留在仓库的文件通过 `.chezmoiignore` 排除。用例验证未经登记的嵌套目标会失败、登记后通过、机器本地配置继续排除。
 - 仓库根级文档门：每个根级 `*.md` 必须被 Git 跟踪、不出现在 `chezmoi managed`（`.chezmoiignore` 的 `**/*.md` 保证不落进 `$HOME`），且从 `README.md` 建立链接（`test_root_repository_docs_are_tracked_and_not_deployed`）。
 - 实际渲染的 Zsh/Zim symlink 目标与 private/default 权限契约（不 apply）；`.keep` 占位文件不产生部署目标；
 - updater 全参数预检、混合失败、缺失依赖、临时文件失败与 stderr；Zsh/Fish 的 `zimfw` 目标覆盖默认及显式选择、缺失与失败，Fish 还验证自定义 `ZDOTDIR` 和非交互启动；全部目标缺失（`attempted==0`）时 zsh/fish 均须报“no runnable targets”而非“更新完成”；brew 目标的第三方 `brew cu`（tap `buo/homebrew-cask-upgrade`）不可用时须跳过并提示、不得把 brew 误报为 failed，同时真实 `cu` 失败仍须传播；
