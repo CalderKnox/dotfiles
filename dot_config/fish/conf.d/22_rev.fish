@@ -24,7 +24,7 @@
 # GDA
 
 
-# IDA
+# IDA 
 # Ghidra
 # Radare2
 
