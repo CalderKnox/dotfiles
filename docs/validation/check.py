@@ -59,6 +59,9 @@ ALIAS_DIVERGENCES = {
 }
 
 
+ZSH_INTERACTIVE_ALIASES = {"rm": "rm -i", "cp": "cp -i", "mv": "mv -i"}
+
+
 def alias_value(raw):
   """Return an `alias name=<value>` value with any trailing `# ...` comment outside quotes removed."""
   raw = raw.strip()
@@ -293,14 +296,7 @@ class SourceChecks(Fixture):
         )
 
   def test_shell_alias_inventory_parity(self):
-    """fish and zsh must expose the same personal aliases with equivalent targets.
-
-    docs/shell.md claims both shells share every personal alias name and target, but until now
-    only a handful of names were pinned: a fish-only alias or a divergent target on one side
-    could drift silently. Derive both inventories from the sources and compare normalized
-    values, allowing only the documented divergences. The synthetic mutation at the end keeps
-    the comparison honest — a parser that silently matches nothing would make it vacuous.
-    """
+    """Check shared aliases and the documented Zsh-only aliases."""
     fish_paths = sorted(FISH.glob("*.fish")) + sorted(FUNCS.glob("*.fish"))
     fish_aliases = alias_inventory(fish_paths)
     zsh_aliases = alias_inventory([ZSH / "aliases.zsh"])
@@ -311,6 +307,10 @@ class SourceChecks(Fixture):
         self.assertTrue(reason.strip(), f"{name} 必须写明 fish 与 zsh 刻意不同的原因")
         self.assertIn(name, fish_aliases)
         self.assertIn(name, zsh_aliases)
+    for name, target in ZSH_INTERACTIVE_ALIASES.items():
+      with self.subTest(zsh_only=name):
+        self.assertNotIn(name, fish_aliases)
+        self.assertEqual(zsh_aliases.pop(name, None), target)
     self.assertEqual(alias_parity_drifts(fish_aliases, zsh_aliases, ALIAS_DIVERGENCES), [])
 
     # 反证：合成一对清单，分别制造“单侧多出别名”和“同名异值”，比较器必须报出两种漂移。
@@ -499,9 +499,8 @@ class SourceChecks(Fixture):
       pattern = rf"^[ \t]*alias {re.escape(alias)}="
       self.assertIsNotNone(re.search(pattern, fish_sys, re.MULTILINE))
       self.assertIsNotNone(re.search(pattern, zsh_aliases, re.MULTILINE))
-    for source in (fish_sys, zsh_aliases):
-      self.assertIsNone(re.search(r"^\s*alias\s+(?:rm|cp|mv)=", source, re.MULTILINE))
-    self.assertIn("`-i` 别名都已注释停用", shell_docs)
+    self.assertIn("交互式 Zsh 启用 `rm`/`cp`/`mv` 的 `-i` 别名", shell_docs)
+    self.assertIn("Fish 中这三个别名仍停用", shell_docs)
     self.assertIn("应用别名在非交互 fish 中也定义", shell_docs)
     fish = self.require("fish")
     for relative, alias in (
