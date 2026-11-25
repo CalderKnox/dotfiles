@@ -9,93 +9,292 @@
 # zimfw docs  : https://github.com/zimfw/zimfw
 # Update      : `zimfw install` 重新生成 ~/.zim/init.zsh；新增模块放 utility 之后、
 #               Prompt 之前（见下方注释）。
+# Manager     : Zimfw
+# Shell       : Zsh
+# Platforms   : macOS / Linux / WSL
+# Principles  : MECE / Modularity / Security / Reproducibility
+# Lifecycle   :
+#   zimfw install
+#   zimfw update
+#   zimfw uninstall
+#   exec zsh
 # =============================================================================
 
 #
 # This is not sourced during shell startup and is only used to configure zimfw.
 #
 
+# ==============================================================================
+# 00. MODULE MANAGEMENT
+# 模块管理策略
+# ==============================================================================
+
+# 使用 Git，保留版本历史和审计能力。
+zstyle ':zim:zmodule' use 'git'
+
+
+# ==============================================================================
+# 01. SHELL FOUNDATION
+# Shell 基础行为
+# ==============================================================================
+
 #
 # Modules
 #
 
 # Sets sane Zsh built-in environment options.
+# Zsh 基础选项、历史记录及通用环境行为。
 zmodule environment
-# Provides handy git aliases and functions.
-zmodule git
 zmodule wfxr/forgit
 zmodule unixorn/git-extra-commands
-zmodule joke/zim-mise --if-command mise
 
-zmodule fzf --if-command fzf
 zmodule wfxr/forgit --source forgit.plugin.zsh --if-command fzf
 
 # Applies correct bindkeys for input events. Add one of the following to the
 # beginning of your ~/.zshrc to set your preferred editor keymap to emacs or vi
 # respectively: bindkey -e or bindkey -v
+# 终端输入事件及基础快捷键。
 zmodule input
-# Sets a custom terminal title.
-zmodule termtitle
+
+# Shell 内建命令及外部命令帮助系统。
+zmodule zimfw/run-help
+
+# ==============================================================================
+# 02. RUNTIME & PROJECT ENVIRONMENT
+# 语言运行时及项目环境
+# 必须尽可能早于依赖相关命令的模块。
+# ==============================================================================
+
+# 2.1 多语言版本管理：二选一。
+zmodule joke/zim-mise --if-command mise
+# zmodule zimfw/asdf --if-command asdf
+
+# 2.2 项目级环境变量。
+# 若 mise 已负责同一项目的环境变量，应避免重复配置。
+# zmodule direnv --if-command direnv
+zmodule zimfw/direnv --if-command direnv
+
+
+# 2.3 Python 虚拟环境辅助管理。
+# zmodule zimfw/pvenv --if-command python3
+
+# 2.4 Ruby 生态集成。
+# 若使用 mise/asdf 管理 Ruby，应先检查 PATH 冲突。
+# zmodule zimfw/ruby
+
+# ==============================================================================
+# 03. GENERAL UTILITIES
+# 通用命令及文件操作
+# ==============================================================================
+
 # Utility aliases and functions. Adds colour to ls, grep and less.
+# 3.1 通用别名、实用函数、命令颜色。
 zmodule utility
 
-zmodule direnv --if-command direnv
-zmodule antoineco/zim-zoxide --if-command zoxide
+# 3.2 压缩及解压缩。
+zmodule zimfw/archive
+
+# 3.3 现代文件列表工具。
+# 模块名是 exa，但支持 eza。
+# 必须位于 utility 之后。
+# zmodule zimfw/exa --if-command eza
+
+# 3.4 空命令行按 Enter 时触发自定义操作。
+# zmodule zimfw/magic-enter
+zmodule magic-enter
+
+# 3.5 删除不需要的历史记录条目。
+zmodule zimfw/smite
+
+# 3.6 已有别名发现及提示。
+zmodule shanwker1223/zim-alias-finder
+
+# ==============================================================================
+# 04. VERSION CONTROL
+# 版本控制及代码协作
+# ==============================================================================
+
+# 4.1 Git 别名与函数。
+zmodule zimfw/git --if-command git
+
+# 4.2 GitHub CLI。
+# zmodule joke/zim-github-cli --if-command gh
+
+# ==============================================================================
+# 05. PLATFORM INTEGRATION
+# 操作系统及软件包管理器
+# ==============================================================================
+
+# 5.1 Homebrew: macOS / Linux。
+# Homebrew：注入 brew shellenv（HOMEBREW_PREFIX/PATH/fpath 等）并提供 brew/cask 别名。
+# fpath 无需额外声明：shell 启动时 HOMEBREW_PREFIX 未设，模块 else 分支 eval 的
+# brew shellenv 会无条件前置 brew 的 site-functions（fpath[1,0]），补全直接可用。
+zmodule zimfw/homebrew --if-command brew
+
+# 5.2 MacPorts。
+# zmodule zimfw/macports --if-command port
+
+# 5.3 Arch Linux。
+# zmodule zimfw/pacman --if-command pacman
+
+# 5.4 Dotfiles 管理。
+# zmodule joke/zim-chezmoi --if-command chezmoi
+
+# ==============================================================================
+# 06. DOMAIN-SPECIFIC TOOLS
+# 领域工具：容器、云服务、基础设施等
+# ==============================================================================
+
+
+# 6.1 Kubernetes 命令辅助。
+# zmodule zimfw/k --if-command kubectl
+
+# 6.2 Kubernetes CLI 补全及集成。
+# zmodule joke/zim-kubectl --if-command kubectl
+# zmodule joke/zim-helm --if-command helm
+# zmodule joke/zim-k9s --if-command k9s
+# zmodule joke/zim-minikube --if-command minikube
+# zmodule joke/zim-skaffold --if-command skaffold
+# zmodule joke/zim-istioctl --if-command istioctl
+# zmodule joke/zim-kn --if-command kn
+
+# 6.3 云服务及数据工具。
+# zmodule pXius/zim-gcloud --if-command gcloud
+# zmodule joke/zim-steampipe --if-command steampipe
+# zmodule joke/zim-yq --if-command yq
+
+# 6.4 SSH Agent。
+# 默认禁用，防止与系统、桌面环境、密码管理器冲突。
+# zmodule zimfw/ssh
+
+# 6.5 密码管理。
+# zmodule joke/zim-gopass --if-command gopass
+
+# ==============================================================================
+# 07. COMMAND LINE EDITING
+# 命令行编辑增强
+# ==============================================================================
+
+# 7.1 自动配对括号、引号。
+zmodule hlissner/zsh-autopair
+
+# 7.2 命令行 vi 模式增强。
+# 若启用，需要重新审计 input 和其他插件的快捷键。
+# zmodule jeffreytse/zsh-vi-mode
+
 
 # <-- Normally new modules should be added here. Check each module documentation
 # for any caveats.
+
+# ==============================================================================
+# 08. TERMINAL & PROMPT
+# 终端显示及提示符
+# ==============================================================================
 
 #
 # Prompt
 #
 
-# Exposes how long the last command took to run to prompts.
-# <!-- zmodule duration-info -->
-# Formats the current working directory for prompts.
-# <!-- zmodule prompt-pwd -->
-# A heavily reduced, ASCII-only version of the Spaceship and Starship prompts.
-# <!-- zmodule asciiship -->
-zmodule duration-info
-zmodule git-info
-zmodule prompt-pwd
-zmodule asciiship
-zmodule magic-enter
+# 8.1 终端标题。
+zmodule zimfw/termtitle
+
+# ------------------------------------------------------------------------------
+# 8.2 Starship is initialized in .zshrc when installed. Otherwise use Asciiship.
+zmodule zimfw/prompt-pwd --if '(( ! $+commands[starship] ))'
+zmodule zimfw/duration-info --if '(( ! $+commands[starship] ))'
+zmodule zimfw/git-info --if '(( ! $+commands[starship] ))'
+zmodule zimfw/asciiship --if '(( ! $+commands[starship] ))'
+
+
+# ==============================================================================
+# 09. COMPLETION DEFINITIONS
+# 补全定义及 fpath 扩展
+# 必须位于 completion 引擎之前。
+# ==============================================================================
 
 #
 # Completion
 #
-# Homebrew：注入 brew shellenv（HOMEBREW_PREFIX/PATH/fpath 等）并提供 brew/cask 别名。
-# fpath 无需额外声明：shell 启动时 HOMEBREW_PREFIX 未设，模块 else 分支 eval 的
-# brew shellenv 会无条件前置 brew 的 site-functions（fpath[1,0]），补全直接可用。
-zmodule zimfw/homebrew
+
 
 # Additional completion definitions for Zsh.
 zmodule zsh-users/zsh-completions --fpath src
+
+# ==============================================================================
+# 10. COMPLETION ENGINE
+# 补全引擎：唯一的 compinit 管理者
+# ==============================================================================
+
 # Enables and configures smart and extensive tab completion, must be sourced
 # after all modules that add completion definitions.
 zmodule completion
+
+# ==============================================================================
+# 11. SMART DIRECTORY NAVIGATION
+# 智能目录导航
+# zoxide 的补全需要在 compinit 之后初始化。
+# ==============================================================================
+
+zmodule antoineco/zim-zoxide --if-command zoxide
+
+# Alternatives：如需使用其他目录跳转器，应关闭 zoxide。
+# zmodule agkozak/zsh-z
+
+
+# ==============================================================================
+# 12. FUZZY SEARCH
+# 文件、目录和历史记录的模糊检索
+#
+# zimfw/fzf:
+#   fzf >= 0.48.0
+#   至少安装 bfs / fd / rg / ugrep 之一。
+# ==============================================================================
+
+zmodule zimfw/fzf --if '(( $+commands[fzf] && ($+commands[bfs] || $+commands[fd] || $+commands[rg] || $+commands[ugrep]) ))'
+
+# ==============================================================================
+# 13. COMPLETION USER INTERFACE
+# 补全结果交互界面
+# 必须位于 completion 之后，ZLE 包装插件之前。
+# ==============================================================================
 
 # <!-- zmodule fzf -->  # disabled: replaced by Aloxaf/fzf-tab + fzf.zsh
 # fzf-tab: replace Zsh's default completion menu with fzf-powered fuzzy search.
 # zmodule Aloxaf/fzf-tab
 zmodule Aloxaf/fzf-tab --source fzf-tab.plugin.zsh --if-command fzf
 
+# ==============================================================================
+# 14. SYNTAX HIGHLIGHTING
+# 命令语法高亮：只启用一种实现。
+# ==============================================================================
+
+# <!-- zmodule zsh-users/zsh-syntax-highlighting -->  # disabled: using fast-syntax-highlighting
+zmodule zdharma-continuum/fast-syntax-highlighting
+
+# ==============================================================================
+# 15. HISTORY SEARCH
+# 基于输入内容的历史记录检索
+# ==============================================================================
+# Fish-like history search for Zsh, must be sourced after
+# fast-syntax-highlighting.
+zmodule zsh-users/zsh-history-substring-search
+
+# ==============================================================================
+# 16. AUTOSUGGESTIONS
+# 基于历史记录等来源的命令预测
+# 按 Zim 官方模板放置于末尾。
+# ==============================================================================
+# Fish-like autosuggestions for Zsh. Add the following to your ~/.zshrc to boost
+# performance: ZSH_AUTOSUGGEST_MANUAL_REBIND=1
+# Fish-like syntax highlighting for Zsh, must be sourced after completion.
+zmodule zsh-users/zsh-autosuggestions
+
 #
 # Modules that must be initialized last
 #
 zmodule sunlei/zsh-ssh
 zmodule reegnz/jq-zsh-plugin
-zmodule hlissner/zsh-autopair
 
-# Fish-like syntax highlighting for Zsh, must be sourced after completion.
-# <!-- zmodule zsh-users/zsh-syntax-highlighting -->  # disabled: using fast-syntax-highlighting
-zmodule zdharma-continuum/fast-syntax-highlighting
-# Fish-like history search for Zsh, must be sourced after
-# fast-syntax-highlighting.
-zmodule zsh-users/zsh-history-substring-search
-# Fish-like autosuggestions for Zsh. Add the following to your ~/.zshrc to boost
-# performance: ZSH_AUTOSUGGEST_MANUAL_REBIND=1
-zmodule zsh-users/zsh-autosuggestions
 
 # <!-- zmodule pabloariasal/zfm -->  # disabled: file-manager not needed
 

@@ -58,6 +58,7 @@ ofproxy() {
 auto-update() {
     echo "🚀 开始更新 ..."
     (( $+functions[onproxy] )) && onproxy
+    echo -e "\n"
     update-all
 }
 
@@ -123,9 +124,9 @@ alias tmux='tmux -2'                             # 强制 256 色
 # 注：原 chown/chmod/chgrp --preserve-root 别名已移除——GNU 专属标志在 macOS BSD
 # 工具链上必然报 illegal option（历史版本即已损坏），需要时从 git 历史找回。
 alias wget='wget -c'                             # 断点续传
-# alias rm='rm -i'                                 # 删除前逐个确认
-# alias cp='cp -i'                                 # 覆盖前确认
-# alias mv='mv -i'                                 # 移动覆盖前确认
+alias rm='rm -i'                                 # 删除前逐个确认
+alias cp='cp -i'                                 # 覆盖前确认
+alias mv='mv -i'                                 # 移动覆盖前确认
 alias mkdir='mkdir -p -v'                        # 自动创建父目录并显示过程
 
 # ~~~ 列表与导航 (lsd) ~~~
@@ -312,13 +313,13 @@ update-all() {
         # brew cu 由第三方 tap（buo/homebrew-cask-upgrade）提供，不在 brew 核心内。原先直接串进
         # && 链：未装该 tap 时 `brew cu` 报 Unknown command，整条链非零 → brew 被误判为失败。
         # 先探测再决定是否跑 cask 升级：不可用则跳过并在 stderr 提示；brew cu 真的失败仍传播非零。
-        brew  "brew update -f && brew upgrade -f --greedy-latest -y && { if brew commands 2>/dev/null | grep -qx cu; then brew cu -y -a; else echo '⚠️  brew cu 不可用（缺 buo/homebrew-cask-upgrade tap），跳过 cask 升级' >&2; fi; } && brew cleanup --prune=all"
         zimfw "zimfw update"
+        brew  "brew update -f && brew upgrade -f --greedy-latest -y && { if brew commands 2>/dev/null | grep -qx cu; then brew cu -y -a; else echo '⚠️  brew cu 不可用（缺 buo/homebrew-cask-upgrade tap），跳过 cask 升级' >&2; fi; } && brew cleanup --prune=all"
         tldr  "tldr --update"
+        mise  "mise upgrade"
         rustup  "rustup update"
         uv    "uv tool upgrade --all"
         pnpm "pnpm update -g"
-        mise  "mise upgrade"
         pi  "pi update --all"
     )
 
@@ -326,7 +327,7 @@ update-all() {
     if (( $# > 0 )); then
         targets=("$@")
     else
-        targets=(${(k)tasks})
+        targets=(brew zimfw tldr mise rustup uv pnpm pi)
     fi
 
     # 全量预检：未知目标不得在前面的目标已更新后才被发现。

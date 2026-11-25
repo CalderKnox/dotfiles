@@ -79,3 +79,5 @@ node_modules/
 
 # Note: `*.git` typo line removed (was ambiguous — likely *.orig/*.patch merge
 # residue; `*.orig` now covers it above).
+
+**/.claude/settings.local.json

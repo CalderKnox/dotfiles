@@ -7,7 +7,7 @@ import shlex
 import unittest
 from pathlib import Path
 
-from check import FISH, FUNCS, ROOT, ZSH, Fixture, function_source
+from check import FISH, FUNCS, ROOT, ZSH, ZSH_INTERACTIVE_ALIASES, Fixture, function_source
 
 
 class FishRuntime(Fixture):
@@ -231,6 +231,29 @@ class FishRuntime(Fixture):
 
 
 class ZshRuntime(Fixture):
+  def test_file_operation_aliases_load_only_in_interactive_zsh(self):
+    home = Path(self.env["HOME"])
+    (home / ".zshrc").symlink_to(ZSH / "dot_zshrc")
+    config = home / ".config/zsh"
+    config.mkdir(parents=True)
+    (config / "aliases.zsh").symlink_to(ZSH / "aliases.zsh")
+    zim = home / ".zim"
+    zim.mkdir()
+    (zim / "zimfw.zsh").write_text("# Offline fixture\n")
+    (zim / "init.zsh").touch()
+
+    commands = []
+    for name in ZSH_INTERACTIVE_ALIASES:
+      self.stub(name)
+      commands.append(f"{name} -- fixture")
+    script = "\n".join(commands)
+    zsh = self.require("zsh")
+    for flags, options in (("-dc", []), ("-dic", ["-i"])):
+      with self.subTest(flags=flags):
+        self.trace.unlink(missing_ok=True)
+        self.ok(self.run_command([zsh, flags, script]))
+        self.assertEqual(self.calls(), [[name, *options, "--", "fixture"] for name in ZSH_INTERACTIVE_ALIASES])
+
   def test_backup_mixed_failures_are_not_masked_by_later_success(self):
     (self.cwd / "file.txt").write_text("fixture")
     self.stub("cp")
@@ -600,7 +623,8 @@ class AliasRuntime(Fixture):
     fish = set().union(*(set(re.findall(pattern, (FISH / name).read_text(), re.M)) for name in
                          ('10_sys.fish', '20_dev.fish', '21_k8s.fish')))
     zsh = set(re.findall(pattern, (ZSH / 'aliases.zsh').read_text(), re.M))
-    self.assertEqual(fish, zsh)
+    self.assertEqual(zsh - fish, ZSH_INTERACTIVE_ALIASES.keys())
+    self.assertEqual(fish - zsh, set())
     for binary in ('open', 'code', 'chezmoi', 'nvim', 'fastfetch', 'date', 'python3', 'htop',
                    'df', 'du', 'ping', 'tmux', 'wget', 'mkdir', 'lsd', 'pbcopy', 'pbpaste',
                    'kubectl', 'biome', 'claude', 'opencode', 'gh', 'lazygit', 'pnpm', 'go',

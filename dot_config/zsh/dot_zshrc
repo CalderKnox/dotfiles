@@ -37,8 +37,17 @@ export HOMEBREW_NO_ENV_HINTS=1
 # History
 #
 
+HISTFILE="${ZDOTDIR:-$HOME}/.zsh_history"
+HISTSIZE=100000
+SAVEHIST=50000
+
 # Remove older command from the history if a duplicate is to be added.
 setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_REDUCE_BLANKS
+setopt HIST_SAVE_NO_DUPS
+setopt EXTENDED_HISTORY
+setopt SHARE_HISTORY
 
 #
 # Input/output
@@ -56,6 +65,10 @@ bindkey -e
 # Remove path separator from WORDCHARS.
 WORDCHARS=${WORDCHARS//[\/]}
 
+
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+zstyle ':completion:*' menu no
+
 # --------------------
 # Module configuration
 # --------------------
@@ -66,6 +79,7 @@ WORDCHARS=${WORDCHARS//[\/]}
 
 # Set a custom prefix for the generated aliases. The default prefix is 'G'.
 #zstyle ':zim:git' aliases-prefix 'g'
+zstyle ':zim' disable-version-check yes
 
 #
 # input
@@ -92,10 +106,16 @@ WORDCHARS=${WORDCHARS//[\/]}
 # here (fzf-tab initializes before the syntax-highlighting block), and the
 # option cuts precmd cost.
 ZSH_AUTOSUGGEST_MANUAL_REBIND=1
+ZSH_AUTOSUGGEST_STRATEGY=(history)
 
 # Customize the style that the suggestions are shown with.
 # See https://github.com/zsh-users/zsh-autosuggestions/blob/master/README.md#suggestion-highlight-style
-#ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=242'
+# ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=242'
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
+
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
+
+HISTORY_SUBSTRING_SEARCH_ENSURE_UNIQUE=1
 
 # ------------------
 # Initialize modules
