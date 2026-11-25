@@ -58,6 +58,7 @@ ofproxy() {
 auto-update() {
     echo "🚀 开始更新 ..."
     (( $+functions[onproxy] )) && onproxy
+    echo -e "\n"
     update-all
 }
 
