@@ -1187,6 +1187,15 @@ class ZshHelpers(Fixture):
     self.assertIn("pi not found", result.stdout)
     self.assertEqual(list(self.cwd.glob("update-all.*")), [])
 
+  def test_update_target_order(self):
+    self.stub("mise")
+    cases = (("", ["brew", "zimfw", "tldr", "mise", "rustup", "uv", "pnpm", "pi"]),
+             ("rustup mise brew", ["rustup", "mise", "brew"]))
+    for args, expected in cases:
+      with self.subTest(args=args):
+        result = self.shell(self.updater(), f"update-all {args}\n")
+        self.assertEqual(re.findall(r"Updating (\w+)", self.ok(result)), expected)
+
   def test_update_pnpm_explicit_and_default(self):
     self.stub("pnpm")
     for args in ("pnpm", ""):

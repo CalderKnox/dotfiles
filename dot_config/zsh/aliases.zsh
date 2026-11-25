@@ -312,13 +312,13 @@ update-all() {
         # brew cu 由第三方 tap（buo/homebrew-cask-upgrade）提供，不在 brew 核心内。原先直接串进
         # && 链：未装该 tap 时 `brew cu` 报 Unknown command，整条链非零 → brew 被误判为失败。
         # 先探测再决定是否跑 cask 升级：不可用则跳过并在 stderr 提示；brew cu 真的失败仍传播非零。
-        brew  "brew update -f && brew upgrade -f --greedy-latest -y && { if brew commands 2>/dev/null | grep -qx cu; then brew cu -y -a; else echo '⚠️  brew cu 不可用（缺 buo/homebrew-cask-upgrade tap），跳过 cask 升级' >&2; fi; } && brew cleanup --prune=all"
         zimfw "zimfw update"
+        brew  "brew update -f && brew upgrade -f --greedy-latest -y && { if brew commands 2>/dev/null | grep -qx cu; then brew cu -y -a; else echo '⚠️  brew cu 不可用（缺 buo/homebrew-cask-upgrade tap），跳过 cask 升级' >&2; fi; } && brew cleanup --prune=all"
         tldr  "tldr --update"
+        mise  "mise upgrade"
         rustup  "rustup update"
         uv    "uv tool upgrade --all"
         pnpm "pnpm update -g"
-        mise  "mise upgrade"
         pi  "pi update --all"
     )
 
@@ -326,7 +326,7 @@ update-all() {
     if (( $# > 0 )); then
         targets=("$@")
     else
-        targets=(${(k)tasks})
+        targets=(brew zimfw tldr mise rustup uv pnpm pi)
     fi
 
     # 全量预检：未知目标不得在前面的目标已更新后才被发现。
