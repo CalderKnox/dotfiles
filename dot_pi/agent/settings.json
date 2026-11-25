@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "1.5.2",
+  "lastChangelogVersion": "1.6.1",
   "packages": [
     "npm:pi-background-tasks",
     "npm:pi-web-access",
@@ -19,10 +19,10 @@
   "hideThinkingBlock": true,
   "extensionChangelogVersions": {
     "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.48.0",
-    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.89.1",
+    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.90.0",
     "{\"source\":\"npm:@czottmann/pi-automode\",\"scope\":\"user\"}": "1.18.0",
-    "{\"source\":\"npm:@narumitw/pi-goal\",\"scope\":\"user\"}": "0.55.3",
-    "{\"source\":\"npm:@narumitw/pi-btw\",\"scope\":\"user\"}": "0.63.8",
-    "{\"source\":\"npm:@narumitw/pi-plan-mode\",\"scope\":\"user\"}": "0.60.3"
+    "{\"source\":\"npm:@narumitw/pi-goal\",\"scope\":\"user\"}": "0.55.5",
+    "{\"source\":\"npm:@narumitw/pi-btw\",\"scope\":\"user\"}": "0.63.9",
+    "{\"source\":\"npm:@narumitw/pi-plan-mode\",\"scope\":\"user\"}": "0.62.0"
   }
 }
