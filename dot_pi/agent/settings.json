@@ -13,8 +13,6 @@
     "enabled": false
   },
   "defaultProvider": "bestfulfill",
-  "defaultModel": "deepseek/deepseek-flash",
-  "defaultThinkingLevel": "high",
   "steeringMode": "all",
   "hideThinkingBlock": true,
   "extensionChangelogVersions": {
