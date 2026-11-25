@@ -199,10 +199,11 @@ zmodule hlissner/zsh-autopair
 zmodule zimfw/termtitle
 
 # ------------------------------------------------------------------------------
-zmodule duration-info
-zmodule git-info
-zmodule prompt-pwd
-zmodule asciiship
+# 8.2 Starship is initialized in .zshrc when installed. Otherwise use Asciiship.
+zmodule zimfw/prompt-pwd --if '(( ! $+commands[starship] ))'
+zmodule zimfw/duration-info --if '(( ! $+commands[starship] ))'
+zmodule zimfw/git-info --if '(( ! $+commands[starship] ))'
+zmodule zimfw/asciiship --if '(( ! $+commands[starship] ))'
 
 
 # ==============================================================================
